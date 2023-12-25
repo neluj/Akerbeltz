@@ -1,0 +1,8 @@
+spot.cpp
+//TODO istringstream
+//TODO agregar notas 
+//TODO asserts
+spotTest.cpp
+//TODO test con un spot mas alternativo
+//WORKING en passant no se setea cuando se avanzan dos, se setea cuando se hace una caputa enpassant
+//WORKING test search using perft
