@@ -10,8 +10,8 @@ class Position;
 namespace Search{
 
     static long leafCounter;
-    void perft(int depth, Position &position);
-    void perftTest(int depth, Position &position);
+    void perft(Position &position, int depth);
+    long perftTest(Position &position, int depth);
 
 }
 

@@ -339,7 +339,7 @@ bool Position::do_move(const Move &move){
 
     //Castling rights
     history[historySize-1].castlingRight = history[historySize-2].castlingRight & CASTLE_PERSMISION_UPDATES[from];
-    history[historySize-1].castlingRight = history[historySize-2].castlingRight & CASTLE_PERSMISION_UPDATES[to];
+    history[historySize-1].castlingRight &= CASTLE_PERSMISION_UPDATES[to];
     
     //Set next move to empty
     history[historySize-1].nextMove = 0;
