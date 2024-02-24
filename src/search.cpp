@@ -6,7 +6,7 @@
 
 namespace Xake{
 
-void Search::perft(int depth, Position &position){
+void Search::perft(Position &position, int depth){
 
    if(depth == 0){
         leafCounter++;
@@ -23,14 +23,14 @@ void Search::perft(int depth, Position &position){
             continue;
         }
         //std::cout << "\n" << "Sub-move:"<< algebraic_move(move);
-        perft(depth-1, position);
+        perft(position, depth-1);
         position.undo_move();
     }
-     //std::cout << "\n";
+    //std::cout << "\n";
 }
 
 
-void Search::perftTest(int depth, Position &position){
+long Search::perftTest(Position &position, int depth){
 
     leafCounter = 0;
     long allNodesCounter = 0;
@@ -38,7 +38,7 @@ void Search::perftTest(int depth, Position &position){
     MoveList moveList;
     generate_all_moves(position, moveList);
 
-    std::cout << "\n";
+    //std::cout << "\n";
     
     for(std::size_t mIndx = 0; mIndx < moveList.size;++mIndx){
 
@@ -48,18 +48,19 @@ void Search::perftTest(int depth, Position &position){
         }
 
         long cumnodes = leafCounter;
-        perft(depth-1, position);
+        perft(position, depth-1);
 
         position.undo_move();
 
         long oldNodes = leafCounter - cumnodes;
         allNodesCounter += oldNodes;
 
-        std::cout << algebraic_move(move) << ": " << oldNodes << "\n";
+        //std::cout << algebraic_move(move) << ": " << oldNodes << "\n";
 
     }
 
     std::cout << "\n" << "Total nodes size: " << allNodesCounter << "\n\n";
+    return allNodesCounter;
 
 }
 

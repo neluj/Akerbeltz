@@ -9,6 +9,8 @@ enum MoveType{
     CAPTURE
 };
 
+//TODO using templates
+//constexpr Direction knights_directions[] = {NORTH_NORTH_WEST, NORTH_NORTH_EAST, NORTH_WEST_WEST, NORTH_EAST_EAST, SOUTH_WEST_WEST, SOUTH_EAST_EAST, SOUTH_SOUTH_WEST, SOUTH_SOUTH_EAST}; 
 //Function Declarations
 template<Color C, Direction D, MoveType T>
 void loop_move(const Position &position, MoveList &moveList, const Square& from);
@@ -222,7 +224,7 @@ void Knight_moves(const Position &position, MoveList &moveList){
         non_loop_move<C, SOUTH_WEST_WEST, T>(position,moveList,position.get_piece_list(c_Knight)[pciCount]);
         non_loop_move<C, SOUTH_EAST_EAST, T>(position,moveList,position.get_piece_list(c_Knight)[pciCount]);
         non_loop_move<C, SOUTH_SOUTH_WEST, T>(position,moveList,position.get_piece_list(c_Knight)[pciCount]);
-        non_loop_move<C, SOUTH_SOUTH_EAST, T>(position,moveList,position.get_piece_list(c_Knight)[pciCount]);
+        non_loop_move<C, SOUTH_SOUTH_EAST, T>(position,moveList,position.get_piece_list(c_Knight)[pciCount]); 
     }  
 }
 

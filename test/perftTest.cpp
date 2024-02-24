@@ -1,28 +1,97 @@
 #include <gtest/gtest.h>
+#include <string>
+#include <fstream>
+#include <istream>
+#include <sstream>
+#include <vector>
+#include <iostream>
 #include "search.h"
 #include "position.h"
 
 using namespace Xake;
-//Pseudo-legal basic unit test, using random position 
 
-TEST(PerftTest, CaseOne){
+struct PerftSample{
 
-    Position position;
+  std::string fen_notation;
+  //Saves nodes for each depth on [depth-1]
+  std::vector<long long int> depthNodes; 
 
+};
 
+void loadPerftSampleLine(std::vector<PerftSample>& samples){
 
-    //const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    //const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/1P6/8/PQ1PP2P/R3K2R w KQkq - 0 1";
-    //const std::string FEN_INIT_POSITION = "r3k2r/p1ppqpb1/bn2pnN1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-    //const std::string FEN_INIT_POSITION = "r3k2r/2P5/8/8/1p6/8/P1P5/R3K2R w KQkq - 0 1";
-    //const std::string FEN_INIT_POSITION = "4k3/8/8/8/1p6/P7/8/4K3 w - - 0 1";
-    //const std::string FEN_INIT_POSITION = "4k3/8/8/8/1p6/8/P7/4K3 w - - 0 1";
-    // perft 2 const std::string FEN_INIT_POSITION = "4k3/P7/8/8/8/8/4K3/2q5 b - - 0 1";
-    //const std::string FEN_INIT_POSITION = "4k3/8/8/8/8/8/6K1/6r1 w - - 0 1";
-    const std::string FEN_INIT_POSITION = "8/1n4N1/2k5/8/8/5K2/1N4n1/8 b - - 0 1";
+  std::fstream fileIn; 
+
+  fileIn.open("perftsuite.epd", std::ios::in); 
+
+  std::string line; 
+
+  while (std::getline(fileIn, line)) { 
+
+    std::string word;
+    std::vector<std::string> words;
+    std::string delimiter = " ;";
+
+    size_t pos = 0;
+    std::string token;
     
-    position.set_FEN(FEN_INIT_POSITION);
+    while ((pos = line.find(delimiter)) < std::string::npos) {
+        token = line.substr(0, pos);        
+        words.push_back(token);
+        line.erase(0, pos + delimiter.length());
+    }
 
-    Search::perftTest(6, position);
+    words.push_back(line);
+
+
+    PerftSample sample;
+
+    sample.fen_notation = words.at(0);
+
+    for(std::size_t ind = 1; ind < words.size(); ++ind){
+
+      std::stringstream depthStream(words.at(ind));
+      std::string name, depthString;
+      std::vector<std::string> words;
+      depthStream>>name>>depthString;
+
+      sample.depthNodes.push_back(std::stoll(depthString));
+    }
+
+    samples.push_back(sample); 
+    
+  } 
+
+}
+
+//TEST(PerftTest, DISABLED_FileTest) {
+TEST(PerftTest, FileTest) {
+
+  std::vector<PerftSample> samples;
+
+  loadPerftSampleLine(samples);
+  std::size_t lineNumber = 0;
+
+  for(auto &sample: samples){
+
+    Position position; 
+
+    const std::string FEN_POSITION = sample.fen_notation;
+    ++lineNumber;
+    
+    position.set_FEN(FEN_POSITION);
+
+    std::cout << "Test for line: " << lineNumber << ": " << sample.fen_notation << "\n";
+
+    for(std::size_t ind = 0; ind < sample.depthNodes.size(); ++ind){
+
+      std::cout << "Deth " << ind+1 << " :" << "\n";
+      long long int searchedNodes = Search::perftTest(position, ind+1);
+      
+      EXPECT_EQ(searchedNodes, sample.depthNodes.at(ind));
+      
+    }
+
+  }
 
 }

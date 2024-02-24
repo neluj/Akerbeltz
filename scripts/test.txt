@@ -1,53 +1,25 @@
-c1d1
-c1e1
-c1f1
-c1g1
-c1h1
-c1b1
-c1a1
-c1c2
-c1c3
-c1c4
-c1c5
-c1c6
-c1c7
-c1c8
-c1d2
-c1e3
-c1f4
-c1g5
-c1h6
-c1b2
-c1a3
-e8f8
-e8d8
-e8e7
-e8f7
-e8d7
+h3h4: 65
+g2g3: 55
+g2g4: 55
+h1g1: 50
+h1f1: 48
+h1h2: 50
+e1f1: 45
+e1d1: 60
+e1e2: 100
+e1f2: 95
+e1d2: 100
+e1g1: 54
 NEW
-c1a1
-c1b1
-c1d1
-c1e1
-c1f1
-c1g1
-c1h1
-c1b2
-c1c2
-c1d2
-c1a3
-c1c3
-c1e3
-c1c4
-c1f4
-c1c5
-c1g5
-c1c6
-c1h6
-c1c7
-c1c8
-e8d7
-e8e7
-e8f7
-e8d8
-e8f8
+g2g3: 55
+h3h4: 65
+g2g4: 55
+h1f1: 48
+h1g1: 50
+h1h2: 45
+e1d1: 60
+e1f1: 45
+e1d2: 95
+e1e2: 95
+e1f2: 90
+e1g1: 54
