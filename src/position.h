@@ -2,6 +2,7 @@
 #define INCLUDE_POSITION_H
 
 #include "move.h"
+#include "evaluate.h"
 #include <sstream>
 
 
@@ -15,7 +16,7 @@ namespace Xake{
         Square enpassantSquare;
     };
 
-    const Square SQUARES_120[Xake::SQUARE_SIZE_120] = {
+    const Square SQUARES_120[SQUARE_SIZE_120] = {
       OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD,
       OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD,
       OFFBOARD, A1, B1, C1, D1, E1, F1, G1, H1, OFFBOARD,
@@ -33,7 +34,7 @@ namespace Xake{
 class Position{
 
 public:
-
+    
     Position(); 
     void set_FEN(const std::string & fenNotation);
     Color get_side_to_move() const;
@@ -41,11 +42,12 @@ public:
     Square get_enpassant_square() const;
     unsigned short get_fifty_moves_counter() const;
     unsigned short get_moves_counter() const;
-    PieceType get_mailbox_piece(const Xake::Color &color, const Xake::Square &square) const;
-    std::size_t get_piece_size(const Xake::Piece &piece) const;
-    const Xake::Square* get_piece_list(const Xake::Piece &piece) const;
+    PieceType get_mailbox_piece(const Color &color, const Square &square) const;
+    std::size_t get_piece_size(const Piece &piece) const;
+    const Square* get_piece_list(const Piece &piece) const;
     bool square_is_attacked(const Square &square) const; 
 
+    //Move related functions
     bool do_move(const Move &move);
     void undo_move();
     void move_piece(const Square &from, const Square &to);
@@ -53,10 +55,12 @@ public:
     void add_piece(const Square &square, const Piece &piece);
 
     void print_board();
+    Evaluate::Score get_material_score(const Color &color);
 
 private:
 
     void init();
+    void calc_material_score();
 
     PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_120];
     std::size_t pieceCounter[PIECE_SIZE];
@@ -70,6 +74,8 @@ private:
     //Move moveHistory[MAX_GAME_MOVES];
     int historySize;
     HistoryInfo history[MAX_GAME_MOVES];
+    Evaluate::Score material_score[COLOR_SIZE];
+
 };
 
 /*NOTE https://stackoverflow.com/questions/9734175/why-are-class-member-functions-inlined
@@ -89,14 +95,17 @@ inline unsigned short Position::get_fifty_moves_counter() const{
 inline unsigned short Position::get_moves_counter() const{
     return history[historySize-1].movesCounter;
 }
-inline PieceType Position::get_mailbox_piece(const Xake::Color &color, const Xake::Square &square) const{
+inline PieceType Position::get_mailbox_piece(const Color &color, const Square &square) const{
     return mailbox[color][square];
 }
-inline std::size_t Position::get_piece_size(const Xake::Piece &piece) const{
+inline std::size_t Position::get_piece_size(const Piece &piece) const{
     return pieceCounter[piece];
 }
-inline const Xake::Square* Position::get_piece_list(const Xake::Piece &piece) const{
+inline const Square* Position::get_piece_list(const Piece &piece) const{
     return pieceList[piece];
+}
+inline Evaluate::Score Position::get_material_score(const Color &color){
+    return material_score[color];
 }
 
 

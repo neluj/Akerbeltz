@@ -48,6 +48,11 @@ void Position::init(){
     history[historySize-1].fiftyMovesCounter = 0;
     history[historySize-1].movesCounter = 0;
     history[historySize-1].enpassantSquare = Square::NO_SQUARE;
+
+
+    material_score[WHITE] = 0;
+    material_score[BLACK] = 0;
+    material_score[COLOR_NC] = 0;
 }
 
 //TODO FEN could be shorter 
@@ -161,6 +166,7 @@ void Position::set_FEN(const std::string & fenNotation){
         }
         
         c = fenNotation[++charIndex];
+        //TODO contar materiales y sumar y restar en cada captura, promotion o undo move
     }
 
     
@@ -216,6 +222,22 @@ void Position::set_FEN(const std::string & fenNotation){
             if(mailbox[c][i] != NO_PIECE_TYPE)
                 mailbox[COLOR_NC][i] = mailbox[c][i];
         }
+    }
+
+    calc_material_score();
+
+}
+
+void Position::calc_material_score(){
+
+    for(std::size_t i = 0; i < SQUARE_SIZE_120; ++i){
+        if(mailbox[WHITE][i] != NO_PIECE_TYPE)
+            material_score[WHITE] += Evaluate::evaluate_material(mailbox[WHITE][i]);
+    }
+
+    for(std::size_t i = 0; i < SQUARE_SIZE_120; ++i){
+        if(mailbox[BLACK][i] != NO_PIECE_TYPE)
+            material_score[BLACK] += Evaluate::evaluate_material(mailbox[BLACK][i]);
     }
 
 }
@@ -494,10 +516,13 @@ void Position::remove_piece(const Square &square){
     Color pieceColor{Color::COLOR_NC};
     PieceType pieceType{PieceType::NO_PIECE_TYPE};
 
-    // Check witch piece is located on the square
+    // Check witch piece is located on the square of each color mailbox
     if(mailbox[Color::WHITE][square] != PieceType::NO_PIECE_TYPE){
+        //Save piece type
         pieceType = mailbox[Color::WHITE][square];
+        //Remove piece from corresponding mailbox
         mailbox[Color::WHITE][square] = PieceType::NO_PIECE_TYPE;
+        //Save piece color
         pieceColor = Color::WHITE;
     }else if(mailbox[Color::BLACK][square] != PieceType::NO_PIECE_TYPE){
         pieceType = mailbox[Color::BLACK][square];
@@ -510,10 +535,11 @@ void Position::remove_piece(const Square &square){
     //Update both color mailbox
     mailbox[Color::COLOR_NC][square] = PieceType::NO_PIECE_TYPE;
 
+    //Knowing the piece color and piece type, make piece
     Piece piece = make_piece(pieceColor, pieceType);
 
+    //Find on concret piece list until find the piece that contains the square, for remove it 
     for(std::size_t i = 0; i < pieceCounter[piece]; ++i){
-        
         if(pieceList[piece][i] == square){
             pieceList[piece][i] = pieceList[piece][pieceCounter[piece]-1];
             pieceList[piece][pieceCounter[piece]-1] = Square::NO_SQUARE;
@@ -521,6 +547,9 @@ void Position::remove_piece(const Square &square){
             break;
         }
     }
+
+    //Remove piece value from material 
+    material_score[pieceColor] -= Evaluate::evaluate_material(pieceType);
 }
 
 void Position::add_piece(const Square &square, const Piece &piece){
@@ -532,6 +561,9 @@ void Position::add_piece(const Square &square, const Piece &piece){
 
     pieceList[piece][pieceCounter[piece]] = square;
     ++pieceCounter[piece];
+
+    //Add piece value from material 
+    material_score[pieceColor] += Evaluate::evaluate_material(pieceType);
 
 }
 
