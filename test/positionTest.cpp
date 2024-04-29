@@ -351,6 +351,7 @@ TEST(PositionTest, RemovePiece){
     }
 
     ASSERT_EQ(findwp, true);
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 54000);
 
     //2 Remove piece located on D2
     position.remove_piece(Square::D2);
@@ -378,6 +379,7 @@ TEST(PositionTest, RemovePiece){
     }
 
     ASSERT_EQ(findnp, false);
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 53900);
 
 }
  
@@ -412,6 +414,7 @@ TEST(PositionTest, AddPiece){
     }
 
     ASSERT_EQ(findwp, false);
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 53900);
 
     //2 Add piece on D2
     position.add_piece(Square::D2, Piece::W_PAWN);
@@ -439,6 +442,7 @@ TEST(PositionTest, AddPiece){
     }
 
     ASSERT_EQ(findnp, true);
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 54000);
 
 }
 
@@ -457,6 +461,7 @@ TEST(PositionTest, DoMove){
     EXPECT_EQ(position.get_moves_counter(), 1);
     EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square::B2), PieceType::PAWN);
     EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square::B4), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 54000);
 
     Move moveb2b4 = make_move(Square::B2, Square::B4, SpecialMove::PAWN_START, Piece::NO_PIECE);    
     position.do_move(moveb2b4);
@@ -468,6 +473,7 @@ TEST(PositionTest, DoMove){
     EXPECT_EQ(position.get_moves_counter(), 1);
     EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square::B2), PieceType::NO_PIECE_TYPE);
     EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square::B4), PieceType::PAWN);
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 54000);
 
 }
 
@@ -486,6 +492,7 @@ TEST(PositionTest, UndoMove){
     EXPECT_EQ(position.get_moves_counter(), 1);
     EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square::B2), PieceType::PAWN);
     EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square::B4), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 54000);
 
     Move moveb2b4 = make_move(Square::B2, Square::B4, SpecialMove::PAWN_START, Piece::NO_PIECE); 
 
@@ -500,6 +507,6 @@ TEST(PositionTest, UndoMove){
     EXPECT_EQ(position.get_moves_counter(), 1);
     EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square::B2), PieceType::PAWN);
     EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square::B4), PieceType::NO_PIECE_TYPE);
-
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 54000);
 
 }
