@@ -8,6 +8,8 @@ namespace Xake{
 
 class Position;
 
+namespace MoveGen{
+
 struct MoveList{
     
     void set_move(Move move){
@@ -25,5 +27,5 @@ void generate_all_moves(const Position &position, MoveList &moveList);
 
 
 } // namespace Xake
-
+}
 #endif // #ifndef INCLUDE_MOVEGENERATOR_H

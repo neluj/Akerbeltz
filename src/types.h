@@ -10,6 +10,7 @@ namespace Xake{
 
 //Enum sizes
 constexpr std::size_t PIECE_SIZE = 13;
+constexpr std::size_t PIECETYPE_SIZE = 7;
 constexpr std::size_t FILE_SIZE = 8;
 constexpr std::size_t RANK_SIZE = 8;
 constexpr std::size_t SQUARE_SIZE_64 = 64;
@@ -20,6 +21,8 @@ constexpr std::size_t COLOR_SIZE = 3;
 constexpr std::size_t MAX_POSITION_MOVES_SIZE = 256;
 constexpr std::size_t MAX_GAME_MOVES = 2048;
 constexpr std::size_t MAX_SAME_PIECE = 10;
+
+constexpr int CHECKMATE_SCORE = 99000;
 
 enum PieceType{
   NO_PIECE_TYPE,
@@ -49,8 +52,10 @@ enum Color : int{
   BLACK,
   COLOR_NC
 };
-
+// TODO improve methods
 constexpr Piece make_piece(Color c, PieceType pt) { 
+  if(pt == NO_PIECE_TYPE)
+    return NO_PIECE;
   return Piece(pt + (c * 6)); 
 }
 
@@ -82,23 +87,55 @@ enum Rank : int{
   RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8
 };
 
-enum Square : int{
-	A1 = 21, B1, C1, D1, E1, F1, G1, H1,
-	A2 = 31, B2, C2, D2, E2, F2, G2, H2,
-	A3 = 41, B3, C3, D3, E3, F3, G3, H3,
-	A4 = 51, B4, C4, D4, E4, F4, G4, H4,
-	A5 = 61, B5, C5, D5, E5, F5, G5, H5,
-	A6 = 71, B6, C6, D6, E6, F6, G6, H6,
-	A7 = 81, B7, C7, D7, E7, F7, G7, H7,
-	A8 = 91, B8, C8, D8, E8, F8, G8, H8,
-  NO_SQUARE, OFFBOARD
+enum Square120 : int{
+	SQ120_A1 = 21, SQ120_B1, SQ120_C1, SQ120_D1, SQ120_E1, SQ120_F1, SQ120_G1, SQ120_H1,
+	SQ120_A2 = 31, SQ120_B2, SQ120_C2, SQ120_D2, SQ120_E2, SQ120_F2, SQ120_G2, SQ120_H2,
+	SQ120_A3 = 41, SQ120_B3, SQ120_C3, SQ120_D3, SQ120_E3, SQ120_F3, SQ120_G3, SQ120_H3,
+	SQ120_A4 = 51, SQ120_B4, SQ120_C4, SQ120_D4, SQ120_E4, SQ120_F4, SQ120_G4, SQ120_H4,
+	SQ120_A5 = 61, SQ120_B5, SQ120_C5, SQ120_D5, SQ120_E5, SQ120_F5, SQ120_G5, SQ120_H5,
+	SQ120_A6 = 71, SQ120_B6, SQ120_C6, SQ120_D6, SQ120_E6, SQ120_F6, SQ120_G6, SQ120_H6,
+	SQ120_A7 = 81, SQ120_B7, SQ120_C7, SQ120_D7, SQ120_E7, SQ120_F7, SQ120_G7, SQ120_H7,
+	SQ120_A8 = 91, SQ120_B8, SQ120_C8, SQ120_D8, SQ120_E8, SQ120_F8, SQ120_G8, SQ120_H8,
+  SQ120_NO_SQUARE, SQ120_OFFBOARD
 };
 
-constexpr File square_file(Square square){ 
+enum Square64 : int{
+	SQ64_A1, SQ64_B1, SQ64_C1, SQ64_D1, SQ64_E1, SQ64_F1, SQ64_G1, SQ64_H1,
+	SQ64_A2, SQ64_B2, SQ64_C2, SQ64_D2, SQ64_E2, SQ64_F2, SQ64_G2, SQ64_H2,
+	SQ64_A3, SQ64_B3, SQ64_C3, SQ64_D3, SQ64_E3, SQ64_F3, SQ64_G3, SQ64_H3,
+	SQ64_A4, SQ64_B4, SQ64_C4, SQ64_D4, SQ64_E4, SQ64_F4, SQ64_G4, SQ64_H4,
+	SQ64_A5, SQ64_B5, SQ64_C5, SQ64_D5, SQ64_E5, SQ64_F5, SQ64_G5, SQ64_H5,
+	SQ64_A6, SQ64_B6, SQ64_C6, SQ64_D6, SQ64_E6, SQ64_F6, SQ64_G6, SQ64_H6,
+	SQ64_A7, SQ64_B7, SQ64_C7, SQ64_D7, SQ64_E7, SQ64_F7, SQ64_G7, SQ64_H7,
+	SQ64_A8, SQ64_B8, SQ64_C8, SQ64_D8, SQ64_E8, SQ64_F8, SQ64_G8, SQ64_H8,
+  SQ64_NO_SQUARE, SQ64_OFFBOARD
+};
+ 
+constexpr Square64 square120_square64[SQUARE_SIZE_120] = {
+      SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_A1,       SQ64_B1,       SQ64_C1,       SQ64_D1,       SQ64_E1,       SQ64_F1,       SQ64_G1,       SQ64_H1,       SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_A2,       SQ64_B2,       SQ64_C2,       SQ64_D2,       SQ64_E2,       SQ64_F2,       SQ64_G2,       SQ64_H2,       SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_A3,       SQ64_B3,       SQ64_C3,       SQ64_D3,       SQ64_E3,       SQ64_F3,       SQ64_G3,       SQ64_H3,       SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_A4,       SQ64_B4,       SQ64_C4,       SQ64_D4,       SQ64_E4,       SQ64_F4,       SQ64_G4,       SQ64_H4,       SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_A5,       SQ64_B5,       SQ64_C5,       SQ64_D5,       SQ64_E5,       SQ64_F5,       SQ64_G5,       SQ64_H5,       SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_A6,       SQ64_B6,       SQ64_C6,       SQ64_D6,       SQ64_E6,       SQ64_F6,       SQ64_G6,       SQ64_H6,       SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_A7,       SQ64_B7,       SQ64_C7,       SQ64_D7,       SQ64_E7,       SQ64_F7,       SQ64_G7,       SQ64_H7,       SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_A8,       SQ64_B8,       SQ64_C8,       SQ64_D8,       SQ64_E8,       SQ64_F8,       SQ64_G8,       SQ64_H8,       SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD,
+      SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD,
+};
+
+
+constexpr Square64 square120_to_square64(Square120 square){
+  return square120_square64[square];
+} 
+
+constexpr File square_file(Square120 square){ 
   return File((square-1) % 10); 
 }
 
-constexpr Rank square_rank(Square square){
+constexpr Rank square_rank(Square120 square){
   return Rank((square/10) - 2);
 }
 

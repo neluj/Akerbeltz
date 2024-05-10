@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "move.h"
 
+using namespace Xake;
+
 /*Move:
 0000 0000 0000 0000 0000 0000 0000 0111 1111 -> From 0x7F
 0000 0000 0000 0000 0000 0011 1111 1000 0000 -> To 0x7F
@@ -12,13 +14,13 @@
 
 TEST(MoveTest, PromotionMove){
                                                                 
-    Xake::Square from = Xake::Square::A6;                       //1000111
-    Xake::Square to = Xake::Square::A7;                         //1010001
-    Xake::SpecialMove specialMove = Xake::SpecialMove::PROMOTION_QUEEN;  //1 0100
-    Xake::Piece capturedPiece = Xake::Piece::B_BISHOP;          //1001
+    Square120 from = Square120::SQ120_A6;                       //1000111
+    Square120 to = Square120::SQ120_A7;                         //1010001
+    SpecialMove specialMove = SpecialMove::PROMOTION_QUEEN;  //1 0100
+    Piece capturedPiece = Piece::B_BISHOP;          //1001
 
-    Xake::Move moveQueenPromotion = Xake::make_move(from, to, specialMove, capturedPiece);
-    Xake::Move expected = 0b10011010010100011000111;
+    Move moveQueenPromotion = make_move(from, to, specialMove, capturedPiece);
+    Move expected = 0b10011010010100011000111;
 
     EXPECT_EQ(moveQueenPromotion, expected);
 
@@ -26,13 +28,13 @@ TEST(MoveTest, PromotionMove){
 
 TEST(MoveTest, CastlingMove){
 
-    Xake::Square from = Xake::Square::A6;                           //1000111
-    Xake::Square to = Xake::Square::A7;                             //1010001
-    Xake::SpecialMove specialMove = Xake::SpecialMove::CASTLE;      //0 0011
-    Xake::Piece capturedPiece = Xake::Piece::B_BISHOP;              //1001
+    Square120 from = Square120::SQ120_A6;                           //1000111
+    Square120 to = Square120::SQ120_A7;                             //1010001
+    SpecialMove specialMove = SpecialMove::CASTLE;      //0 0011
+    Piece capturedPiece = Piece::B_BISHOP;              //1001
     
-    Xake::Move moveCasling = Xake::make_move(from, to, specialMove, capturedPiece);
-    Xake::Move expected = 0b10010001110100011000111;
+    Move moveCasling = make_move(from, to, specialMove, capturedPiece);
+    Move expected = 0b10010001110100011000111;
 
     EXPECT_EQ(moveCasling, expected);
 

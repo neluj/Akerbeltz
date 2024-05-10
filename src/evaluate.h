@@ -4,14 +4,21 @@
 
 #include "types.h"
 
+
 namespace Xake{
+
+class Position;
 
 namespace Evaluate{
 
     using Score = int;
 
-    Score evaluate_material(PieceType pieceType);
+    void init();
+    //Score evaluate_material(PieceType pieceType);
+    
+    Score calc_material_table(Color color, PieceType pieceType, Square120 sq);
 
+    Score calc_score(const Position &position);
 }
 }
 

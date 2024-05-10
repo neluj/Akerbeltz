@@ -37,7 +37,7 @@ void Position::init(){
     }
     for(std::size_t pt = 0; pt < PIECE_SIZE; ++pt){
         for(std::size_t pn = 0; pn < MAX_SAME_PIECE; ++pn){
-            pieceList[pt][pn] = NO_SQUARE;
+            pieceList[pt][pn] = SQ120_NO_SQUARE;
         }    
     }
 
@@ -47,7 +47,7 @@ void Position::init(){
     history[historySize-1].castlingRight = 0;
     history[historySize-1].fiftyMovesCounter = 0;
     history[historySize-1].movesCounter = 0;
-    history[historySize-1].enpassantSquare = Square::NO_SQUARE;
+    history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
 
 
     material_score[WHITE] = 0;
@@ -56,7 +56,7 @@ void Position::init(){
 }
 
 //TODO FEN could be shorter 
-void Position::set_FEN(const std::string & fenNotation){
+void Position::set_FEN(std::string fenNotation){
 
     init();
 
@@ -71,84 +71,84 @@ void Position::set_FEN(const std::string & fenNotation){
         {
 		case('k'): 
             mailbox[BLACK][((rank + 2) * 10) + (file +1)] = KING;
-            pieceList[B_KING][pieceCounter[B_KING]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[B_KING][pieceCounter[B_KING]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[B_KING];   
             ++file; 
             break;  
 
 		case('P'): 
             mailbox[WHITE][((rank + 2) * 10) + (file +1)] = PAWN;
-            pieceList[W_PAWN][pieceCounter[W_PAWN]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[W_PAWN][pieceCounter[W_PAWN]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[W_PAWN];   
             ++file; 
             break;
 
 		case('R'): 
             mailbox[WHITE][((rank + 2) * 10) + (file +1)] = ROOK;
-            pieceList[W_ROOK][pieceCounter[W_ROOK]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[W_ROOK][pieceCounter[W_ROOK]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[W_ROOK];   
             ++file; 
             break;
 
 		case('N'):
              mailbox[WHITE][((rank + 2) * 10) + (file +1)] = KNIGHT;
-            pieceList[W_KNIGHT][pieceCounter[W_KNIGHT]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[W_KNIGHT][pieceCounter[W_KNIGHT]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[W_KNIGHT]; 
             ++file; 
             break;
 
 		case('B'): 
             mailbox[WHITE][((rank + 2) * 10) + (file +1)] = BISHOP;
-            pieceList[W_BISHOP][pieceCounter[W_BISHOP]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[W_BISHOP][pieceCounter[W_BISHOP]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[W_BISHOP]; 
             ++file; 
             break;
 
 		case('Q'): 
             mailbox[WHITE][((rank + 2) * 10) + (file +1)] = QUEEN;
-            pieceList[W_QUEEN][pieceCounter[W_QUEEN]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[W_QUEEN][pieceCounter[W_QUEEN]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[W_QUEEN];  
             ++file; 
             break;
 
 		case('K'): 
             mailbox[WHITE][((rank + 2) * 10) + (file +1)] = KING;
-            pieceList[W_KING][pieceCounter[W_KING]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[W_KING][pieceCounter[W_KING]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[W_KING];   
             ++file; 
             break;  
 
 		case('p'): 
             mailbox[BLACK][((rank + 2) * 10) + (file +1)] = PAWN;
-            pieceList[B_PAWN][pieceCounter[B_PAWN]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[B_PAWN][pieceCounter[B_PAWN]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[B_PAWN];   
             ++file; 
             break;
 
 		case('r'): 
             mailbox[BLACK][((rank + 2) * 10) + (file +1)] = ROOK;
-            pieceList[B_ROOK][pieceCounter[B_ROOK]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[B_ROOK][pieceCounter[B_ROOK]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[B_ROOK];   
             ++file; 
             break;
 
 		case('n'): 
             mailbox[BLACK][((rank + 2) * 10) + (file +1)] = KNIGHT;
-            pieceList[B_KNIGHT][pieceCounter[B_KNIGHT]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[B_KNIGHT][pieceCounter[B_KNIGHT]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[B_KNIGHT]; 
             ++file; 
             break;
 
 		case('b'): 
             mailbox[BLACK][((rank + 2) * 10) + (file +1)] = BISHOP;
-            pieceList[B_BISHOP][pieceCounter[B_BISHOP]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[B_BISHOP][pieceCounter[B_BISHOP]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[B_BISHOP]; 
             ++file; 
             break;
 
 		case('q'): 
             mailbox[BLACK][((rank + 2) * 10) + (file +1)] = QUEEN;
-            pieceList[B_QUEEN][pieceCounter[B_QUEEN]] = static_cast<Square>(((rank + 2) * 10) + (file +1));
+            pieceList[B_QUEEN][pieceCounter[B_QUEEN]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
             ++pieceCounter[B_QUEEN];  
             ++file; 
             break;
@@ -191,7 +191,7 @@ void Position::set_FEN(const std::string & fenNotation){
         int enpassantFile = c - 97;
         c = fenNotation[++charIndex];
         int enpassantRank = c - 49;
-	    history[historySize-1].enpassantSquare = Square(((enpassantRank+2) * 10) + (1 + enpassantFile));
+	    history[historySize-1].enpassantSquare = Square120(((enpassantRank+2) * 10) + (1 + enpassantFile));
     }
 
     c = fenNotation[++++charIndex];
@@ -230,14 +230,16 @@ void Position::set_FEN(const std::string & fenNotation){
 
 void Position::calc_material_score(){
 
-    for(std::size_t i = 0; i < SQUARE_SIZE_120; ++i){
-        if(mailbox[WHITE][i] != NO_PIECE_TYPE)
-            material_score[WHITE] += Evaluate::evaluate_material(mailbox[WHITE][i]);
+    Evaluate::init();
+
+    for(std::size_t sq = 0; sq < SQUARE_SIZE_120; ++sq){
+        if(mailbox[WHITE][sq] != NO_PIECE_TYPE)
+            material_score[WHITE] += Evaluate::calc_material_table(WHITE, mailbox[WHITE][sq], Square120(sq));
     }
 
-    for(std::size_t i = 0; i < SQUARE_SIZE_120; ++i){
-        if(mailbox[BLACK][i] != NO_PIECE_TYPE)
-            material_score[BLACK] += Evaluate::evaluate_material(mailbox[BLACK][i]);
+    for(std::size_t sq = 0; sq < SQUARE_SIZE_120; ++sq){
+        if(mailbox[BLACK][sq] != NO_PIECE_TYPE)
+            material_score[BLACK] += Evaluate::calc_material_table(BLACK, mailbox[BLACK][sq], Square120(sq));
     }
 
 }
@@ -248,25 +250,25 @@ const Direction sizes[DIRECTION_SIDES] = {EAST, WEST, NORTH, SOUTH};
 const Direction diagonals[DIRECTION_SIDES] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
 
 
-bool Position::square_is_attacked(const Square &square) const{
+bool Position::square_is_attacked(Square120 square) const{
 
     //Pawns
     if(sideToMove==Color::WHITE){
-        if(mailbox[Color::BLACK][Square(square+NORTH_EAST)] == PieceType::PAWN || mailbox[Color::BLACK][Square(square+NORTH_WEST)] == PieceType::PAWN){
+        if(mailbox[Color::BLACK][Square120(square+NORTH_EAST)] == PieceType::PAWN || mailbox[Color::BLACK][Square120(square+NORTH_WEST)] == PieceType::PAWN){
             return true;
         }
     }
     if(sideToMove==Color::BLACK){
-        if(mailbox[Color::WHITE][Square(square+SOUTH_EAST)] == PieceType::PAWN || mailbox[Color::WHITE][Square(square+SOUTH_WEST)] == PieceType::PAWN){
+        if(mailbox[Color::WHITE][Square120(square+SOUTH_EAST)] == PieceType::PAWN || mailbox[Color::WHITE][Square120(square+SOUTH_WEST)] == PieceType::PAWN){
             return true;
         }
     }
 
     //Knights
-    bool isKnightAttack =   (mailbox[~sideToMove][Square(square+NORTH_NORTH_WEST)] == PieceType::KNIGHT || mailbox[~sideToMove][Square(square+NORTH_NORTH_EAST)] == PieceType::KNIGHT ||
-                            mailbox[~sideToMove][Square(square+NORTH_WEST_WEST)] == PieceType::KNIGHT  || mailbox[~sideToMove][Square(square+NORTH_EAST_EAST)] == PieceType::KNIGHT  ||
-                            mailbox[~sideToMove][Square(square+SOUTH_WEST_WEST)] == PieceType::KNIGHT  || mailbox[~sideToMove][Square(square+SOUTH_EAST_EAST)] == PieceType::KNIGHT  ||
-                            mailbox[~sideToMove][Square(square+SOUTH_SOUTH_WEST)] == PieceType::KNIGHT || mailbox[~sideToMove][Square(square+SOUTH_SOUTH_EAST)] == PieceType::KNIGHT) 
+    bool isKnightAttack =   (mailbox[~sideToMove][Square120(square+NORTH_NORTH_WEST)] == PieceType::KNIGHT || mailbox[~sideToMove][Square120(square+NORTH_NORTH_EAST)] == PieceType::KNIGHT ||
+                            mailbox[~sideToMove][Square120(square+NORTH_WEST_WEST)] == PieceType::KNIGHT  || mailbox[~sideToMove][Square120(square+NORTH_EAST_EAST)] == PieceType::KNIGHT  ||
+                            mailbox[~sideToMove][Square120(square+SOUTH_WEST_WEST)] == PieceType::KNIGHT  || mailbox[~sideToMove][Square120(square+SOUTH_EAST_EAST)] == PieceType::KNIGHT  ||
+                            mailbox[~sideToMove][Square120(square+SOUTH_SOUTH_WEST)] == PieceType::KNIGHT || mailbox[~sideToMove][Square120(square+SOUTH_SOUTH_EAST)] == PieceType::KNIGHT) 
                             ? true : false;
     if(isKnightAttack){
         return true;
@@ -275,8 +277,8 @@ bool Position::square_is_attacked(const Square &square) const{
     //bishops, queens
     for(Direction dir : diagonals){
         int toSquareIndex = square + dir;
-        Square toSquare = SQUARES_120[toSquareIndex];
-        while(toSquare != Square::OFFBOARD && mailbox[Color::COLOR_NC][toSquare] == NO_PIECE_TYPE) {
+        Square120 toSquare = SQUARES_120[toSquareIndex];
+        while(toSquare != Square120::SQ120_OFFBOARD && mailbox[Color::COLOR_NC][toSquare] == NO_PIECE_TYPE) {
             toSquareIndex += dir;
             toSquare = SQUARES_120[toSquareIndex];
         }
@@ -288,8 +290,8 @@ bool Position::square_is_attacked(const Square &square) const{
     //rooks, queens
     for(Direction dir : sizes){
         int toSquareIndex = square + dir;
-        Square toSquare = SQUARES_120[toSquareIndex];
-        while(toSquare != Square::OFFBOARD && mailbox[Color::COLOR_NC][toSquare] == NO_PIECE_TYPE) {
+        Square120 toSquare = SQUARES_120[toSquareIndex];
+        while(toSquare != Square120::SQ120_OFFBOARD && mailbox[Color::COLOR_NC][toSquare] == NO_PIECE_TYPE) {
             toSquareIndex += dir;
             toSquare = SQUARES_120[toSquareIndex];
         }
@@ -301,14 +303,14 @@ bool Position::square_is_attacked(const Square &square) const{
     //king
     for(Direction dir : diagonals){
         int toSquareIndex = square + dir;
-        Square toSquare = SQUARES_120[toSquareIndex];
+        Square120 toSquare = SQUARES_120[toSquareIndex];
         if(mailbox[~sideToMove][toSquare] == PieceType::KING){
             return true;
         }
     }
     for(Direction dir : sizes){
         int toSquareIndex = square + dir;
-        Square toSquare = SQUARES_120[toSquareIndex];
+        Square120 toSquare = SQUARES_120[toSquareIndex];
         if(mailbox[~sideToMove][toSquare] == PieceType::KING){
             return true;
         }
@@ -317,10 +319,10 @@ bool Position::square_is_attacked(const Square &square) const{
     return false;
 }
 
-bool Position::do_move(const Move &move){
+bool Position::do_move(Move move){
 
-    Square from = move_from(move);
-    Square to = move_to(move);
+    Square120 from = move_from(move);
+    Square120 to = move_to(move);
     SpecialMove specialMove = move_special(move);
 
     //Set move to the move history
@@ -329,25 +331,25 @@ bool Position::do_move(const Move &move){
     if(specialMove != SpecialMove::NO_SPECIAL){
         if(specialMove == SpecialMove::ENPASSANT){
             if(sideToMove==Color::WHITE){
-                remove_piece(Square(to+Direction::SOUTH));
+                remove_piece(Square120(to+Direction::SOUTH));
             }else{
-                remove_piece(Square(to+Direction::NORTH));
+                remove_piece(Square120(to+Direction::NORTH));
             }
         }
         if(specialMove == SpecialMove::CASTLE){
             switch (to)
             {
-            case Square::C1:
-                move_piece(Square::A1, Square::D1);
+            case Square120::SQ120_C1:
+                move_piece(Square120::SQ120_A1, Square120::SQ120_D1);
                 break;
-            case Square::G1:
-                move_piece(Square::H1, Square::F1);
+            case Square120::SQ120_G1:
+                move_piece(Square120::SQ120_H1, Square120::SQ120_F1);
                 break;
-            case Square::C8:
-                move_piece(Square::A8, Square::D8);
+            case Square120::SQ120_C8:
+                move_piece(Square120::SQ120_A8, Square120::SQ120_D8);
                 break;
-            case Square::G8:
-                move_piece(Square::H8, Square::F8);
+            case Square120::SQ120_G8:
+                move_piece(Square120::SQ120_H8, Square120::SQ120_F8);
                 break;
             default:
                 break;
@@ -381,14 +383,14 @@ bool Position::do_move(const Move &move){
         history[historySize-1].movesCounter = history[historySize-2].movesCounter+1;
 
     //Set enpassant square
-    history[historySize-1].enpassantSquare = Square::NO_SQUARE;
+    history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
     if(mailbox[Color::COLOR_NC][from] == PieceType::PAWN){
         history[historySize-1].fiftyMovesCounter = 0;
         
         if(sideToMove==Color::WHITE && specialMove == SpecialMove::PAWN_START){
-            history[historySize-1].enpassantSquare = Square(from+10);
+            history[historySize-1].enpassantSquare = Square120(from+10);
         } else if(sideToMove==Color::BLACK && specialMove == SpecialMove::PAWN_START){
-            history[historySize-1].enpassantSquare = Square(from-10);
+            history[historySize-1].enpassantSquare = Square120(from-10);
         }
     }
 
@@ -417,8 +419,8 @@ bool Position::do_move(const Move &move){
 void Position::undo_move(){
     
     Move move = history[historySize-2].nextMove;
-    Square from = move_from(move);
-    Square to = move_to(move);
+    Square120 from = move_from(move);
+    Square120 to = move_to(move);
     SpecialMove specialMove = move_special(move);
 
     sideToMove =~ sideToMove; 
@@ -426,25 +428,25 @@ void Position::undo_move(){
     if(specialMove != SpecialMove::NO_SPECIAL){
         if(specialMove == SpecialMove::ENPASSANT){
             if(sideToMove==Color::WHITE){
-                add_piece(Square(to+Direction::SOUTH), Piece::B_PAWN);
+                add_piece(Square120(to+Direction::SOUTH), Piece::B_PAWN);
             }else{
-                add_piece(Square(to+Direction::NORTH), Piece::W_PAWN);
+                add_piece(Square120(to+Direction::NORTH), Piece::W_PAWN);
             }
         }
         if(specialMove == SpecialMove::CASTLE){
             switch (to)
             {
-            case Square::C1:
-                move_piece(Square::D1, Square::A1);
+            case Square120::SQ120_C1:
+                move_piece(Square120::SQ120_D1, Square120::SQ120_A1);
                 break;
-            case Square::G1:
-                move_piece(Square::F1, Square::H1);
+            case Square120::SQ120_G1:
+                move_piece(Square120::SQ120_F1, Square120::SQ120_H1);
                 break;
-            case Square::C8:
-                move_piece(Square::D8, Square::A8);
+            case Square120::SQ120_C8:
+                move_piece(Square120::SQ120_D8, Square120::SQ120_A8);
                 break;
-            case Square::G8:
-                move_piece(Square::F8, Square::H8);
+            case Square120::SQ120_G8:
+                move_piece(Square120::SQ120_F8, Square120::SQ120_H8);
                 break;
             default:
                 break;
@@ -470,13 +472,13 @@ void Position::undo_move(){
     history[historySize-1].castlingRight = 0;
     history[historySize-1].fiftyMovesCounter = 0;
     history[historySize-1].movesCounter = 0;
-    history[historySize-1].enpassantSquare = Square::NO_SQUARE;
+    history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
 
     --historySize;
 
 }
 
-void Position::move_piece(const Square &from, const Square &to){
+void Position::move_piece(Square120 from, Square120 to){
 
     Color pieceColor{Color::COLOR_NC};
     PieceType pieceType{PieceType::NO_PIECE_TYPE};
@@ -511,7 +513,7 @@ void Position::move_piece(const Square &from, const Square &to){
 }
 
 //TODO usar templates para evitar if else
-void Position::remove_piece(const Square &square){
+void Position::remove_piece(Square120 square){
 
     Color pieceColor{Color::COLOR_NC};
     PieceType pieceType{PieceType::NO_PIECE_TYPE};
@@ -542,17 +544,17 @@ void Position::remove_piece(const Square &square){
     for(std::size_t i = 0; i < pieceCounter[piece]; ++i){
         if(pieceList[piece][i] == square){
             pieceList[piece][i] = pieceList[piece][pieceCounter[piece]-1];
-            pieceList[piece][pieceCounter[piece]-1] = Square::NO_SQUARE;
+            pieceList[piece][pieceCounter[piece]-1] = Square120::SQ120_NO_SQUARE;
             --pieceCounter[piece];
             break;
         }
     }
 
     //Remove piece value from material 
-    material_score[pieceColor] -= Evaluate::evaluate_material(pieceType);
+    material_score[pieceColor] -= Evaluate::calc_material_table(pieceColor, pieceType, square);
 }
 
-void Position::add_piece(const Square &square, const Piece &piece){
+void Position::add_piece(Square120 square, Piece piece){
 
     Color pieceColor = piece_color(piece);
     PieceType pieceType = piece_type(piece);
@@ -563,7 +565,7 @@ void Position::add_piece(const Square &square, const Piece &piece){
     ++pieceCounter[piece];
 
     //Add piece value from material 
-    material_score[pieceColor] += Evaluate::evaluate_material(pieceType);
+    material_score[pieceColor] += Evaluate::calc_material_table(pieceColor, pieceType, square);
 
 }
 
