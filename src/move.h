@@ -49,34 +49,34 @@ const std::string SQUARE_NAMES[Xake::SQUARE_SIZE_120] = {
 
 
 //IMPROVE inline or constxpr? same for other functionsfff
-inline Move make_move(const Square &from, const Square &to, const SpecialMove &SpecialMove, const Piece &capturedPiece) {
+inline Move make_move(Square120 from, Square120 to, SpecialMove SpecialMove, Piece capturedPiece) {
     return Move((capturedPiece << 19) | (SpecialMove << 14) + (to << 7) + from);
 }
 
-inline Square move_from(const Move &move) {
-	return Square(move & 0x7f);
+inline Square120 move_from(Move move) {
+	return Square120(move & 0x7f);
 }
 
-inline Xake::Square move_to(const Move &move) {
-	return Square((move >> 7) & 0x7f);
+inline Xake::Square120 move_to(Move move) {
+	return Square120((move >> 7) & 0x7f);
 }
 
-inline SpecialMove move_special(const Move &move) {
+inline SpecialMove move_special(Move move) {
     return SpecialMove((move >> 14) & 0x1F);
 }
 
-inline PieceType promoted_piece(const Move &move){
+inline PieceType promoted_piece(Move move){
     return PieceType((move >> 16) & 0x07);
 } 
 
-inline Piece captured_piece(const Move &move){
+inline Piece captured_piece(Move move){
     return Piece((move >> 19) & 0x0f);
 } 
 
-inline std::string algebraic_move(const Move &move) {
+inline std::string algebraic_move(Move move) {
     std::string algebraic_move;
-    Xake::Square from   = move_from(move);
-    Xake::Square to     = move_to(move);
+    Xake::Square120 from   = move_from(move);
+    Xake::Square120 to     = move_to(move);
     algebraic_move = SQUARE_NAMES[from] + SQUARE_NAMES[to];
 
     PieceType promoted = promoted_piece(move);

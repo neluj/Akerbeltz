@@ -13,22 +13,23 @@ namespace Xake{
         int castlingRight;
         unsigned short int fiftyMovesCounter;
         unsigned short int movesCounter;
-        Square enpassantSquare;
+        Square120 enpassantSquare;
     };
 
-    const Square SQUARES_120[SQUARE_SIZE_120] = {
-      OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD,
-      OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD,
-      OFFBOARD, A1, B1, C1, D1, E1, F1, G1, H1, OFFBOARD,
-      OFFBOARD, A2, B2, C2, D2, E2, F2, G2, H2, OFFBOARD,
-      OFFBOARD, A3, B3, C3, D3, E3, F3, G3, H3, OFFBOARD,
-      OFFBOARD, A4, B4, C4, D4, E4, F4, G4, H4, OFFBOARD,
-      OFFBOARD, A5, B5, C5, D5, E5, F5, G5, H5, OFFBOARD,
-      OFFBOARD, A6, B6, C6, D6, E6, F6, G6, H6, OFFBOARD,
-      OFFBOARD, A7, B7, C7, D7, E7, F7, G7, H7, OFFBOARD,
-      OFFBOARD, A8, B8, C8, D8, E8, F8, G8, H8, OFFBOARD,
-      OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD,
-      OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD, OFFBOARD,
+
+    const Square120 SQUARES_120[SQUARE_SIZE_120] = {
+      SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_A1,       SQ120_B1,       SQ120_C1,       SQ120_D1,       SQ120_E1,       SQ120_F1,       SQ120_G1,       SQ120_H1,       SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_A2,       SQ120_B2,       SQ120_C2,       SQ120_D2,       SQ120_E2,       SQ120_F2,       SQ120_G2,       SQ120_H2,       SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_A3,       SQ120_B3,       SQ120_C3,       SQ120_D3,       SQ120_E3,       SQ120_F3,       SQ120_G3,       SQ120_H3,       SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_A4,       SQ120_B4,       SQ120_C4,       SQ120_D4,       SQ120_E4,       SQ120_F4,       SQ120_G4,       SQ120_H4,       SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_A5,       SQ120_B5,       SQ120_C5,       SQ120_D5,       SQ120_E5,       SQ120_F5,       SQ120_G5,       SQ120_H5,       SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_A6,       SQ120_B6,       SQ120_C6,       SQ120_D6,       SQ120_E6,       SQ120_F6,       SQ120_G6,       SQ120_H6,       SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_A7,       SQ120_B7,       SQ120_C7,       SQ120_D7,       SQ120_E7,       SQ120_F7,       SQ120_G7,       SQ120_H7,       SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_A8,       SQ120_B8,       SQ120_C8,       SQ120_D8,       SQ120_E8,       SQ120_F8,       SQ120_G8,       SQ120_H8,       SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
+      SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
     };
 
 class Position{
@@ -36,26 +37,26 @@ class Position{
 public:
     
     Position(); 
-    void set_FEN(const std::string & fenNotation);
+    void set_FEN(std::string fenNotation);
     Color get_side_to_move() const;
     int get_castling_right() const;
-    Square get_enpassant_square() const;
+    Square120 get_enpassant_square() const;
     unsigned short get_fifty_moves_counter() const;
     unsigned short get_moves_counter() const;
-    PieceType get_mailbox_piece(const Color &color, const Square &square) const;
-    std::size_t get_piece_size(const Piece &piece) const;
-    const Square* get_piece_list(const Piece &piece) const;
-    bool square_is_attacked(const Square &square) const; 
+    PieceType get_mailbox_piece(Color color, Square120 square) const;
+    std::size_t get_piece_size(Piece piece) const;
+    const Square120* get_piece_list(Piece piece) const;
+    bool square_is_attacked(Square120 square) const; 
 
     //Move related functions
-    bool do_move(const Move &move);
+    bool do_move(Move move);
     void undo_move();
-    void move_piece(const Square &from, const Square &to);
-    void remove_piece(const Square &square);
-    void add_piece(const Square &square, const Piece &piece);
+    void move_piece(Square120 from, Square120 to);
+    void remove_piece(Square120 square);
+    void add_piece(Square120 square, Piece piece);
 
     void print_board();
-    Evaluate::Score get_material_score(const Color &color);
+    Evaluate::Score get_material_score(Color color) const;
 
 private:
 
@@ -64,7 +65,7 @@ private:
 
     PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_120];
     std::size_t pieceCounter[PIECE_SIZE];
-    Square pieceList[PIECE_SIZE][MAX_SAME_PIECE];
+    Square120 pieceList[PIECE_SIZE][MAX_SAME_PIECE];
     Color sideToMove{COLOR_NC};
     //TODO improve this to CastligRigth type, and divid by color (stockfish  CastlingRights castling_rights(Color c) const;)
     //int castlingRight{0};
@@ -86,7 +87,7 @@ inline Color Position::get_side_to_move() const{
 inline int Position::get_castling_right() const{
     return history[historySize-1].castlingRight;
 }
-inline Square Position::get_enpassant_square() const{
+inline Square120 Position::get_enpassant_square() const{
     return history[historySize-1].enpassantSquare;
 }
 inline unsigned short Position::get_fifty_moves_counter() const{
@@ -95,16 +96,16 @@ inline unsigned short Position::get_fifty_moves_counter() const{
 inline unsigned short Position::get_moves_counter() const{
     return history[historySize-1].movesCounter;
 }
-inline PieceType Position::get_mailbox_piece(const Color &color, const Square &square) const{
+inline PieceType Position::get_mailbox_piece(Color color, Square120 square) const{
     return mailbox[color][square];
 }
-inline std::size_t Position::get_piece_size(const Piece &piece) const{
+inline std::size_t Position::get_piece_size(Piece piece) const{
     return pieceCounter[piece];
 }
-inline const Square* Position::get_piece_list(const Piece &piece) const{
+inline const Square120* Position::get_piece_list(Piece piece) const{
     return pieceList[piece];
 }
-inline Evaluate::Score Position::get_material_score(const Color &color){
+inline Evaluate::Score Position::get_material_score(Color color) const{
     return material_score[color];
 }
 

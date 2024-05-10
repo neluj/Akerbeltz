@@ -9,9 +9,15 @@ class Position;
 
 namespace Search{
 
-    static long leafCounter;
-    void perft(Position &position, int depth);
-    long perftTest(Position &position, int depth);
+    using DepthSize = unsigned short int;
+    using NodesSize = unsigned long long int;
+
+    struct SearchInfo{
+        unsigned short int depth;
+    };
+
+    NodesSize perftTest(Position &position, DepthSize depth);
+    void search(Position &position, SearchInfo &searchInfo);
 
 }
 
