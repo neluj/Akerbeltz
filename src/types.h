@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 
 namespace Xake{
 
@@ -22,7 +23,7 @@ constexpr std::size_t MAX_POSITION_MOVES_SIZE = 256;
 constexpr std::size_t MAX_GAME_MOVES = 2048;
 constexpr std::size_t MAX_SAME_PIECE = 10;
 
-constexpr int CHECKMATE_SCORE = 99000;
+constexpr int CHECKMATE_SCORE = 30000;
 
 enum PieceType{
   NO_PIECE_TYPE,
@@ -39,6 +40,8 @@ enum Piece : int{
   W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING,
   B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING
 };
+
+const std::string_view PIECE_NAMES{" PNBRQKpnbrqk"};
 
 /*  NOTE 
     IMPROVE 
@@ -110,7 +113,10 @@ enum Square64 : int{
 	SQ64_A8, SQ64_B8, SQ64_C8, SQ64_D8, SQ64_E8, SQ64_F8, SQ64_G8, SQ64_H8,
   SQ64_NO_SQUARE, SQ64_OFFBOARD
 };
- 
+
+
+// TODO revisar todos los 64to120 y 120to64
+// set_FEN ((rank + 2) * 10) + (file +1)
 constexpr Square64 square120_square64[SQUARE_SIZE_120] = {
       SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD,
       SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD,
@@ -124,6 +130,22 @@ constexpr Square64 square120_square64[SQUARE_SIZE_120] = {
       SQ64_OFFBOARD, SQ64_A8,       SQ64_B8,       SQ64_C8,       SQ64_D8,       SQ64_E8,       SQ64_F8,       SQ64_G8,       SQ64_H8,       SQ64_OFFBOARD,
       SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD,
       SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD, SQ64_OFFBOARD,
+};
+
+const std::string SQUARE_NAMES[Xake::SQUARE_SIZE_120] = {
+    "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD","OFFBOARD", "OFFBOARD", "OFFBOARD",
+    "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD","OFFBOARD", "OFFBOARD", "OFFBOARD",
+    "OFFBOARD", "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "OFFBOARD",
+    "OFFBOARD", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "OFFBOARD",
+    "OFFBOARD", "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3", "OFFBOARD",
+    "OFFBOARD", "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4", "OFFBOARD",
+    "OFFBOARD", "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5", "OFFBOARD",
+    "OFFBOARD", "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6", "OFFBOARD",
+    "OFFBOARD", "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7", "OFFBOARD",
+    "OFFBOARD", "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8", "OFFBOARD",
+    "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD","OFFBOARD", "OFFBOARD", "OFFBOARD",
+    "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD","OFFBOARD", "OFFBOARD", "OFFBOARD"
+
 };
 
 
@@ -149,7 +171,9 @@ enum CastlingRight: int{
 
 enum Direction: int{
     NORTH = 10,
+    NORTH_NORTH = NORTH + NORTH,
     SOUTH = -NORTH,
+    SOUTH_SOUTH = SOUTH + SOUTH,
     EAST  = 1,
     WEST  = -EAST,
 

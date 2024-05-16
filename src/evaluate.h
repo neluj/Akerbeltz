@@ -14,7 +14,6 @@ namespace Evaluate{
     using Score = int;
 
     void init();
-    //Score evaluate_material(PieceType pieceType);
     
     Score calc_material_table(Color color, PieceType pieceType, Square120 sq);
 
