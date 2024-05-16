@@ -22,8 +22,12 @@ void search(Position &position, SearchInfo &searchInfo){
 
     for(DepthSize currentDepth = 1; currentDepth <= searchInfo.depth; ++currentDepth){
         
-        bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, bestMoveScore);
-        std::cout << "best score: " << bestMoveScore << " depth: " << currentDepth;
+        // DELETEME
+        searchInfo.bestMove = 0;
+        
+        bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
+        //std::cout << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
+        std::cout << "move:" << algebraic_move(searchInfo.bestMove) << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
         
     }
 
@@ -46,6 +50,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         if(!position.do_move(move)){
             continue;
         }
+        //TODO imprimir para ver si se ejecuta el movimiento
 
         score = -alpha_beta(position, searchInfo, -beta, -alpha, depth - 1);
         position.undo_move();
@@ -55,7 +60,13 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
                 return beta;
             }
             alpha = score;
+            // DELETEME
+            searchInfo.bestMove = move;
         }
+        //if(score >= beta)
+        //    return beta;
+        //if(score>alpha)
+        //    alpha = score;
 
     }
 

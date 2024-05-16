@@ -2,6 +2,7 @@
 #define INCLUDE_SEARCH_H
 
 #include "types.h"
+#include "move.h"
 
 namespace Xake{
 
@@ -14,10 +15,12 @@ namespace Search{
 
     struct SearchInfo{
         unsigned short int depth;
+        //DELETEME 
+        Move bestMove;
     };
 
     NodesSize perftTest(Position &position, DepthSize depth);
-    void search(Position &position, SearchInfo &searchInfo);
+    void search(Position &position,  SearchInfo &searchInfo);
 
 }
 

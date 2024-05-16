@@ -3,10 +3,24 @@
 //TODO use gmock
 using namespace Xake;
 
-TEST(PositionTest, RandomSetPosition){
-    const std::string RANDOM_FEN_POSITION = "rnbqk3/PPpBpppP/8/1Q2N3/8/7K/R15p/8 w KQkq c3 34 1";
+class PositionTest : public ::testing::Test
+{
+     protected:
+     virtual void SetUp()
+     {      
+        Evaluate::init();
+     }
 
+     virtual void TearDown()
+    {
+    }
+    public:
     Position position;
+};
+
+TEST_F(PositionTest, RandomSetPosition){
+    const std::string RANDOM_FEN_POSITION = "rnbqk3/PPpBpppP/8/1Q2N3/8/7K/R15p/8 w KQkq c3 34 1";
+    //Position position;
 
     position.set_FEN(RANDOM_FEN_POSITION);
 
@@ -168,8 +182,8 @@ TEST(PositionTest, RandomSetPosition){
     EXPECT_EQ(position.get_piece_list(B_KING)[9], SQ120_NO_SQUARE);
 
     //TODO UT for mailbox
-    EXPECT_EQ(position.get_mailbox_piece(WHITE, SQ120_A7), PAWN);
-    EXPECT_EQ(position.get_mailbox_piece(COLOR_NC, SQ120_A7), PAWN);
+    EXPECT_EQ(position.get_mailbox_pieceType(WHITE, SQ120_A7), PAWN);
+    EXPECT_EQ(position.get_mailbox_pieceType(COLOR_NC, SQ120_A7), PAWN);
     EXPECT_EQ(position.get_side_to_move(), WHITE);
 
     EXPECT_EQ(position.get_castling_right(), 0xF);
@@ -181,9 +195,9 @@ TEST(PositionTest, RandomSetPosition){
     EXPECT_EQ(position.get_moves_counter(), 1);
 }
 
-TEST(PositionTest, SquareAttacked){
+TEST_F(PositionTest, SquareAttacked){
 
-    Position position;
+    //Position position;
 
     //Attacks
 
@@ -238,9 +252,9 @@ TEST(PositionTest, SquareAttacked){
     ASSERT_EQ(position.square_is_attacked(Square120::SQ120_F1), false);
 }
 
-TEST(PositionTest, MovePiece){
+TEST_F(PositionTest, MovePiece){
 
-    Position position;
+    //Position position;
 
     const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -249,14 +263,14 @@ TEST(PositionTest, MovePiece){
     //1 Check if the square D2 is taken by a pawn and D4 is empty
 
     //mailbox
-    PieceType pieceTypewpbd2 = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D2);
-    PieceType pieceTypencbd2 = position.get_mailbox_piece(Color::COLOR_NC, Square120::SQ120_D2);
+    PieceType pieceTypewpbd2 = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D2);
+    PieceType pieceTypencbd2 = position.get_mailbox_pieceType(Color::COLOR_NC, Square120::SQ120_D2);
 
     ASSERT_EQ(pieceTypewpbd2, PieceType::PAWN);
     ASSERT_EQ(pieceTypencbd2, PieceType::PAWN);
 
-    PieceType pieceTypewpbd4 = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D4);
-    PieceType pieceTypencbd4 = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D4);
+    PieceType pieceTypewpbd4 = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D4);
+    PieceType pieceTypencbd4 = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D4);
 
     ASSERT_EQ(pieceTypewpbd4, PieceType::NO_PIECE_TYPE);
     ASSERT_EQ(pieceTypencbd4, PieceType::NO_PIECE_TYPE);
@@ -287,14 +301,14 @@ TEST(PositionTest, MovePiece){
     //3 Check D2 square
 
     //mailbox
-    PieceType pieceTypewpad2 = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D2);
-    PieceType pieceTypencad2 = position.get_mailbox_piece(Color::COLOR_NC, Square120::SQ120_D2);
+    PieceType pieceTypewpad2 = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D2);
+    PieceType pieceTypencad2 = position.get_mailbox_pieceType(Color::COLOR_NC, Square120::SQ120_D2);
 
     ASSERT_EQ(pieceTypewpad2, PieceType::NO_PIECE_TYPE);
     ASSERT_EQ(pieceTypencad2, PieceType::NO_PIECE_TYPE);
 
-    PieceType pieceTypewpad4 = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D4);
-    PieceType pieceTypencad4 = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D4);
+    PieceType pieceTypewpad4 = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D4);
+    PieceType pieceTypencad4 = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D4);
 
     ASSERT_EQ(pieceTypewpad4, PieceType::PAWN);
     ASSERT_EQ(pieceTypencad4, PieceType::PAWN);  
@@ -320,9 +334,9 @@ TEST(PositionTest, MovePiece){
 
 }
 
-TEST(PositionTest, RemovePiece){
+TEST_F(PositionTest, RemovePiece){
 
-    Position position;
+    //Position position;
 
     const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -331,8 +345,8 @@ TEST(PositionTest, RemovePiece){
     //1 Check if the square D2 is taken by a pawn
 
     //mailbox
-    PieceType pieceTypewp = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D2);
-    PieceType pieceTypep = position.get_mailbox_piece(Color::COLOR_NC, Square120::SQ120_D2);
+    PieceType pieceTypewp = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D2);
+    PieceType pieceTypep = position.get_mailbox_pieceType(Color::COLOR_NC, Square120::SQ120_D2);
 
     ASSERT_EQ(pieceTypewp, PieceType::PAWN);
     ASSERT_EQ(pieceTypep, PieceType::PAWN);
@@ -359,8 +373,8 @@ TEST(PositionTest, RemovePiece){
     //3 Check D2 square
 
     //mailbox
-    PieceType pieceTypenptw = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D2);
-    PieceType pieceTypenptn = position.get_mailbox_piece(Color::COLOR_NC, Square120::SQ120_D2);
+    PieceType pieceTypenptw = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D2);
+    PieceType pieceTypenptn = position.get_mailbox_pieceType(Color::COLOR_NC, Square120::SQ120_D2);
 
     ASSERT_EQ(pieceTypenptw, PieceType::NO_PIECE_TYPE);   
     ASSERT_EQ(pieceTypenptn, PieceType::NO_PIECE_TYPE);
@@ -383,9 +397,9 @@ TEST(PositionTest, RemovePiece){
 
 }
  
-TEST(PositionTest, AddPiece){
+TEST_F(PositionTest, AddPiece){
 
-    Position position;
+    //Position position;
 
     const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -394,8 +408,8 @@ TEST(PositionTest, AddPiece){
     //1 Check if the square D2 is empty
 
     //mailbox
-    PieceType pieceTypewp = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D2);
-    PieceType pieceTypep = position.get_mailbox_piece(Color::COLOR_NC, Square120::SQ120_D2);
+    PieceType pieceTypewp = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D2);
+    PieceType pieceTypep = position.get_mailbox_pieceType(Color::COLOR_NC, Square120::SQ120_D2);
 
     ASSERT_EQ(pieceTypewp, PieceType::NO_PIECE_TYPE);
     ASSERT_EQ(pieceTypep, PieceType::NO_PIECE_TYPE);
@@ -422,8 +436,8 @@ TEST(PositionTest, AddPiece){
     //3 Check D2 square
 
     //mailbox
-    PieceType pieceTypenptw = position.get_mailbox_piece(Color::WHITE, Square120::SQ120_D2);
-    PieceType pieceTypenptn = position.get_mailbox_piece(Color::COLOR_NC, Square120::SQ120_D2);
+    PieceType pieceTypenptw = position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_D2);
+    PieceType pieceTypenptn = position.get_mailbox_pieceType(Color::COLOR_NC, Square120::SQ120_D2);
 
     ASSERT_EQ(pieceTypenptw, PieceType::PAWN);   
     ASSERT_EQ(pieceTypenptn, PieceType::PAWN);
@@ -446,9 +460,9 @@ TEST(PositionTest, AddPiece){
 
 }
 
-TEST(PositionTest, DoMove){
+TEST_F(PositionTest, DoMove){
 
-    Position position;
+    //Position position;
 
     const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -459,8 +473,8 @@ TEST(PositionTest, DoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square120::SQ120_NO_SQUARE);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square120::SQ120_B2), PieceType::PAWN);
-    EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square120::SQ120_B4), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B2), PieceType::PAWN);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B4), PieceType::NO_PIECE_TYPE);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     Move moveb2b4 = make_move(Square120::SQ120_B2, Square120::SQ120_B4, SpecialMove::PAWN_START, Piece::NO_PIECE);    
@@ -471,15 +485,15 @@ TEST(PositionTest, DoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square120::SQ120_B3);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square120::SQ120_B2), PieceType::NO_PIECE_TYPE);
-    EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square120::SQ120_B4), PieceType::PAWN);
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B2), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B4), PieceType::PAWN);
+    EXPECT_EQ(position.get_material_score(Color::WHITE), 23891);
 
 }
 
-TEST(PositionTest, UndoMove){
+TEST_F(PositionTest, UndoMove){
 
-    Position position;
+    //Position position;
 
     const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -490,8 +504,8 @@ TEST(PositionTest, UndoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square120::SQ120_NO_SQUARE);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square120::SQ120_B2), PieceType::PAWN);
-    EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square120::SQ120_B4), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B2), PieceType::PAWN);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B4), PieceType::NO_PIECE_TYPE);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     Move moveb2b4 = make_move(Square120::SQ120_B2, Square120::SQ120_B4, SpecialMove::PAWN_START, Piece::NO_PIECE); 
@@ -505,8 +519,8 @@ TEST(PositionTest, UndoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square120::SQ120_NO_SQUARE);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square120::SQ120_B2), PieceType::PAWN);
-    EXPECT_EQ(position.get_mailbox_piece(Color::WHITE, Square120::SQ120_B4), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B2), PieceType::PAWN);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B4), PieceType::NO_PIECE_TYPE);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
 }

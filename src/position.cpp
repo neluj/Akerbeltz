@@ -20,18 +20,49 @@ const int CASTLE_PERSMISION_UPDATES[Xake::SQUARE_SIZE_120] = {
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15
 };
     
-Position::Position(){
-    init();
+std::ostream& operator<<(std::ostream& os, const Position& pos) {
+
+    os << "+---+---+---+---+---+---+---+---+" << std::endl;
+    for (int rank = RANK_8; rank >= RANK_1; --rank)
+    {
+        os << "| ";
+        for (int file = FILE_A; file <= FILE_H; ++file)
+        {
+            Square120 square = Square120(((rank + 2) * 10) + (file +1));
+            PieceType pieceType{NO_PIECE_TYPE};
+            Color color{COLOR_NC};
+            if(pos.get_mailbox_pieceType(WHITE, square) != NO_PIECE_TYPE){
+                pieceType = pos.get_mailbox_pieceType(WHITE, square);
+                color = WHITE;
+            }else if(pos.get_mailbox_pieceType(BLACK, square) != NO_PIECE_TYPE){
+                pieceType = pos.get_mailbox_pieceType(BLACK, square);
+                color = BLACK;
+            }
+
+            os << PIECE_NAMES[make_piece(color, pieceType)] << " | ";
+
+        }
+
+        os << rank + 1 << std::endl << "+---+---+---+---+---+---+---+---+" << std::endl; 
+    }
+
+    os << "  a   b   c   d   e   f   g   h" << std::endl;
+
+    return os;
+
 }
 
-void Position::init(){
-
-    //init mailbox
+void Position::clean_mailbox(){
+    //clean mailbox
     for(std::size_t c = 0; c < COLOR_SIZE; ++c){
         for(std::size_t i = 0; i < SQUARE_SIZE_120; ++i){
             mailbox[c][i] = NO_PIECE_TYPE;
         }
     }
+}
+
+void Position::clean_piece_list(){
+    //clean piece list
     for(std::size_t i = 0; i < PIECE_SIZE; ++i){
         pieceCounter[i] = 0;
     }
@@ -40,6 +71,11 @@ void Position::init(){
             pieceList[pt][pn] = SQ120_NO_SQUARE;
         }    
     }
+}
+
+void Position::clear_position_info(){
+
+    sideToMove = COLOR_NC;
 
     historySize = 1;
 
@@ -49,16 +85,29 @@ void Position::init(){
     history[historySize-1].movesCounter = 0;
     history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
 
-
     material_score[WHITE] = 0;
     material_score[BLACK] = 0;
     material_score[COLOR_NC] = 0;
+
+}
+
+void Position::clean_position(){
+
+    clean_mailbox();
+    clean_piece_list();
+    clear_position_info();
+
 }
 
 //TODO FEN could be shorter 
+// https://www.geeksforgeeks.org/processing-strings-using-stdistringstream/
+// https://www.geeksforgeeks.org/stringstream-c-applications/
+//https://www.geeksforgeeks.org/ios-manipulators-skipws-function-in-c/
+//dividir en funciones
+//constexpr std::string_view PieceToChar(" PNBRQK  pnbrqk"); en vez de switch case
 void Position::set_FEN(std::string fenNotation){
 
-    init();
+    clean_position();
 
     int     rank    = RANK_8;
     int     file    = FILE_A;
@@ -229,8 +278,6 @@ void Position::set_FEN(std::string fenNotation){
 }
 
 void Position::calc_material_score(){
-
-    Evaluate::init();
 
     for(std::size_t sq = 0; sq < SQUARE_SIZE_120; ++sq){
         if(mailbox[WHITE][sq] != NO_PIECE_TYPE)
@@ -509,6 +556,10 @@ void Position::move_piece(Square120 from, Square120 to){
             break;
         }
     }
+
+    //Update piece value from material
+    material_score[pieceColor] -= Evaluate::calc_material_table(pieceColor, pieceType, from);
+    material_score[pieceColor] += Evaluate::calc_material_table(pieceColor, pieceType, to);
 
 }
 

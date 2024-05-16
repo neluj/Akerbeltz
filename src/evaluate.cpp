@@ -5,8 +5,6 @@ namespace Xake{
 
 namespace Evaluate {
 
-
-void init();
 int flip(int sq);
 
 Score material_evaluation_array[] = {0,82,337,365,477, 1025,20000};

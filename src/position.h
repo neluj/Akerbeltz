@@ -16,7 +16,7 @@ namespace Xake{
         Square120 enpassantSquare;
     };
 
-
+    //TODO review if is repeted in types
     const Square120 SQUARES_120[SQUARE_SIZE_120] = {
       SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
       SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
@@ -36,14 +36,13 @@ class Position{
 
 public:
     
-    Position(); 
     void set_FEN(std::string fenNotation);
     Color get_side_to_move() const;
     int get_castling_right() const;
     Square120 get_enpassant_square() const;
     unsigned short get_fifty_moves_counter() const;
     unsigned short get_moves_counter() const;
-    PieceType get_mailbox_piece(Color color, Square120 square) const;
+    PieceType get_mailbox_pieceType(Color color, Square120 square) const;
     std::size_t get_piece_size(Piece piece) const;
     const Square120* get_piece_list(Piece piece) const;
     bool square_is_attacked(Square120 square) const; 
@@ -60,9 +59,15 @@ public:
 
 private:
 
-    void init();
     void calc_material_score();
+    void clean_position();
 
+    void clean_mailbox();
+    void clean_piece_list();
+    void clear_position_info();
+    
+
+    // NOTE revisar si merece así o guardando piezas directamente?
     PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_120];
     std::size_t pieceCounter[PIECE_SIZE];
     Square120 pieceList[PIECE_SIZE][MAX_SAME_PIECE];
@@ -78,6 +83,8 @@ private:
     Evaluate::Score material_score[COLOR_SIZE];
 
 };
+
+std::ostream& operator<<(std::ostream& os, const Position& pos);
 
 /*NOTE https://stackoverflow.com/questions/9734175/why-are-class-member-functions-inlined
 */
@@ -96,7 +103,7 @@ inline unsigned short Position::get_fifty_moves_counter() const{
 inline unsigned short Position::get_moves_counter() const{
     return history[historySize-1].movesCounter;
 }
-inline PieceType Position::get_mailbox_piece(Color color, Square120 square) const{
+inline PieceType Position::get_mailbox_pieceType(Color color, Square120 square) const{
     return mailbox[color][square];
 }
 inline std::size_t Position::get_piece_size(Piece piece) const{

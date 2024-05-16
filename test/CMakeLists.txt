@@ -15,6 +15,7 @@ movegenTest.cpp
 typesTest.cpp
 perftTest.cpp
 evaluateTest.cpp
+uciTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}-test  gtest_main src)
