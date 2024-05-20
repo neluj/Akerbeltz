@@ -8,22 +8,25 @@
 #include <string_view>
 
 namespace Xake{
-
+//TODO quitar size_t pero cuando se pueda, los size que sean el ultimo valor de enum o sino meter todos aqui
 //Enum sizes
 constexpr std::size_t PIECE_SIZE = 13;
 constexpr std::size_t PIECETYPE_SIZE = 7;
-constexpr std::size_t FILE_SIZE = 8;
-constexpr std::size_t RANK_SIZE = 8;
 constexpr std::size_t SQUARE_SIZE_64 = 64;
 constexpr std::size_t SQUARE_SIZE_120 = 120;
-constexpr std::size_t COLOR_SIZE = 3;
 
 //
 constexpr std::size_t MAX_POSITION_MOVES_SIZE = 256;
 constexpr std::size_t MAX_GAME_MOVES = 2048;
 constexpr std::size_t MAX_SAME_PIECE = 10;
 
+constexpr unsigned short int CASTLING_POSIBILITIES = 4 * 4;
+
 constexpr int CHECKMATE_SCORE = 30000;
+
+using DepthSize = unsigned short int;
+using NodesSize = unsigned long long int;
+using Key = unsigned long long;
 
 enum PieceType{
   NO_PIECE_TYPE,
@@ -53,7 +56,8 @@ const std::string_view PIECE_NAMES{" PNBRQKpnbrqk"};
 enum Color : int{
   WHITE,
   BLACK,
-  COLOR_NC
+  COLOR_NC,
+  COLOR_SIZE
 };
 // TODO improve methods
 constexpr Piece make_piece(Color c, PieceType pt) { 
@@ -83,11 +87,11 @@ constexpr Color operator~(Color color) {
 }
 
 enum File : int{
-  FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H
+  FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_SIZE
 };
 
 enum Rank : int{
-  RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8
+  RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_SIZE
 };
 
 enum Square120 : int{

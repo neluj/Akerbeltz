@@ -14,9 +14,10 @@ namespace Xake{
         unsigned short int fiftyMovesCounter;
         unsigned short int movesCounter;
         Square120 enpassantSquare;
+        Key positionKey;
     };
 
-    //TODO review if is repeted in types
+    //TODO review if is repeted in types.h
     const Square120 SQUARES_120[SQUARE_SIZE_120] = {
       SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
       SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
@@ -36,6 +37,7 @@ class Position{
 
 public:
     
+    static void init();
     void set_FEN(std::string fenNotation);
     Color get_side_to_move() const;
     int get_castling_right() const;
@@ -45,6 +47,7 @@ public:
     PieceType get_mailbox_pieceType(Color color, Square120 square) const;
     std::size_t get_piece_size(Piece piece) const;
     const Square120* get_piece_list(Piece piece) const;
+    Key get_key() const;
     bool square_is_attacked(Square120 square) const; 
 
     //Move related functions
@@ -59,14 +62,16 @@ public:
 
 private:
 
-    void calc_material_score();
     void clean_position();
+    static void zobris_prng();
 
     void clean_mailbox();
     void clean_piece_list();
     void clear_position_info();
-    
 
+    void calc_material_score();
+    void calc_key();
+    
     // NOTE revisar si merece así o guardando piezas directamente?
     PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_120];
     std::size_t pieceCounter[PIECE_SIZE];
@@ -114,6 +119,9 @@ inline const Square120* Position::get_piece_list(Piece piece) const{
 }
 inline Evaluate::Score Position::get_material_score(Color color) const{
     return material_score[color];
+}
+inline Key Position::get_key() const{
+    return history[historySize-1].positionKey;
 }
 
 

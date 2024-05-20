@@ -114,6 +114,7 @@ void white_pawn_capture_moves(const Position &position, MoveList &moveList, Squa
     //en passant captures
     if(position.get_enpassant_square() != SQ120_NO_SQUARE){
         if(from+NORTH_WEST == position.get_enpassant_square()){
+            // BUG enpassant capture must be NO_PIECE?
             moveList.set_move(make_move(from, Square120(from+NORTH_WEST), Xake::ENPASSANT, Piece::NO_PIECE));
         }        
         if(from+NORTH_EAST == position.get_enpassant_square()){
