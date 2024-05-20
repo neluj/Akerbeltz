@@ -19,17 +19,17 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 void search(Position &position, SearchInfo &searchInfo){
 
     int bestMoveScore = -CHECKMATE_SCORE;
+    Move bestMove = 0;
 
     for(DepthSize currentDepth = 1; currentDepth <= searchInfo.depth; ++currentDepth){
         
-        // DELETEME
-        searchInfo.bestMove = 0;
-        
         bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
         //std::cout << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
-        std::cout << "move:" << algebraic_move(searchInfo.bestMove) << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
+        //std::cout << "move:" << algebraic_move(veryBestMove) << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
         
     }
+
+    //std::cout << "bestmove " << algebraic_move(veryBestMove) << std::endl; 
 
 }
 
@@ -43,6 +43,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     MoveGen::generate_all_moves(position, moveList);
 
     Score score = -CHECKMATE_SCORE;
+    Score oldAlpha = alpha;
 
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
 
@@ -61,7 +62,6 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
             }
             alpha = score;
             // DELETEME
-            searchInfo.bestMove = move;
         }
         //if(score >= beta)
         //    return beta;

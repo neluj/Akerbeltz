@@ -83,10 +83,10 @@ TEST(PerftTest, DISABLED_FileTest) {
 
     std::cout << "Test for line: " << lineNumber << ": " << sample.fen_notation << "\n";
 
-    for(Search::NodesSize ind = 0; ind < sample.depthNodes.size(); ++ind){
+    for(NodesSize ind = 0; ind < sample.depthNodes.size(); ++ind){
 
       std::cout << "Deth " << ind+1 << " :" << "\n";
-      Search::NodesSize searchedNodes = Search::perftTest(position, ind+1);
+      NodesSize searchedNodes = Search::perftTest(position, ind+1);
       
       EXPECT_EQ(searchedNodes, sample.depthNodes.at(ind));
       
