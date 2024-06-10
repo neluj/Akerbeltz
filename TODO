@@ -12,3 +12,8 @@ spotTest.cpp
 //TODO iniciar todos los valores necesarios desde un main
 //TODO arreglar set fen para cuando no se pone la linea completa usar para testear: 2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -
 //TODO pasar de enum type a int, si no hacer lo que en stockfish en types.h lineas 286-312 y siguientes para operadores
+//TODO unificar typdef y using
+//TODO PV table -> transposition table (mirar diferencia en chatgpt)
+//TODO comparar tiempos con time: 
+//     -con pv tables (con for )y sin (sin for)
+//     Negamax y negamax con alphabeta

@@ -49,6 +49,8 @@ public:
     const Square120* get_piece_list(Piece piece) const;
     Key get_key() const;
     bool square_is_attacked(Square120 square) const; 
+    Evaluate::Score get_material_score(Color color) const;
+    bool is_repetition() const;
 
     //Move related functions
     bool do_move(Move move);
@@ -58,7 +60,7 @@ public:
     void add_piece(Square120 square, Piece piece);
 
     void print_board();
-    Evaluate::Score get_material_score(Color color) const;
+    
 
 private:
 
@@ -83,9 +85,10 @@ private:
     //unsigned short int fiftyMovesCounter{0};
     //unsigned short int movesCounter{0};
     //Move moveHistory[MAX_GAME_MOVES];
+    //TODO esto meterlo en HistoryInfo?
     int historySize;
     HistoryInfo history[MAX_GAME_MOVES];
-    Evaluate::Score material_score[COLOR_SIZE];
+    Evaluate::Score materialScore[COLOR_SIZE];
 
 };
 
@@ -118,7 +121,7 @@ inline const Square120* Position::get_piece_list(Piece piece) const{
     return pieceList[piece];
 }
 inline Evaluate::Score Position::get_material_score(Color color) const{
-    return material_score[color];
+    return materialScore[color];
 }
 inline Key Position::get_key() const{
     return history[historySize-1].positionKey;

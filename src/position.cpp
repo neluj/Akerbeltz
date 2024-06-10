@@ -109,9 +109,9 @@ void Position::clear_position_info(){
     history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
     history[historySize-1].positionKey = 0;
 
-    material_score[WHITE] = 0;
-    material_score[BLACK] = 0;
-    material_score[COLOR_NC] = 0;
+    materialScore[WHITE] = 0;
+    materialScore[BLACK] = 0;
+    materialScore[COLOR_NC] = 0;
 
 }
 
@@ -318,12 +318,12 @@ void Position::calc_material_score(){
 
     for(std::size_t sq = 0; sq < SQUARE_SIZE_120; ++sq){
         if(mailbox[WHITE][sq] != NO_PIECE_TYPE)
-            material_score[WHITE] += Evaluate::calc_material_table(WHITE, mailbox[WHITE][sq], Square120(sq));
+            materialScore[WHITE] += Evaluate::calc_material_table(WHITE, mailbox[WHITE][sq], Square120(sq));
     }
 
     for(std::size_t sq = 0; sq < SQUARE_SIZE_120; ++sq){
         if(mailbox[BLACK][sq] != NO_PIECE_TYPE)
-            material_score[BLACK] += Evaluate::calc_material_table(BLACK, mailbox[BLACK][sq], Square120(sq));
+            materialScore[BLACK] += Evaluate::calc_material_table(BLACK, mailbox[BLACK][sq], Square120(sq));
     }
 
 }
@@ -344,6 +344,18 @@ void Position::calc_key(){
         history[historySize-1].positionKey ^= Zobrist::blackMoves;
 
 }
+
+bool Position::is_repetition() const {
+
+    for(int i = historySize-1 - history[historySize-1].fiftyMovesCounter; i < historySize - 1; ++i){
+
+        if(history[historySize-1].positionKey == history[i].positionKey){
+            return true;
+        }
+    }
+    return false;
+}
+
 
 
 const std::size_t DIRECTION_SIDES = 4;
@@ -624,8 +636,8 @@ void Position::move_piece(Square120 from, Square120 to){
     }
 
     //Update piece value from material
-    material_score[pieceColor] -= Evaluate::calc_material_table(pieceColor, pieceType, from);
-    material_score[pieceColor] += Evaluate::calc_material_table(pieceColor, pieceType, to);
+    materialScore[pieceColor] -= Evaluate::calc_material_table(pieceColor, pieceType, from);
+    materialScore[pieceColor] += Evaluate::calc_material_table(pieceColor, pieceType, to);
 
     //Update key
     history[historySize-1].positionKey ^= Zobrist::pieceSquare[piece][from];
@@ -672,7 +684,7 @@ void Position::remove_piece(Square120 square){
     }
 
     //Remove piece value from material 
-    material_score[pieceColor] -= Evaluate::calc_material_table(pieceColor, pieceType, square);
+    materialScore[pieceColor] -= Evaluate::calc_material_table(pieceColor, pieceType, square);
 
     //Update key
     history[historySize-1].positionKey ^= Zobrist::pieceSquare[piece][square];
@@ -689,7 +701,7 @@ void Position::add_piece(Square120 square, Piece piece){
     ++pieceCounter[piece];
 
     //Add piece value from material 
-    material_score[pieceColor] += Evaluate::calc_material_table(pieceColor, pieceType, square);
+    materialScore[pieceColor] += Evaluate::calc_material_table(pieceColor, pieceType, square);
     
     //Update key
     history[historySize-1].positionKey ^= Zobrist::pieceSquare[piece][square];

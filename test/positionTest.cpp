@@ -822,3 +822,26 @@ TEST_F(PositionTest, CalcKeyBasicPromotion){
     EXPECT_EQ(keyBlackPromotion, keyBlackPromotionAfter);
 
 }
+
+TEST_F(PositionTest, IsRepetition){
+
+    const std::string FEN_INIT_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    position.set_FEN(FEN_INIT_POS);
+
+    Move move_wk = make_move(SQ120_B1, SQ120_A3, NO_SPECIAL, NO_PIECE);
+    position.do_move(move_wk);
+    EXPECT_EQ(position.is_repetition(), false);
+
+    Move move_bk = make_move(SQ120_B8, SQ120_A6 , NO_SPECIAL, NO_PIECE);
+    position.do_move(move_bk);
+    EXPECT_EQ(position.is_repetition(), false);
+
+    Move unmove_wk = make_move(SQ120_A3, SQ120_B1, NO_SPECIAL, NO_PIECE);
+    position.do_move(unmove_wk);
+    EXPECT_EQ(position.is_repetition(), false);
+
+    Move unmove_bk = make_move(SQ120_A6, SQ120_B8, NO_SPECIAL, NO_PIECE);
+    position.do_move(unmove_bk);
+    EXPECT_EQ(position.is_repetition(), true);
+
+}
