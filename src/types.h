@@ -19,6 +19,7 @@ constexpr std::size_t SQUARE_SIZE_120 = 120;
 constexpr std::size_t MAX_POSITION_MOVES_SIZE = 256;
 constexpr std::size_t MAX_GAME_MOVES = 2048;
 constexpr std::size_t MAX_SAME_PIECE = 10;
+constexpr std::size_t MAX_DEPTH = 64;
 
 constexpr unsigned short int CASTLING_POSIBILITIES = 4 * 4;
 
