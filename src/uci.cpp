@@ -30,6 +30,8 @@ void run(){
 
     std::string inputStr, token;
 
+    uci_info();
+
     //if(argc<2)
     //    token = "quit";
 
