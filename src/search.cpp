@@ -4,6 +4,7 @@
 
 #include "movegen.h"
 #include "position.h"
+#include "pvtable.h"
 
 namespace Xake{
 
@@ -12,38 +13,63 @@ namespace Search{
 using namespace Evaluate;
 
 static NodesSize leafCounter;
+PVTable::PVLine pvLine;
+
 void perft(Position &position, DepthSize depth);
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth);
+void clean_search_info(SearchInfo &searchInfo);
 
 void search(Position &position, SearchInfo &searchInfo){
 
     int bestMoveScore = -CHECKMATE_SCORE;
     Move bestMove = 0;
 
+    clean_search_info(searchInfo);
+
     for(DepthSize currentDepth = 1; currentDepth <= searchInfo.depth; ++currentDepth){
         
         bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
+        bestMove = pvLine.moves[0];
+
+        std::cout << 
+        "depth:" << currentDepth << 
+        " score:" << bestMoveScore << 
+        " move:" << algebraic_move(bestMove) <<
+        " nodes:" << searchInfo.nodes;
+
+        PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
+        std::cout << " pv";
+
+        for(DepthSize pvLineDepth = 0; pvLineDepth < pvLine.depth; ++pvLineDepth){
+            std::cout << " " << algebraic_move(pvLine.moves[pvLineDepth]);
+        }
+
+        std::cout << std::endl;
         //std::cout << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
         //std::cout << "move:" << algebraic_move(veryBestMove) << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
         
     }
 
-    //std::cout << "bestmove " << algebraic_move(veryBestMove) << std::endl; 
+    std::cout << "bestmove " << algebraic_move(bestMove) << std::endl; 
 
 }
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth){
 
     if(depth==0){
+        ++searchInfo.nodes;
         return Evaluate::calc_score(position);
     }
+
+    ++searchInfo.nodes;
 
     MoveGen::MoveList moveList;
     MoveGen::generate_all_moves(position, moveList);
 
     Score score = -CHECKMATE_SCORE;
     Score oldAlpha = alpha;
+    Move bestMove = 0;
 
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
 
@@ -61,6 +87,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
                 return beta;
             }
             alpha = score;
+            bestMove = move;
             // DELETEME
         }
         //if(score >= beta)
@@ -70,8 +97,16 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     }
 
+    if(alpha != oldAlpha){
+        PVTable::insert_entry(position, bestMove);
+    }
+
     return alpha;
     
+}
+
+void clean_search_info(SearchInfo &searchInfo){
+    searchInfo.nodes = 0;
 }
 
 

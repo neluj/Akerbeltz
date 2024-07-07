@@ -10,7 +10,8 @@ class Position;
 
 namespace Search{
     struct SearchInfo{
-        unsigned short int depth;
+        DepthSize depth;
+        NodesSize nodes;
     };
 
     NodesSize perftTest(Position &position, DepthSize depth);
