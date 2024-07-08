@@ -30,6 +30,8 @@ void search(Position &position, SearchInfo &searchInfo){
     for(DepthSize currentDepth = 1; currentDepth <= searchInfo.depth; ++currentDepth){
         
         bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
+
+        PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
         bestMove = pvLine.moves[0];
 
         std::cout << 
@@ -38,7 +40,6 @@ void search(Position &position, SearchInfo &searchInfo){
         " move:" << algebraic_move(bestMove) <<
         " nodes:" << searchInfo.nodes;
 
-        PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
         std::cout << " pv";
 
         for(DepthSize pvLineDepth = 0; pvLineDepth < pvLine.depth; ++pvLineDepth){

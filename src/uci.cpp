@@ -88,7 +88,8 @@ void position(Position & pos, std::stringstream &is){
         return;
 
     pos.set_FEN(fen);
-
+    
+    is >> arg;
     while(is >> arg)
         pos.do_move(make_move(pos, arg));
 
