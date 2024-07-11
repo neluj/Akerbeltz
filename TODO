@@ -18,3 +18,4 @@ spotTest.cpp
 //     -con pv tables (con for )y sin (sin for)
 //     Negamax y negamax con alphabeta
 //TODO init position poner en defs, ya se que define muchas veces
+//TODO Al imprimir position, anadir informacion adicional como el key (mirar en stockfish)

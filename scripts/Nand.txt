@@ -1,16 +1,9 @@
-First move list size: 12
+First move list size: 27
 First moves not included in second: 
 
-e1f2: 90
-h1h2: 45
-e1e2: 95
-e1d2: 95
 
 
-Second move list size: 12
+
+Second move list size: 27
 Second moves not included in first: 
 
-e1e2: 100
-e1d2: 100
-e1f2: 95
-h1h2: 50
