@@ -79,8 +79,10 @@ void position(Position & pos, std::stringstream &is){
 
     is >> arg;
 
-    if(arg == "startpos")
+    if(arg == "startpos"){
         fen = START_FEN;
+        is >> arg;
+    }
     else if(arg == "fen")
         while(is >> arg && arg != "moves")
             fen += arg + " ";
@@ -88,7 +90,8 @@ void position(Position & pos, std::stringstream &is){
         return;
 
     pos.set_FEN(fen);
-    
+    //VIDEO uno de los bugs que he tenido al ponerlo en marcha con el protocolo ha sido que a veces is >> arg; se salta y otras no. Solo
+    //se queda el salto en startpos, a que tiene que saltar dos palabras, no solo "moves", sino "startpos" tambien.
     //is >> arg;
     while(is >> arg)
         pos.do_move(make_move(pos, arg));
