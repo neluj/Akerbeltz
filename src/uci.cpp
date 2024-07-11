@@ -89,7 +89,7 @@ void position(Position & pos, std::stringstream &is){
 
     pos.set_FEN(fen);
     
-    is >> arg;
+    //is >> arg;
     while(is >> arg)
         pos.do_move(make_move(pos, arg));
 
@@ -132,8 +132,7 @@ Move make_move(const Position &pos, std::string algebraic_move){
 
     Piece capturedPiece = make_piece(WHITE, pos.get_mailbox_pieceType(WHITE, to));
     if(capturedPiece == NO_PIECE)
-        capturedPiece = make_piece(BLACK, pos.get_mailbox_pieceType(WHITE, to));
-
+        capturedPiece = make_piece(BLACK, pos.get_mailbox_pieceType(BLACK, to));
 
     return make_move(from, to, specialMove, capturedPiece);
 }

@@ -85,7 +85,7 @@ TEST(PerftTest, DISABLED_FileTest) {
 
     for(NodesSize ind = 0; ind < sample.depthNodes.size(); ++ind){
 
-      std::cout << "Deth " << ind+1 << " :" << "\n";
+      std::cout << "Depth " << ind+1 << " :" << "\n";
       NodesSize searchedNodes = Search::perftTest(position, ind+1);
       
       EXPECT_EQ(searchedNodes, sample.depthNodes.at(ind));
