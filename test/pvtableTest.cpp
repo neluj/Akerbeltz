@@ -19,16 +19,15 @@ class PVTableTest : public ::testing::Test
     {
     }
     public:
+    
     Position position;
+    const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    
 };
 
 TEST_F(PVTableTest, LoadPVLine){
 
-    //Inser new PV line
-
-    Position position;
-    const std::string FEN_INIT_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    position.set_FEN(FEN_INIT_POS);
+    position.set_FEN(START_FEN);
 
     PVTable::PVLine pvLine;
                                                                 
@@ -75,7 +74,7 @@ TEST_F(PVTableTest, LoadPVLine){
 
     //Inser new PV line
 
-    position.set_FEN(FEN_INIT_POS);
+    position.set_FEN(START_FEN);
 
     PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
                                     

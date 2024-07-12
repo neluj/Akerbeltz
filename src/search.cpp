@@ -89,7 +89,6 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
             }
             alpha = score;
             bestMove = move;
-            // DELETEME
         }
         //if(score >= beta)
         //    return beta;

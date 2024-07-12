@@ -1,22 +1,24 @@
 spot.cpp
 //TODO istringstream
 //TODO agregar notas 
-//TODO asserts
 spotTest.cpp
 //TODO test con un spot mas alternativo
-//WORKING en passant no se setea cuando se avanzan dos, se setea cuando se hace una caputa enpassant
-//WORKING test search using perft
-//TODO https://www.chessprogramming.org/Alpha-Beta
 
-//TODO quitar los size_t por int
 //TODO iniciar todos los valores necesarios desde un main
 //TODO arreglar set fen para cuando no se pone la linea completa usar para testear: 2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -
 //TODO pasar de enum type a int, si no hacer lo que en stockfish en types.h lineas 286-312 y siguientes para operadores
-//TODO unificar typdef y using
 //TODO PV table -> transposition table (mirar diferencia en chatgpt)
 //TODO comparar tiempos con time: 
 //     -con pv tables (con for )y sin (sin for)
 //     Negamax y negamax con alphabeta
 //TODO init position poner en defs, ya se que define muchas veces
 //TODO Al imprimir position, anadir informacion adicional como el key (mirar en stockfish)
+
+1.
 //TODO quitar los tags del codigo y sacarlos a otro sitio
+
+4.
+//TODO para las versiones, crear tags 0.0.1
+
+5.
+//TODO NO mergear los test NI este fichero
