@@ -41,7 +41,7 @@ inline Square120 move_from(Move move) {
 	return Square120(move & 0x7f);
 }
 
-inline Xake::Square120 move_to(Move move) {
+inline Square120 move_to(Move move) {
 	return Square120((move >> 7) & 0x7f);
 }
 
@@ -59,8 +59,8 @@ inline Piece captured_piece(Move move){
 
 inline std::string algebraic_move(Move move) {
     std::string algebraic_move;
-    Xake::Square120 from   = move_from(move);
-    Xake::Square120 to     = move_to(move);
+    Square120 from   = move_from(move);
+    Square120 to     = move_to(move);
     algebraic_move = SQUARE_NAMES[from] + SQUARE_NAMES[to];
 
     PieceType promoted = promoted_piece(move);

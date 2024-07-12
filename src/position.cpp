@@ -16,7 +16,7 @@ namespace Zobrist{
 
 }
 
-const int CASTLE_PERSMISION_UPDATES[Xake::SQUARE_SIZE_120] = {
+const int CASTLE_PERSMISION_UPDATES[SQUARE_SIZE_120] = {
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
     15, 13, 15, 15, 15, 12, 15, 15, 14, 15,
@@ -59,7 +59,7 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 
     os << "  a   b   c   d   e   f   g   h" << std::endl;
 
-    return os;
+    return os; 
 
 }
 
@@ -706,47 +706,6 @@ void Position::add_piece(Square120 square, Piece piece){
     //Update key
     history[historySize-1].positionKey ^= Zobrist::pieceSquare[piece][square];
 
-}
-
-
-//TODO delete this or << overload
-void Position::print_board(){
-
-    for(std::size_t rank = 90; rank > 10; rank -= 10){
-        for(std::size_t file = 1; file < 9; ++file) {
-            char csquare;
-            std::size_t index = rank + file;
-            if(mailbox[Color::WHITE][index] != PieceType::NO_PIECE_TYPE){
-                PieceType wpt = mailbox[Color::WHITE][index];
-                switch (wpt)
-                {
-                    case PieceType::BISHOP: csquare = 'B'; break;
-                    case PieceType::KING: csquare = 'K'; break;
-                    case PieceType::KNIGHT:   csquare = 'N'; break;
-                    case PieceType::PAWN:  csquare = 'P'; break;
-                    case PieceType::QUEEN:  csquare = 'Q'; break;
-                    case PieceType::ROOK:  csquare = 'R'; break;
-                }
-            }
-            else if(mailbox[Color::BLACK][index] != PieceType::NO_PIECE_TYPE){
-                PieceType wpt = mailbox[Color::BLACK][index];
-                switch (wpt)
-                {
-                    case PieceType::BISHOP: csquare = 'b'; break;
-                    case PieceType::KING: csquare = 'k'; break;
-                    case PieceType::KNIGHT:   csquare = 'n'; break;
-                    case PieceType::PAWN:  csquare = 'p'; break;
-                    case PieceType::QUEEN:  csquare = 'q'; break;
-                    case PieceType::ROOK:  csquare = 'r'; break;
-                }
-            }
-            else{
-                csquare = '-';
-            }
-            std::cout << " " << csquare << " ";
-        }
-        std::cout << "\n";
-    }
 }
 
 } // namespace Xake

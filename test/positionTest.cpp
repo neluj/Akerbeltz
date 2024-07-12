@@ -16,7 +16,9 @@ class PositionTest : public ::testing::Test
     {
     }
     public:
+
     Position position;
+    const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 };
 
 TEST_F(PositionTest, RandomSetPosition){
@@ -255,10 +257,6 @@ TEST_F(PositionTest, SquareAttacked){
 
 TEST_F(PositionTest, MovePiece){
 
-    //Position position;
-
-    const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
     position.set_FEN(FEN_INIT_POSITION);
 
     //1 Check if the square D2 is taken by a pawn and D4 is empty
@@ -337,10 +335,6 @@ TEST_F(PositionTest, MovePiece){
 
 TEST_F(PositionTest, RemovePiece){
 
-    //Position position;
-
-    const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
     position.set_FEN(FEN_INIT_POSITION);
 
     //1 Check if the square D2 is taken by a pawn
@@ -402,9 +396,9 @@ TEST_F(PositionTest, AddPiece){
 
     //Position position;
 
-    const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
+    const std::string FEN_INIT_NOPAWN_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
 
-    position.set_FEN(FEN_INIT_POSITION);
+    position.set_FEN(FEN_INIT_NOPAWN_POSITION);
 
     //1 Check if the square D2 is empty
 
@@ -463,10 +457,6 @@ TEST_F(PositionTest, AddPiece){
 
 TEST_F(PositionTest, DoMove){
 
-    //Position position;
-
-    const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
     position.set_FEN(FEN_INIT_POSITION);
 
     EXPECT_EQ(position.get_side_to_move(), Color::WHITE);
@@ -493,10 +483,6 @@ TEST_F(PositionTest, DoMove){
 }
 
 TEST_F(PositionTest, UndoMove){
-
-    //Position position;
-
-    const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     position.set_FEN(FEN_INIT_POSITION);
 
@@ -825,8 +811,7 @@ TEST_F(PositionTest, CalcKeyBasicPromotion){
 
 TEST_F(PositionTest, IsRepetition){
 
-    const std::string FEN_INIT_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    position.set_FEN(FEN_INIT_POS);
+    position.set_FEN(FEN_INIT_POSITION);
 
     Move move_wk = make_move(SQ120_B1, SQ120_A3, NO_SPECIAL, NO_PIECE);
     position.do_move(move_wk);

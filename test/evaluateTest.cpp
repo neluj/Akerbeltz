@@ -15,6 +15,12 @@ class EvaluateTest : public ::testing::Test
      virtual void TearDown()
     {
     }
+
+    public:
+    
+    Position pos;
+    const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 };
 
 TEST_F(EvaluateTest, MaterialTable){
@@ -40,8 +46,6 @@ TEST_F(EvaluateTest, MaterialTable){
 
 TEST_F(EvaluateTest, Score){
 
-    const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    Position pos;
     pos.set_FEN(START_FEN);
 
     EXPECT_EQ(0, Evaluate::calc_score(pos));

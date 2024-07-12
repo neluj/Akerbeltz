@@ -17,22 +17,6 @@ namespace Xake{
         Key positionKey;
     };
 
-    //TODO review if is repeted in types.h
-    const Square120 SQUARES_120[SQUARE_SIZE_120] = {
-      SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_A1,       SQ120_B1,       SQ120_C1,       SQ120_D1,       SQ120_E1,       SQ120_F1,       SQ120_G1,       SQ120_H1,       SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_A2,       SQ120_B2,       SQ120_C2,       SQ120_D2,       SQ120_E2,       SQ120_F2,       SQ120_G2,       SQ120_H2,       SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_A3,       SQ120_B3,       SQ120_C3,       SQ120_D3,       SQ120_E3,       SQ120_F3,       SQ120_G3,       SQ120_H3,       SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_A4,       SQ120_B4,       SQ120_C4,       SQ120_D4,       SQ120_E4,       SQ120_F4,       SQ120_G4,       SQ120_H4,       SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_A5,       SQ120_B5,       SQ120_C5,       SQ120_D5,       SQ120_E5,       SQ120_F5,       SQ120_G5,       SQ120_H5,       SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_A6,       SQ120_B6,       SQ120_C6,       SQ120_D6,       SQ120_E6,       SQ120_F6,       SQ120_G6,       SQ120_H6,       SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_A7,       SQ120_B7,       SQ120_C7,       SQ120_D7,       SQ120_E7,       SQ120_F7,       SQ120_G7,       SQ120_H7,       SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_A8,       SQ120_B8,       SQ120_C8,       SQ120_D8,       SQ120_E8,       SQ120_F8,       SQ120_G8,       SQ120_H8,       SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
-      SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD, SQ120_OFFBOARD,
-    };
-
 class Position{
 
 public:
@@ -57,10 +41,7 @@ public:
     void undo_move();
     void move_piece(Square120 from, Square120 to);
     void remove_piece(Square120 square);
-    void add_piece(Square120 square, Piece piece);
-
-    void print_board();
-    
+    void add_piece(Square120 square, Piece piece);    
 
 private:
 
