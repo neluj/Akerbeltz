@@ -211,6 +211,7 @@ enum Direction: int{
     SOUTH_SOUTH_EAST = SOUTH + SOUTH_EAST
 };
 
+constexpr Square120 operator+(Square120 d1, int d2) { return Square120 (int(d1) + d2); }
 
 } // namespace Xake
 
