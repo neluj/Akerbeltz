@@ -167,6 +167,9 @@ const std::string SQUARE_NAMES[SQUARE_SIZE_120] = {
   "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD", "OFFBOARD","OFFBOARD", "OFFBOARD", "OFFBOARD"
 };
 
+constexpr Square120 square120(Rank rank, File file){
+  return Square120(((rank + 2) * 10) + (file + 1));
+} 
 
 constexpr Square64 square120_to_square64(Square120 square){
   return SQUARE120_to_SQUARE64[square];
@@ -211,7 +214,11 @@ enum Direction: int{
     SOUTH_SOUTH_EAST = SOUTH + SOUTH_EAST
 };
 
-constexpr Square120 operator+(Square120 d1, int d2) { return Square120 (int(d1) + d2); }
+constexpr Square120 operator+(Square120& sq1, int sq2) { return Square120 (int(sq1) + sq2); }
+
+inline File& operator++(File& f) { return f = File(int(f) + 1); }
+constexpr File operator+(File f1, int f2) { return File (int(f1) + f2); }
+inline Rank& operator--(Rank& r) { return r = Rank(int(r) - 1); }
 
 } // namespace Xake
 

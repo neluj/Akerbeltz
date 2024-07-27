@@ -23,6 +23,7 @@ public:
     
     static void init();
     void set_FEN(std::string fenNotation);
+    std::string get_FEN() const;
     Color get_side_to_move() const;
     int get_castling_right() const;
     Square120 get_enpassant_square() const;
