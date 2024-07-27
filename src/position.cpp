@@ -1,6 +1,5 @@
 #include "position.h"
 
-#include <ctype.h>
 #include <iostream>
 #include <random>
 
@@ -58,6 +57,10 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
     }
 
     os << "  a   b   c   d   e   f   g   h" << std::endl;
+
+    os << "Fen: " << pos.get_FEN() << std::endl;
+
+    os << "Key: " << pos.get_key() << std::endl;
 
     return os; 
 
@@ -135,13 +138,6 @@ void Position::zobris_prng(){
     Zobrist::blackMoves = dist(e2);
 }
 
-
-//TODO FEN could be shorter 
-// https://www.geeksforgeeks.org/processing-strings-using-stdistringstream/
-// https://www.geeksforgeeks.org/stringstream-c-applications/
-//https://www.geeksforgeeks.org/ios-manipulators-skipws-function-in-c/
-//dividir en funciones
-//constexpr std::string_view PieceToChar(" PNBRQK  pnbrqk"); en vez de switch case
 void Position::set_FEN(std::string fenNotation){
 
     clean_position();
@@ -312,6 +308,65 @@ void Position::set_FEN(std::string fenNotation){
     calc_material_score();
     calc_key();
 
+}
+
+std::string Position::get_FEN() const{
+
+    std::ostringstream ss;
+    
+    for (Rank rank = RANK_8; rank >= RANK_1; --rank)
+    {
+        int emptySquaresCounter;
+        for (File file = FILE_A; file <= FILE_H; ++file)
+        {
+            Square120 square = square120(rank, file);
+            PieceType pieceType{NO_PIECE_TYPE};
+            for(emptySquaresCounter = 0; mailbox[COLOR_NC][square] == NO_PIECE_TYPE && file <= FILE_H;++file){
+                ++emptySquaresCounter;
+                square = square120(rank, file + 1);                    
+            }
+
+            if(emptySquaresCounter)
+                ss << emptySquaresCounter;
+            
+            if(mailbox[WHITE][square] != NO_PIECE_TYPE){
+                pieceType = mailbox[WHITE][square];
+                ss << PIECE_NAMES[make_piece(WHITE, pieceType)];
+                
+            }else if(mailbox[BLACK][square] != NO_PIECE_TYPE){
+                pieceType = mailbox[BLACK][square];
+                ss << PIECE_NAMES[make_piece(BLACK, pieceType)];
+            }
+        }
+
+        if(rank > RANK_1)
+            ss << "/";
+    }
+
+    ss << (sideToMove == WHITE ? " w " : " b ");
+
+    int castlingRights = get_castling_right();
+
+    if(castlingRights & CastlingRight::WKCA)
+        ss << 'K';
+
+    if(castlingRights & CastlingRight::WQCA)
+        ss << 'Q';
+
+    if(castlingRights & CastlingRight::BKCA)
+        ss << 'k';
+        
+    if(castlingRights & CastlingRight::BQCA)
+        ss << 'q';
+    
+    if(castlingRights == CastlingRight::NO_RIGHT)
+        ss << '-';
+
+    ss << " " << get_fifty_moves_counter();
+    
+    ss << " " << get_moves_counter();
+
+    return ss.str();
 }
 
 void Position::calc_material_score(){

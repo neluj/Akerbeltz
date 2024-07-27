@@ -11,7 +11,6 @@ spotTest.cpp
 //TODO comparar tiempos con time: 
 //     -con pv tables (con for )y sin (sin for)
 //     Negamax y negamax con alphabeta
-//TODO init position poner en defs, ya se que define muchas veces
 
 1.
 //TODO quitar los tags del codigo y sacarlos a otro sitio

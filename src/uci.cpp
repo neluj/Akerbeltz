@@ -53,7 +53,7 @@ void run(){
         }
         
         else if(token == "d")
-            std::cout << pos << std::endl;
+            std::cout << pos;
         
         else if (token == "isready")
             std::cout << "readyok" << std::endl;
