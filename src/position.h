@@ -10,7 +10,7 @@ namespace Xake{
 
     struct HistoryInfo{
         Move nextMove;
-        int castlingRight;
+        CastlingRight castlingRight;
         unsigned short int fiftyMovesCounter;
         unsigned short int movesCounter;
         Square120 enpassantSquare;

@@ -106,7 +106,7 @@ void Position::clear_position_info(){
     historySize = 1;
 
     history[historySize-1].nextMove = 0;
-    history[historySize-1].castlingRight = 0;
+    history[historySize-1].castlingRight = NO_RIGHT;
     history[historySize-1].fiftyMovesCounter = 0;
     history[historySize-1].movesCounter = 1;
     history[historySize-1].enpassantSquare = SQ120_NO_SQUARE;
@@ -547,7 +547,7 @@ void Position::undo_move(){
     }
 
     history[historySize-2].nextMove = 0;
-    history[historySize-1].castlingRight = 0;
+    history[historySize-1].castlingRight = NO_RIGHT;
     history[historySize-1].fiftyMovesCounter = 0;
     history[historySize-1].movesCounter = 0;
     history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
