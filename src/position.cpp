@@ -108,8 +108,8 @@ void Position::clear_position_info(){
     history[historySize-1].nextMove = 0;
     history[historySize-1].castlingRight = 0;
     history[historySize-1].fiftyMovesCounter = 0;
-    history[historySize-1].movesCounter = 0;
-    history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
+    history[historySize-1].movesCounter = 1;
+    history[historySize-1].enpassantSquare = SQ120_NO_SQUARE;
     history[historySize-1].positionKey = 0;
 
     materialScore[WHITE] = 0;
@@ -140,179 +140,78 @@ void Position::zobris_prng(){
 
 void Position::set_FEN(std::string fenNotation){
 
+    char token;
+
     clean_position();
 
-    int     rank    = RANK_8;
-    int     file    = FILE_A;
+    Rank rank = RANK_8;
+    File file = FILE_A;
+    
+
+    std::istringstream iss(fenNotation);
+
+    //1.- Set pieces on board
+    iss >> std::noskipws;
+
+    while(iss >> token && !isspace(token)){
         
-    std::string::size_type charIndex = 0;
-    char c = fenNotation[charIndex];
-    while(!isspace(c))
-    {   
-        switch (c)
-        {
-		case('k'): 
-            mailbox[BLACK][((rank + 2) * 10) + (file +1)] = KING;
-            pieceList[B_KING][pieceCounter[B_KING]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[B_KING];   
-            ++file; 
-            break;  
-
-		case('P'): 
-            mailbox[WHITE][((rank + 2) * 10) + (file +1)] = PAWN;
-            pieceList[W_PAWN][pieceCounter[W_PAWN]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[W_PAWN];   
-            ++file; 
-            break;
-
-		case('R'): 
-            mailbox[WHITE][((rank + 2) * 10) + (file +1)] = ROOK;
-            pieceList[W_ROOK][pieceCounter[W_ROOK]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[W_ROOK];   
-            ++file; 
-            break;
-
-		case('N'):
-             mailbox[WHITE][((rank + 2) * 10) + (file +1)] = KNIGHT;
-            pieceList[W_KNIGHT][pieceCounter[W_KNIGHT]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[W_KNIGHT]; 
-            ++file; 
-            break;
-
-		case('B'): 
-            mailbox[WHITE][((rank + 2) * 10) + (file +1)] = BISHOP;
-            pieceList[W_BISHOP][pieceCounter[W_BISHOP]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[W_BISHOP]; 
-            ++file; 
-            break;
-
-		case('Q'): 
-            mailbox[WHITE][((rank + 2) * 10) + (file +1)] = QUEEN;
-            pieceList[W_QUEEN][pieceCounter[W_QUEEN]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[W_QUEEN];  
-            ++file; 
-            break;
-
-		case('K'): 
-            mailbox[WHITE][((rank + 2) * 10) + (file +1)] = KING;
-            pieceList[W_KING][pieceCounter[W_KING]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[W_KING];   
-            ++file; 
-            break;  
-
-		case('p'): 
-            mailbox[BLACK][((rank + 2) * 10) + (file +1)] = PAWN;
-            pieceList[B_PAWN][pieceCounter[B_PAWN]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[B_PAWN];   
-            ++file; 
-            break;
-
-		case('r'): 
-            mailbox[BLACK][((rank + 2) * 10) + (file +1)] = ROOK;
-            pieceList[B_ROOK][pieceCounter[B_ROOK]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[B_ROOK];   
-            ++file; 
-            break;
-
-		case('n'): 
-            mailbox[BLACK][((rank + 2) * 10) + (file +1)] = KNIGHT;
-            pieceList[B_KNIGHT][pieceCounter[B_KNIGHT]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[B_KNIGHT]; 
-            ++file; 
-            break;
-
-		case('b'): 
-            mailbox[BLACK][((rank + 2) * 10) + (file +1)] = BISHOP;
-            pieceList[B_BISHOP][pieceCounter[B_BISHOP]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[B_BISHOP]; 
-            ++file; 
-            break;
-
-		case('q'): 
-            mailbox[BLACK][((rank + 2) * 10) + (file +1)] = QUEEN;
-            pieceList[B_QUEEN][pieceCounter[B_QUEEN]] = static_cast<Square120>(((rank + 2) * 10) + (file +1));
-            ++pieceCounter[B_QUEEN];  
-            ++file; 
-            break;
-
-        case '/':
+        if(isdigit(token)){
+            file += (token - '0');
+        }
+        else if(token == '/'){
             file = FILE_A;
             --rank;
-            break;
-        
-        default:
-            if(isdigit(c))
-                if((c - 48)>0 && (c - 48)<9)
-                    file += c - 48;
-            break;
         }
-        
-        c = fenNotation[++charIndex];
+        else{
+            add_piece(square120(rank, file), Piece(PIECE_NAMES.find(token)));
+            ++file;
+        }
     }
 
-    
-    sideToMove = fenNotation[++charIndex] == 'w' ? WHITE : BLACK;
+    //2.- Set side to move
+    iss >> std::skipws >> token;
 
-    c = fenNotation[++++charIndex];
-    while(!isspace(c))
+    sideToMove = token == 'w' ? WHITE : BLACK;
+
+
+    //3.- Set castling rights
+    iss >> std::noskipws >> token;
+    
+    while(iss >> token && !isspace(token))
     {
-        switch (c)
+        switch (token)
         {
 		case 'K': history[historySize-1].castlingRight |= WKCA; break;
 		case 'Q': history[historySize-1].castlingRight |= WQCA; break;
 		case 'k': history[historySize-1].castlingRight |= BKCA; break;
 		case 'q': history[historySize-1].castlingRight |= BQCA; break;
         }
-        c = fenNotation[++charIndex];   
     }
 
-    c = fenNotation[++charIndex];
-    if(c != '-')
+    //4.- Set enpassant square
+    iss >> std::skipws >> token;
+    
+    if(token != '-')
     {
-        int enpassantFile = c - 97;
-        c = fenNotation[++charIndex];
-        int enpassantRank = c - 49;
-	    history[historySize-1].enpassantSquare = Square120(((enpassantRank+2) * 10) + (1 + enpassantFile));
+        File enpassantFile = File(token - 97);
+        iss >> token;
+        Rank enpassantRank = Rank(token - 49);
+	    history[historySize-1].enpassantSquare = square120(enpassantRank, enpassantFile);
     }
 
-    c = fenNotation[++++charIndex];
-    std::string fiftyMovesString{""};
+    //5.- Set fifty moves counter
+    iss >> history[historySize-1].fiftyMovesCounter;
 
-    while(!isspace(c))
-    {
-        fiftyMovesString += c;
-        c = fenNotation[++charIndex];   
-    }
+    //6.- Set move counter
+    iss >>  history[historySize-1].movesCounter;
 
-    history[historySize-1].fiftyMovesCounter = std::stoi(fiftyMovesString);
-
-
-    c = fenNotation[++charIndex];
-    std::string moveCounterString{""};
-
-    while(!isspace(c) && c != '\0')
-    {
-        moveCounterString += c;
-        c = fenNotation[++charIndex];   
-    }
-
-    history[historySize-1].movesCounter= std::stoi(moveCounterString);
-
-    for(std::size_t c = 0; c < COLOR_SIZE-1; ++c){
-        for(std::size_t i = 0; i < SQUARE_SIZE_120; ++i){
-            if(mailbox[c][i] != NO_PIECE_TYPE)
-                mailbox[COLOR_NC][i] = mailbox[c][i];
-        }
-    }
-
-    calc_material_score();
     calc_key();
 
 }
 
 std::string Position::get_FEN() const{
 
-    std::ostringstream ss;
+    std::ostringstream oss;
     
     for (Rank rank = RANK_8; rank >= RANK_1; --rank)
     {
@@ -327,46 +226,51 @@ std::string Position::get_FEN() const{
             }
 
             if(emptySquaresCounter)
-                ss << emptySquaresCounter;
+                oss << emptySquaresCounter;
             
             if(mailbox[WHITE][square] != NO_PIECE_TYPE){
                 pieceType = mailbox[WHITE][square];
-                ss << PIECE_NAMES[make_piece(WHITE, pieceType)];
-                
+                oss << PIECE_NAMES[make_piece(WHITE, pieceType)];
+
             }else if(mailbox[BLACK][square] != NO_PIECE_TYPE){
                 pieceType = mailbox[BLACK][square];
-                ss << PIECE_NAMES[make_piece(BLACK, pieceType)];
+                oss << PIECE_NAMES[make_piece(BLACK, pieceType)];
             }
         }
 
         if(rank > RANK_1)
-            ss << "/";
+            oss << "/";
     }
 
-    ss << (sideToMove == WHITE ? " w " : " b ");
+    oss << (sideToMove == WHITE ? " w " : " b ");
 
     int castlingRights = get_castling_right();
 
     if(castlingRights & CastlingRight::WKCA)
-        ss << 'K';
+        oss << 'K';
 
     if(castlingRights & CastlingRight::WQCA)
-        ss << 'Q';
+        oss << 'Q';
 
     if(castlingRights & CastlingRight::BKCA)
-        ss << 'k';
+        oss << 'k';
         
     if(castlingRights & CastlingRight::BQCA)
-        ss << 'q';
+        oss << 'q';
     
     if(castlingRights == CastlingRight::NO_RIGHT)
-        ss << '-';
+        oss << '-';
 
-    ss << " " << get_fifty_moves_counter();
+    if(get_enpassant_square() == SQ120_NO_SQUARE)
+        oss << " - ";
+    else
+         oss << " " << SQUARE_NAMES[get_enpassant_square()];
+
+    oss << " " << get_fifty_moves_counter();
     
-    ss << " " << get_moves_counter();
+    oss << " " << get_moves_counter();
 
-    return ss.str();
+    return oss.str();
 }
 
 void Position::calc_material_score(){
@@ -384,11 +288,6 @@ void Position::calc_material_score(){
 }
 
 void Position::calc_key(){
-
-    for(int p = 0; p < PIECE_SIZE; ++p)
-        for(int i = 0; i < pieceCounter[p]; ++i){
-            history[historySize-1].positionKey ^= Zobrist::pieceSquare[p][pieceList[p][i]];
-        }
     
     history[historySize-1].positionKey ^= Zobrist::castlingRight[history[historySize-1].castlingRight];
 
