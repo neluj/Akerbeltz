@@ -218,6 +218,7 @@ constexpr Square120 operator+(Square120& sq1, int sq2) { return Square120 (int(s
 
 inline File& operator++(File& f) { return f = File(int(f) + 1); }
 constexpr File operator+(File f1, int f2) { return File (int(f1) + f2); }
+inline File&   operator+=(File& d1, int d2) { return d1 = d1 + d2; }
 inline Rank& operator--(Rank& r) { return r = Rank(int(r) - 1); }
 
 } // namespace Xake

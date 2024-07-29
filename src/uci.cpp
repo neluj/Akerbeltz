@@ -17,9 +17,6 @@ Move make_move(const Position &pos, std::string algebraic_move);
 void go(Position & pos, Search::SearchInfo &info);
 void uci_info();
 
-// https://www.geeksforgeeks.org/processing-strings-using-stdistringstream/
-// https://www.geeksforgeeks.org/stringstream-c-applications/
-// https://www.geeksforgeeks.org/ios-manipulators-skipws-function-in-c/
 void run(){
 
     Position pos;
