@@ -56,7 +56,7 @@ TEST(MovegeneratorTest, BlackKnight){
 }
 
 TEST(MovegeneratorTest, WhiteBishop){
-    const std::string WHITE_BISHOP_FEN_POSITION = "4k3/7B/8/2P1pp2/3B4/8/8/P3K1p1 w- - 0 1";
+    const std::string WHITE_BISHOP_FEN_POSITION = "4k3/7B/8/2P1pp2/3B4/8/8/P3K1p1 w - - 0 1";
     Position position;
     position.set_FEN(WHITE_BISHOP_FEN_POSITION);
     MoveGen::MoveList moveList;

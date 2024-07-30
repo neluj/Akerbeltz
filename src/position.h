@@ -61,12 +61,6 @@ private:
     std::size_t pieceCounter[PIECE_SIZE];
     Square120 pieceList[PIECE_SIZE][MAX_SAME_PIECE];
     Color sideToMove{COLOR_NC};
-    //TODO improve this to CastligRigth type, and divid by color (stockfish  CastlingRights castling_rights(Color c) const;)
-    //int castlingRight{0};
-    //Square enpassantSquare{NO_SQUARE};
-    //unsigned short int fiftyMovesCounter{0};
-    //unsigned short int movesCounter{0};
-    //Move moveHistory[MAX_GAME_MOVES];
     //TODO esto meterlo en HistoryInfo?
     int historySize;
     HistoryInfo history[MAX_GAME_MOVES];
@@ -76,8 +70,6 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const Position& pos);
 
-/*NOTE https://stackoverflow.com/questions/9734175/why-are-class-member-functions-inlined
-*/
 inline Color Position::get_side_to_move() const{
     return sideToMove;
 }
