@@ -140,7 +140,7 @@ void Position::zobris_prng(){
 
 void Position::set_FEN(std::string fenNotation){
 
-    char token;
+    std::string field;
 
     clean_position();
 
@@ -151,9 +151,9 @@ void Position::set_FEN(std::string fenNotation){
     std::istringstream iss(fenNotation);
 
     //1.- Set pieces on board
-    iss >> std::noskipws;
+    iss >> field;
 
-    while(iss >> token && !isspace(token)){
+    for(char token : field){
         
         if(isdigit(token)){
             file += (token - '0');
@@ -169,15 +169,15 @@ void Position::set_FEN(std::string fenNotation){
     }
 
     //2.- Set side to move
-    iss >> std::skipws >> token;
+    iss >> field;
 
-    sideToMove = token == 'w' ? WHITE : BLACK;
+    sideToMove = field == "w" ? WHITE : BLACK;
 
 
     //3.- Set castling rights
-    iss >> std::noskipws >> token;
+    iss >> field;
     
-    while(iss >> token && !isspace(token))
+    for(char token : field)
     {
         switch (token)
         {
@@ -189,13 +189,12 @@ void Position::set_FEN(std::string fenNotation){
     }
 
     //4.- Set enpassant square
-    iss >> std::skipws >> token;
+    iss >> field;
     
-    if(token != '-')
+    if(field != "-")
     {
-        File enpassantFile = File(token - 97);
-        iss >> token;
-        Rank enpassantRank = Rank(token - 49);
+        File enpassantFile = File(field[0] - 97);
+        Rank enpassantRank = Rank(field[1]  - 49);
 	    history[historySize-1].enpassantSquare = square120(enpassantRank, enpassantFile);
     }
 
