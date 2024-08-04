@@ -12,9 +12,9 @@ namespace UCI{
 
 const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-void position(Position & pos, std::stringstream &is);
+void position(Position & pos, std::istringstream &is);
 Move make_move(const Position &pos, std::string algebraic_move);
-void go(Position & pos, Search::SearchInfo &info);
+void go(Position & pos, std::istringstream &is, Search::SearchInfo &info);
 void uci_info();
 
 void run(){
@@ -34,12 +34,12 @@ void run(){
 
     do{
         getline(std::cin, inputStr);
-        std::stringstream is(inputStr);
+        std::istringstream is(inputStr);
 
         is >> token;
 
         if (token == "go")
-            go(pos, info);
+            go(pos, is, info);
 
         else if (token == "position")
             position(pos, is);
@@ -70,7 +70,7 @@ void run(){
 
 }
 
-void position(Position & pos, std::stringstream &is){
+void position(Position & pos, std::istringstream &is){
 
     std::string arg, fen;
 
@@ -137,10 +137,22 @@ Move make_move(const Position &pos, std::string algebraic_move){
     return make_move(from, to, specialMove, capturedPiece);
 }
 
-void go(Position & pos,  Search::SearchInfo &info){
+void go(Position & pos, std::istringstream &is, Search::SearchInfo &info){
 
-    Search::search(pos, info);
-    //TODO finish
+    std::string arg;
+
+    is >> arg;
+
+    if(arg == "perft"){
+        is >> arg;
+            if(!arg.empty())
+                info.depth = std::stoi(arg);
+        
+        Search::perftTest(pos, info); 
+    }
+    else{
+        Search::search(pos, info);
+    }
 
 }
 
