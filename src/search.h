@@ -14,8 +14,8 @@ namespace Search{
         NodesSize nodes;
     };
 
-    NodesSize perftTest(Position &position, DepthSize depth);
-    void search(Position &position,  SearchInfo &searchInfo);
+    NodesSize perftTest(Position &position, SearchInfo &searchInfo);
+    void search(Position &position, SearchInfo &searchInfo);
 
 }
 

@@ -134,15 +134,16 @@ void perft(Position &position, DepthSize depth){
 }
 
 
-NodesSize perftTest(Position &position, DepthSize depth){
+NodesSize perftTest(Position &position, SearchInfo &searchInfo){
 
     leafCounter = 0;
     NodesSize allNodesCounter = 0;
+    DepthSize actualDepth = searchInfo.depth-1;
 
     MoveGen::MoveList moveList;
     MoveGen::generate_all_moves(position, moveList);
 
-    //std::cout << "\n";
+    std::cout << "\n";
     
     for(std::size_t mIndx = 0; mIndx < moveList.size;++mIndx){
 
@@ -152,14 +153,14 @@ NodesSize perftTest(Position &position, DepthSize depth){
         }
 
         long cumnodes = leafCounter;
-        perft(position, depth-1);
+        perft(position, actualDepth);
 
         position.undo_move();
 
         long oldNodes = leafCounter - cumnodes;
         allNodesCounter += oldNodes;
 
-        //std::cout << algebraic_move(move) << ": " << oldNodes << "\n";
+        std::cout << algebraic_move(move) << ": " << oldNodes << "\n";
 
     }
 
@@ -167,7 +168,5 @@ NodesSize perftTest(Position &position, DepthSize depth){
     return allNodesCounter;
 
 }
-
 }
-
 }
