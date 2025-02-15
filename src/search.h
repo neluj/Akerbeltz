@@ -12,6 +12,7 @@ namespace Search{
     struct SearchInfo{
         DepthSize depth;
         NodesSize nodes;
+        Xake::Time startTime;
     };
 
     NodesSize perftTest(Position &position, SearchInfo &searchInfo);
