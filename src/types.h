@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <chrono>
 
 namespace Xake{
 //TODO quitar size_t pero cuando se pueda, los size que sean el ultimo valor de enum o sino meter todos aqui
@@ -28,6 +29,7 @@ constexpr int CHECKMATE_SCORE = 30000;
 using DepthSize = unsigned short int;
 using NodesSize = unsigned long long int;
 using Key = unsigned long long;
+using Time = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 enum PieceType{
   NO_PIECE_TYPE,

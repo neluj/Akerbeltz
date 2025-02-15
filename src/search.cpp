@@ -26,6 +26,7 @@ void search(Position &position, SearchInfo &searchInfo){
     Move bestMove = 0;
 
     clean_search_info(searchInfo);
+    searchInfo.startTime = std::chrono::high_resolution_clock::now(); 
 
     for(DepthSize currentDepth = 1; currentDepth <= searchInfo.depth; ++currentDepth){
         
@@ -34,11 +35,13 @@ void search(Position &position, SearchInfo &searchInfo){
         PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
         bestMove = pvLine.moves[0];
 
+
         std::cout << 
         "depth:" << currentDepth << 
         " score:" << bestMoveScore << 
         " move:" << algebraic_move(bestMove) <<
-        " nodes:" << searchInfo.nodes;
+        " nodes:" << searchInfo.nodes <<
+        " time:" << (std::chrono::high_resolution_clock::now() - searchInfo.startTime).count() << std::endl;
 
         std::cout << " pv";
 
