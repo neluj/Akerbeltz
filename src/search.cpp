@@ -36,12 +36,13 @@ void search(Position &position, SearchInfo &searchInfo){
         bestMove = pvLine.moves[0];
 
 
-        std::cout << 
-        "depth:" << currentDepth << 
-        " score:" << bestMoveScore << 
-        " move:" << algebraic_move(bestMove) <<
-        " nodes:" << searchInfo.nodes <<
-        " time:" << (std::chrono::high_resolution_clock::now() - searchInfo.startTime).count() << std::endl;
+        std::cout <<
+        "info" << 
+        " depth " << currentDepth << 
+        " score cp " << bestMoveScore << 
+        " move " << algebraic_move(bestMove) <<
+        " nodes " << searchInfo.nodes <<
+        " time " << (std::chrono::high_resolution_clock::now() - searchInfo.startTime).count();
 
         std::cout << " pv";
 
