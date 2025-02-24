@@ -31,6 +31,10 @@ void search(Position &position, SearchInfo &searchInfo){
     for(DepthSize currentDepth = 1; currentDepth <= searchInfo.depth; ++currentDepth){
         
         bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
+        int timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now() - searchInfo.startTime
+        ).count();
+
 
         PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
         bestMove = pvLine.moves[0];
@@ -42,7 +46,7 @@ void search(Position &position, SearchInfo &searchInfo){
         " score cp " << bestMoveScore << 
         " move " << algebraic_move(bestMove) <<
         " nodes " << searchInfo.nodes <<
-        " time " << (std::chrono::high_resolution_clock::now() - searchInfo.startTime).count();
+        " time " << timeMs;
 
         std::cout << " pv";
 
