@@ -19,6 +19,7 @@ void perft(Position &position, DepthSize depth);
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth);
 void clean_search_info(SearchInfo &searchInfo);
+void check_time(SearchInfo &searchInfo);
 
 void search(Position &position, SearchInfo &searchInfo){
 
@@ -26,14 +27,18 @@ void search(Position &position, SearchInfo &searchInfo){
     Move bestMove = 0;
 
     clean_search_info(searchInfo);
-    searchInfo.startTime = std::chrono::high_resolution_clock::now(); 
 
     for(DepthSize currentDepth = 1; currentDepth <= searchInfo.depth; ++currentDepth){
         
         bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
-        int timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now() - searchInfo.startTime
-        ).count();
+        
+        if(searchInfo.timeOver){
+            break;
+        }
+        
+        Xake::Time timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()).count() - searchInfo.startTime;
+        
 
 
         PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
@@ -71,6 +76,10 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         return Evaluate::calc_score(position);
     }
 
+    if((searchInfo.nodes & 2047) == 0){
+        check_time(searchInfo);
+    }
+
     ++searchInfo.nodes;
 
     MoveGen::MoveList moveList;
@@ -90,6 +99,10 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
         score = -alpha_beta(position, searchInfo, -beta, -alpha, depth - 1);
         position.undo_move();
+
+        if(searchInfo.timeOver){
+            return 0;
+        }
         
         if(score>alpha){
             if(alpha>=beta){
@@ -115,6 +128,17 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
 void clean_search_info(SearchInfo &searchInfo){
     searchInfo.nodes = 0;
+}
+
+void check_time(SearchInfo &searchInfo){
+    if(searchInfo.stopTime != NO_TIME){
+        Xake::Time timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+
+        if(timeMs >= searchInfo.stopTime){
+            searchInfo.timeOver = true;
+        }
+    }
 }
 
 

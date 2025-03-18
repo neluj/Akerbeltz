@@ -13,6 +13,9 @@ namespace Search{
         DepthSize depth;
         NodesSize nodes;
         Xake::Time startTime;
+        Xake::Time stopTime;
+        Xake::Time moveTime;
+        bool timeOver;
     };
 
     NodesSize perftTest(Position &position, SearchInfo &searchInfo);
