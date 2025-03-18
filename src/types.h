@@ -11,6 +11,13 @@
 namespace Xake{
 //TODO quitar size_t pero cuando se pueda, los size que sean el ultimo valor de enum o sino meter todos aqui
 //Enum sizes
+
+using DepthSize = unsigned short int;
+using NodesSize = unsigned long long int;
+using MovesSize = unsigned short int;
+using Key = unsigned long long;
+using Time = long long;
+
 constexpr std::size_t PIECE_SIZE = 13;
 constexpr std::size_t PIECETYPE_SIZE = 7;
 constexpr std::size_t SQUARE_SIZE_64 = 64;
@@ -26,10 +33,7 @@ constexpr unsigned short int CASTLING_POSIBILITIES = 4 * 4;
 
 constexpr int CHECKMATE_SCORE = 30000;
 
-using DepthSize = unsigned short int;
-using NodesSize = unsigned long long int;
-using Key = unsigned long long;
-using Time = std::chrono::time_point<std::chrono::high_resolution_clock>;
+constexpr Xake::Time NO_TIME = -1;
 
 enum PieceType{
   NO_PIECE_TYPE,

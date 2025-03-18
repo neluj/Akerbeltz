@@ -14,7 +14,8 @@ const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk
 
 void position(Position & pos, std::istringstream &is);
 Move make_move(const Position &pos, std::string algebraic_move);
-void go(Position & pos, std::istringstream &is, Search::SearchInfo &info);
+void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo);
+void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo);
 void uci_info();
 
 void run(){
@@ -22,8 +23,7 @@ void run(){
     Position pos;
     pos.set_FEN(START_FEN);
 
-    Search::SearchInfo info;
-    info.depth = 4;
+    Search::SearchInfo searchInfo;
 
     std::string inputStr, token;
 
@@ -39,7 +39,7 @@ void run(){
         is >> token;
 
         if (token == "go")
-            go(pos, is, info);
+            go(pos, is, searchInfo);
 
         else if (token == "position")
             position(pos, is);
@@ -58,7 +58,7 @@ void run(){
         else if (token == "uci")
             uci_info();
         
-        // TODO info.stop = true
+        // TODO searchInfo.stop = true
         else if(token == "quit"){
             break;
         }
@@ -137,22 +137,76 @@ Move make_move(const Position &pos, std::string algebraic_move){
     return make_move(from, to, specialMove, capturedPiece);
 }
 
-void go(Position & pos, std::istringstream &is, Search::SearchInfo &info){
+void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo){
 
     std::string arg;
+    std::streampos isParamPos = is.tellg(); 
 
     is >> arg;
 
     if(arg == "perft"){
-        is >> arg;
-            if(!arg.empty())
-                info.depth = std::stoi(arg);
-        
-        Search::perftTest(pos, info); 
+        go_info(pos, is, searchInfo);
+        Search::perftTest(pos, searchInfo); 
     }
     else{
-        Search::search(pos, info);
+        is.seekg(isParamPos);
+        go_info(pos, is, searchInfo);
+        Search::search(pos, searchInfo);
     }
+
+}
+
+void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo){
+
+    std::string arg;
+    searchInfo.depth = MAX_DEPTH;
+    searchInfo.stopTime = Xake::NO_TIME;
+    searchInfo.moveTime = Xake::NO_TIME;
+    searchInfo.startTime = Xake::NO_TIME;
+    searchInfo.timeOver = false;
+    Xake::Time colorTime = Xake::NO_TIME;    
+    Xake::Time moveTime = Xake::NO_TIME; 
+    Xake::Time colorInc = 0;   
+    Xake::MovesSize movesToGo = 30;
+
+    while (is >> arg)
+    { 
+        if(arg == "depth")
+            is >> searchInfo.depth;
+        else if(arg == "wtime" && pos.get_side_to_move() == WHITE)
+            is >> colorTime;
+        else if(arg == "btime" && pos.get_side_to_move() == BLACK)
+            is >> colorTime;
+        else if(arg == "winc" && pos.get_side_to_move() == WHITE)
+            is >> colorInc;
+        else if(arg == "binc" && pos.get_side_to_move() == BLACK)
+            is >> colorInc;
+        else if(arg == "movestogo")
+            is >> movesToGo;
+        else if(arg == "movetime")
+            is >> moveTime;
+        else if(arg == "infinite")
+            moveTime = Xake::NO_TIME;
+    }
+
+    searchInfo.startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+
+    if(moveTime != Xake::NO_TIME){
+        searchInfo.moveTime = moveTime;
+        searchInfo.stopTime = searchInfo.startTime + searchInfo.moveTime;    
+    }else if (colorTime != Xake::NO_TIME){
+        colorTime /= movesToGo;
+        colorTime -= 50;
+        searchInfo.moveTime = colorTime + colorInc;
+        searchInfo.stopTime = searchInfo.startTime + searchInfo.moveTime; 
+    }
+
+    std::cout <<
+    "time:" << searchInfo.moveTime << 
+    " start:" << searchInfo.startTime << 
+    " stop:" << searchInfo.stopTime <<
+    " depth:" << searchInfo.depth;
 
 }
 
