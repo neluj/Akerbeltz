@@ -87,7 +87,6 @@ TEST(MovegeneratorTest, WhiteRook){
     EXPECT_EQ(moveList.size, 24);
 
 }
- 
 
 TEST(MovegeneratorTest, BlackRook){
     
@@ -140,12 +139,155 @@ TEST(MovegeneratorTest, WhiteCastling){
 
 TEST(MovegeneratorTest, BlackCastling){
     
-    const std::string WHITE_CASTLING_FEN_POSITION = "3pk2r/4p2p/8/8/8/8/8/4K3 b k - 0 1";
+    const std::string BLACK_CASTLING_FEN_POSITION = "3pk2r/4p2p/8/8/8/8/8/4K3 b k - 0 1";
     Position position;
-    position.set_FEN(WHITE_CASTLING_FEN_POSITION);
+    position.set_FEN(BLACK_CASTLING_FEN_POSITION);
     MoveGen::MoveList moveList;
 
     MoveGen::generate_all_moves(position,moveList);
     EXPECT_EQ(moveList.size, 11);
+
+} 
+
+//Captures
+
+TEST(MovegeneratorTest, WithePawnCapture){
+    
+    const std::string WHITE_PAWN_CAPTURE_FEN_POSITION = "3k4/8/3p4/3PP1Pp/Pp1p4/2p5/3P4/3K4 w - h6 1 1";
+    Position position;
+    position.set_FEN(WHITE_PAWN_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 3);
+
+}
+
+TEST(MovegeneratorTest, BlackPawnCapture){
+    
+    const std::string BLACK_PAWN_CAPTURE_FEN_POSITION = "3k4/8/3p4/3PP1Pp/Pp1p4/2p5/3P4/3K4 b - a3 1 1";
+    Position position;
+    position.set_FEN(BLACK_PAWN_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 3);
+
+}
+
+TEST(MovegeneratorTest, WhiteKnightCapture){
+    
+    const std::string WHITE_KNIGHT_CAPTURE_FEN_POSITION = "3k4/8/3P4/4p3/2N5/4p3/8/4K3 w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_KNIGHT_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 2);
+    
+}
+
+TEST(MovegeneratorTest, BlackKnightCapture){
+    
+    const std::string BLACK_KNIGHT_CAPTURE_FEN_POSITION = "3k4/8/1p6/4P3/2n5/4P3/8/4K3 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_KNIGHT_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 2);
+    
+}
+
+TEST(MovegeneratorTest, WhiteBishopCapture){
+    const std::string WHITE_BISHOP_CAPTURE_FEN_POSITION = "3k4/8/1p6/1p1PP3/2B5/4P3/4p3/7K w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_BISHOP_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 2);
+
+}
+
+TEST(MovegeneratorTest, BlackBishopCapture){
+    const std::string BLACK_BISHOP_CAPTURE_FEN_POSITION = "7k/4P3/4p3/2b5/1P1pp3/1P6/8/3K4 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_BISHOP_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 2);
+}
+
+TEST(MovegeneratorTest, WhiteRookCapture){
+    
+    const std::string WHITE_ROOK_CAPTURE_FEN_POSITION = "7k/2p5/8/2R2P2/8/8/8/3K4 w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_ROOK_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 1);
+
+}
+
+TEST(MovegeneratorTest, BlackRookCapture){
+    
+    const std::string BLACK_ROOK_CAPTURE_FEN_POSITION = "3k4/8/8/8/2r2p2/8/2P5/7K b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_ROOK_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 1);
+
+}
+
+TEST(MovegeneratorTest, WhiteQueenCapture){
+    
+    const std::string WHITE_QUEEN_CAPTURE_FEN_POSITION = "3k4/8/8/3p4/2Q2p2/1P6/2P5/7K w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_QUEEN_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 2);
+
+}
+
+TEST(MovegeneratorTest, BlackQueenCapture){
+    
+    const std::string BLACK_QUEEN_CAPTURE_FEN_POSITION = "7k/2p5/1p6/2q2P2/3P4/8/8/3K4 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_QUEEN_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 2);
+
+}
+
+TEST(MovegeneratorTest, WhiteKingCapture){
+    
+    const std::string WHITE_KING_CAPTURE_FEN_POSITION = "3k4/8/8/8/8/6pP/5p1K/8 w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_KING_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 1);
+
+}
+
+TEST(MovegeneratorTest, BlackKingCapture){
+    
+    const std::string BLACK_KING_CAPTURE_FEN_POSITION = "8/5P1k/6Pp/8/8/8/8/3K4 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_KING_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 1);
 
 }

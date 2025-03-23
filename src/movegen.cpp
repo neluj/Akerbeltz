@@ -371,6 +371,26 @@ void generate_all_moves(const Position &position, MoveList &moveList){
         king_moves<Color::BLACK, MoveType::STANDARD>(position, moveList);
     }
 }
+
+void generate_capture_moves(Position &position, MoveList &moveList){
+    //TODO cambiar a pasar c como parametro
+    //Color c= position.get_side_to_move();
+    if(position.get_side_to_move() == WHITE){
+        white_pawn_capture_moves(position, moveList);
+        Knight_moves<Color::WHITE, MoveType::CAPTURE>(position, moveList);
+        bishop_moves<Color::WHITE, MoveType::CAPTURE>(position, moveList);
+        rook_moves<Color::WHITE, MoveType::CAPTURE>(position, moveList);
+        queen_moves<Color::WHITE, MoveType::CAPTURE>(position, moveList);
+        king_moves<Color::WHITE, MoveType::CAPTURE>(position, moveList);
+    }else{
+        black_pawn_capture_moves(position, moveList);
+        Knight_moves<Color::BLACK, MoveType::CAPTURE>(position, moveList);
+        bishop_moves<Color::BLACK, MoveType::CAPTURE>(position, moveList);
+        rook_moves<Color::BLACK, MoveType::CAPTURE>(position, moveList);
+        queen_moves<Color::BLACK, MoveType::CAPTURE>(position, moveList);
+        king_moves<Color::BLACK, MoveType::CAPTURE>(position, moveList);
+    }
 }
 
-}               
+} 
+}              

@@ -22,7 +22,7 @@ struct MoveList{
 
 
 void generate_all_moves(const Position &position, MoveList &moveList);
-// TODO void generate_capture_moves(Position &position);
+void generate_capture_moves(Position &position, MoveList &moveList);
 // TODO void generate_quiet_moves(Position &position);
 
 
