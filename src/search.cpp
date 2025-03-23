@@ -18,8 +18,11 @@ PVTable::PVLine pvLine;
 void perft(Position &position, DepthSize depth);
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth);
+Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta);
 void clean_search_info(SearchInfo &searchInfo);
 void check_time(SearchInfo &searchInfo);
+//TODO isrepetition
+//TODO PickNextMove
 
 void search(Position &position, SearchInfo &searchInfo){
 
@@ -73,7 +76,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     if(depth==0){
         ++searchInfo.nodes;
-        return Evaluate::calc_score(position);
+        return quiescence_search(position, searchInfo, alpha, beta);
     }
 
     if((searchInfo.nodes & 2047) == 0){
@@ -124,6 +127,66 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     return alpha;
     
+}
+
+Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta){
+
+    if((searchInfo.nodes & 2047) == 0){
+        check_time(searchInfo);
+    }
+
+    ++searchInfo.nodes;
+
+    if(searchInfo.depth > MAX_DEPTH - 1){
+        return Evaluate::calc_score(position);
+    }
+
+    Score score = Evaluate::calc_score(position);
+
+    if(score >= beta){
+        return beta;
+    }
+
+    if(score > alpha){
+        alpha = score;
+    }
+
+    MoveGen::MoveList moveList;
+    MoveGen::generate_capture_moves(position, moveList);
+
+    score = -CHECKMATE_SCORE;
+    Score oldAlpha = alpha;
+    Move bestMove = 0;
+
+    for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
+
+        Move move = moveList.moves[mIndx];
+        if(!position.do_move(move)){
+            continue;
+        }
+
+        score = -quiescence_search(position, searchInfo, -beta, -alpha);
+        position.undo_move();
+
+        if(searchInfo.timeOver){
+            return 0;
+        }
+        
+        if(score>alpha){
+            if(alpha>=beta){
+                return beta;
+            }
+            alpha = score;
+            bestMove = move;
+        }
+    }
+
+    if(alpha != oldAlpha){
+        PVTable::insert_entry(position, bestMove);
+    }
+
+    return alpha;
+
 }
 
 void clean_search_info(SearchInfo &searchInfo){
