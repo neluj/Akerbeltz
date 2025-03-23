@@ -21,12 +21,12 @@ void non_loop_move(const Position &position, MoveList &moveList, Square120 from)
 
 //Pawns
 void white_pawn_moves(const Position &position, MoveList &moveList);
-void white_pawn_quiet_moves(const Position &position, MoveList &moveList, Square120 from);
-void white_pawn_capture_moves(const Position &position, MoveList &moveList, Square120 from);
+void white_pawn_quiet_moves(const Position &position, MoveList &moveList);
+void white_pawn_capture_moves(const Position &position, MoveList &moveList);
 
 void black_pawn_moves(const Position &position, MoveList &moveList);
-void black_pawn_quiet_moves(const Position &position, MoveList &moveList, Square120 from);
-void black_pawn_capture_moves(const Position &position, MoveList &moveList, Square120 from);
+void black_pawn_quiet_moves(const Position &position, MoveList &moveList);
+void black_pawn_capture_moves(const Position &position, MoveList &moveList);
 
 //Knights
 
@@ -81,134 +81,157 @@ void non_loop_move(const Position &position, MoveList &moveList, Square120 from)
     }  
 }
 
-
 //Pawns
 void white_pawn_moves(const Position &position, MoveList &moveList){
+    white_pawn_quiet_moves(position, moveList);
+    white_pawn_capture_moves(position, moveList); 
+}
+
+void white_pawn_quiet_moves(const Position &position, MoveList &moveList){
+
+    Square120 from = SQ120_NO_SQUARE;
+
     for(std::size_t pciCount = 0; pciCount < position.get_piece_size(W_PAWN); ++pciCount){
-        white_pawn_quiet_moves(position, moveList, position.get_piece_list(W_PAWN)[pciCount]);
-        white_pawn_capture_moves(position, moveList, position.get_piece_list(W_PAWN)[pciCount]);
+        
+        from = position.get_piece_list(W_PAWN)[pciCount];
+
+        if(position.get_mailbox_pieceType(COLOR_NC, Square120(from+NORTH)) == NO_PIECE_TYPE)
+        {
+            if(square_rank(from) == RANK_2 && position.get_mailbox_pieceType(COLOR_NC, Square120(from+NORTH_NORTH))== NO_PIECE_TYPE){
+                moveList.set_move(make_move(from, Square120(from+NORTH), SpecialMove::NO_SPECIAL, NO_PIECE));
+                moveList.set_move(make_move(from, Square120(from+(NORTH_NORTH)), SpecialMove::PAWN_START, NO_PIECE));
+            }else if(square_rank(from) == RANK_7){
+                moveList.set_move(make_move(from, Square120(from+NORTH), PROMOTION_BISHOP, NO_PIECE));
+                moveList.set_move(make_move(from, Square120(from+NORTH), PROMOTION_KNIGHT, NO_PIECE));
+                moveList.set_move(make_move(from, Square120(from+NORTH), PROMOTION_QUEEN, NO_PIECE));
+                moveList.set_move(make_move(from, Square120(from+NORTH), PROMOTION_ROOK, NO_PIECE));
+            }else{
+                moveList.set_move(make_move(from, Square120(from+NORTH), SpecialMove::NO_SPECIAL, NO_PIECE));
+            }
+        
+        }
     }
 }
 
-void white_pawn_quiet_moves(const Position &position, MoveList &moveList, Square120 from){
+void white_pawn_capture_moves(const Position &position, MoveList &moveList){
 
-    if(position.get_mailbox_pieceType(COLOR_NC, Square120(from+NORTH)) == NO_PIECE_TYPE)
-    {
-        if(square_rank(from) == RANK_2 && position.get_mailbox_pieceType(COLOR_NC, Square120(from+NORTH_NORTH))== NO_PIECE_TYPE){
-            moveList.set_move(make_move(from, Square120(from+NORTH), SpecialMove::NO_SPECIAL, NO_PIECE));
-            moveList.set_move(make_move(from, Square120(from+(NORTH_NORTH)), SpecialMove::PAWN_START, NO_PIECE));
-        }else if(square_rank(from) == RANK_7){
-            moveList.set_move(make_move(from, Square120(from+NORTH), PROMOTION_BISHOP, NO_PIECE));
-            moveList.set_move(make_move(from, Square120(from+NORTH), PROMOTION_KNIGHT, NO_PIECE));
-            moveList.set_move(make_move(from, Square120(from+NORTH), PROMOTION_QUEEN, NO_PIECE));
-            moveList.set_move(make_move(from, Square120(from+NORTH), PROMOTION_ROOK, NO_PIECE));
-        }else{
-            moveList.set_move(make_move(from, Square120(from+NORTH), SpecialMove::NO_SPECIAL, NO_PIECE));
-        }
-       
-    }
-}
+    Square120 from = SQ120_NO_SQUARE;
 
-void white_pawn_capture_moves(const Position &position, MoveList &moveList, Square120 from){
-    
-    //en passant captures
-    if(position.get_enpassant_square() != SQ120_NO_SQUARE){
-        if(from+NORTH_WEST == position.get_enpassant_square()){
-            // BUG enpassant capture must be NO_PIECE?
-            moveList.set_move(make_move(from, Square120(from+NORTH_WEST), ENPASSANT, Piece::NO_PIECE));
-        }        
-        if(from+NORTH_EAST == position.get_enpassant_square()){
-            moveList.set_move(make_move(from, Square120(from+NORTH_EAST), ENPASSANT, Piece::NO_PIECE));
+    for(std::size_t pciCount = 0; pciCount < position.get_piece_size(W_PAWN); ++pciCount){
+        
+        from = position.get_piece_list(W_PAWN)[pciCount];
+
+        //en passant captures
+        if(position.get_enpassant_square() != SQ120_NO_SQUARE){
+            if(from+NORTH_WEST == position.get_enpassant_square()){
+                // BUG enpassant capture must be NO_PIECE?
+                moveList.set_move(make_move(from, Square120(from+NORTH_WEST), ENPASSANT, Piece::NO_PIECE));
+            }        
+            if(from+NORTH_EAST == position.get_enpassant_square()){
+                moveList.set_move(make_move(from, Square120(from+NORTH_EAST), ENPASSANT, Piece::NO_PIECE));
+            }
         }
-    }
-    PieceType northWestEnemyPiece = position.get_mailbox_pieceType(BLACK, Square120(from+NORTH_WEST));
-    if(northWestEnemyPiece != NO_PIECE_TYPE && square_file(from) != FILE_A){
-        if(square_rank(from) != RANK_7){
-            moveList.set_move(make_move(from, Square120(from+NORTH_WEST), SpecialMove::NO_SPECIAL, make_piece(BLACK, northWestEnemyPiece)));
+        PieceType northWestEnemyPiece = position.get_mailbox_pieceType(BLACK, Square120(from+NORTH_WEST));
+        if(northWestEnemyPiece != NO_PIECE_TYPE && square_file(from) != FILE_A){
+            if(square_rank(from) != RANK_7){
+                moveList.set_move(make_move(from, Square120(from+NORTH_WEST), SpecialMove::NO_SPECIAL, make_piece(BLACK, northWestEnemyPiece)));
+            }
+            else{
+                Piece capturedPiece = make_piece(BLACK, northWestEnemyPiece);
+                moveList.set_move(make_move(from, Square120(from+NORTH_WEST), PROMOTION_BISHOP,  capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+NORTH_WEST), PROMOTION_KNIGHT,  capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+NORTH_WEST), PROMOTION_QUEEN,   capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+NORTH_WEST), PROMOTION_ROOK,    capturedPiece));
+            }
         }
-        else{
-            Piece capturedPiece = make_piece(BLACK, northWestEnemyPiece);
-            moveList.set_move(make_move(from, Square120(from+NORTH_WEST), PROMOTION_BISHOP,  capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+NORTH_WEST), PROMOTION_KNIGHT,  capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+NORTH_WEST), PROMOTION_QUEEN,   capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+NORTH_WEST), PROMOTION_ROOK,    capturedPiece));
-        }
-    }
-    PieceType northEastEnemyPiece = position.get_mailbox_pieceType(BLACK, Square120(from+NORTH_EAST));
-    if(northEastEnemyPiece != NO_PIECE_TYPE && square_file(from) != FILE_H){
-        if(square_rank(from) != RANK_7){
-            moveList.set_move(make_move(from, Square120(from+NORTH_EAST), SpecialMove::NO_SPECIAL, make_piece(BLACK, northEastEnemyPiece)));
-        }
-        else{
-            Piece capturedPiece = make_piece(BLACK, northEastEnemyPiece);
-            moveList.set_move(make_move(from, Square120(from+NORTH_EAST), PROMOTION_BISHOP,  capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+NORTH_EAST), PROMOTION_KNIGHT,  capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+NORTH_EAST), PROMOTION_QUEEN,   capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+NORTH_EAST), PROMOTION_ROOK,    capturedPiece));
+        PieceType northEastEnemyPiece = position.get_mailbox_pieceType(BLACK, Square120(from+NORTH_EAST));
+        if(northEastEnemyPiece != NO_PIECE_TYPE && square_file(from) != FILE_H){
+            if(square_rank(from) != RANK_7){
+                moveList.set_move(make_move(from, Square120(from+NORTH_EAST), SpecialMove::NO_SPECIAL, make_piece(BLACK, northEastEnemyPiece)));
+            }
+            else{
+                Piece capturedPiece = make_piece(BLACK, northEastEnemyPiece);
+                moveList.set_move(make_move(from, Square120(from+NORTH_EAST), PROMOTION_BISHOP,  capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+NORTH_EAST), PROMOTION_KNIGHT,  capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+NORTH_EAST), PROMOTION_QUEEN,   capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+NORTH_EAST), PROMOTION_ROOK,    capturedPiece));
+            }
         }
     }
 }
 
 void black_pawn_moves(const Position &position, MoveList &moveList){
+    black_pawn_quiet_moves(position, moveList);
+    black_pawn_capture_moves(position, moveList);
+}
+
+void black_pawn_quiet_moves(const Position &position, MoveList &moveList){
+
+    Square120 from = SQ120_NO_SQUARE;
+
     for(std::size_t pciCount = 0; pciCount < position.get_piece_size(B_PAWN); ++pciCount){
-        black_pawn_quiet_moves(position, moveList, position.get_piece_list(B_PAWN)[pciCount]);
-        black_pawn_capture_moves(position, moveList, position.get_piece_list(B_PAWN)[pciCount]);
-    }
-}
 
-void black_pawn_quiet_moves(const Position &position, MoveList &moveList, Square120 from){
+        from = position.get_piece_list(B_PAWN)[pciCount];
 
-    if(position.get_mailbox_pieceType(COLOR_NC, Square120(from+SOUTH)) == NO_PIECE_TYPE)
-    {
-        if(square_rank(from) == RANK_7 && position.get_mailbox_pieceType(COLOR_NC, Square120(from+SOUTH_SOUTH))== NO_PIECE_TYPE){
-            moveList.set_move(make_move(from, Square120(from+SOUTH), SpecialMove::NO_SPECIAL, NO_PIECE));
-            moveList.set_move(make_move(from, Square120(from+(SOUTH_SOUTH)), SpecialMove::PAWN_START, NO_PIECE));
-        }else if(square_rank(from) == RANK_2){
-            moveList.set_move(make_move(from, Square120(from+SOUTH), PROMOTION_BISHOP, NO_PIECE));
-            moveList.set_move(make_move(from, Square120(from+SOUTH), PROMOTION_KNIGHT, NO_PIECE));
-            moveList.set_move(make_move(from, Square120(from+SOUTH), PROMOTION_QUEEN, NO_PIECE));
-            moveList.set_move(make_move(from, Square120(from+SOUTH), PROMOTION_ROOK, NO_PIECE));
-        }else{
-            moveList.set_move(make_move(from, Square120(from+SOUTH), SpecialMove::NO_SPECIAL, NO_PIECE));
+        if(position.get_mailbox_pieceType(COLOR_NC, Square120(from+SOUTH)) == NO_PIECE_TYPE)
+        {
+            if(square_rank(from) == RANK_7 && position.get_mailbox_pieceType(COLOR_NC, Square120(from+SOUTH_SOUTH))== NO_PIECE_TYPE){
+                moveList.set_move(make_move(from, Square120(from+SOUTH), SpecialMove::NO_SPECIAL, NO_PIECE));
+                moveList.set_move(make_move(from, Square120(from+(SOUTH_SOUTH)), SpecialMove::PAWN_START, NO_PIECE));
+            }else if(square_rank(from) == RANK_2){
+                moveList.set_move(make_move(from, Square120(from+SOUTH), PROMOTION_BISHOP, NO_PIECE));
+                moveList.set_move(make_move(from, Square120(from+SOUTH), PROMOTION_KNIGHT, NO_PIECE));
+                moveList.set_move(make_move(from, Square120(from+SOUTH), PROMOTION_QUEEN, NO_PIECE));
+                moveList.set_move(make_move(from, Square120(from+SOUTH), PROMOTION_ROOK, NO_PIECE));
+            }else{
+                moveList.set_move(make_move(from, Square120(from+SOUTH), SpecialMove::NO_SPECIAL, NO_PIECE));
+            }
         }
     }
 }
 
-void black_pawn_capture_moves(const Position &position, MoveList &moveList, Square120 from){
-    
-    //en passant captures
-    if(position.get_enpassant_square() != SQ120_NO_SQUARE){
-        if(from+SOUTH_WEST == position.get_enpassant_square()){
-            moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), ENPASSANT, Piece::NO_PIECE));
-        }        
-        if(from+SOUTH_EAST == position.get_enpassant_square()){
-            moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), ENPASSANT, Piece::NO_PIECE));
+void black_pawn_capture_moves(const Position &position, MoveList &moveList){
+
+    Square120 from = SQ120_NO_SQUARE;
+
+    for(std::size_t pciCount = 0; pciCount < position.get_piece_size(B_PAWN); ++pciCount){
+
+        from = position.get_piece_list(B_PAWN)[pciCount];
+
+        //en passant captures
+        if(position.get_enpassant_square() != SQ120_NO_SQUARE){
+            if(from+SOUTH_WEST == position.get_enpassant_square()){
+                moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), ENPASSANT, Piece::NO_PIECE));
+            }        
+            if(from+SOUTH_EAST == position.get_enpassant_square()){
+                moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), ENPASSANT, Piece::NO_PIECE));
+            }
         }
-    }
-    PieceType southWestEnemyPiece = position.get_mailbox_pieceType(WHITE, Square120(from+SOUTH_WEST));
-    if(southWestEnemyPiece != NO_PIECE_TYPE && square_file(from) != FILE_A){
-        if(square_rank(from) != RANK_2){
-            moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), SpecialMove::NO_SPECIAL, make_piece(WHITE, southWestEnemyPiece)));
+        PieceType southWestEnemyPiece = position.get_mailbox_pieceType(WHITE, Square120(from+SOUTH_WEST));
+        if(southWestEnemyPiece != NO_PIECE_TYPE && square_file(from) != FILE_A){
+            if(square_rank(from) != RANK_2){
+                moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), SpecialMove::NO_SPECIAL, make_piece(WHITE, southWestEnemyPiece)));
+            }
+            else{
+                Piece capturedPiece = make_piece(WHITE, southWestEnemyPiece);
+                moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), PROMOTION_BISHOP,  capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), PROMOTION_KNIGHT,  capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), PROMOTION_QUEEN,   capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), PROMOTION_ROOK,    capturedPiece));
+            }
         }
-        else{
-            Piece capturedPiece = make_piece(WHITE, southWestEnemyPiece);
-            moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), PROMOTION_BISHOP,  capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), PROMOTION_KNIGHT,  capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), PROMOTION_QUEEN,   capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+SOUTH_WEST), PROMOTION_ROOK,    capturedPiece));
-        }
-    }
-    PieceType southEastEnemyPiece = position.get_mailbox_pieceType(WHITE, Square120(from+SOUTH_EAST));
-    if(southEastEnemyPiece != NO_PIECE_TYPE && square_file(from) != FILE_H){
-        if(square_rank(from) != RANK_2){
-            moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), SpecialMove::NO_SPECIAL, make_piece(WHITE, southEastEnemyPiece)));
-        }
-        else{
-            Piece capturedPiece = make_piece(WHITE, southEastEnemyPiece);
-            moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), PROMOTION_BISHOP,  capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), PROMOTION_KNIGHT,  capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), PROMOTION_QUEEN,   capturedPiece));
-            moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), PROMOTION_ROOK,    capturedPiece));
+        PieceType southEastEnemyPiece = position.get_mailbox_pieceType(WHITE, Square120(from+SOUTH_EAST));
+        if(southEastEnemyPiece != NO_PIECE_TYPE && square_file(from) != FILE_H){
+            if(square_rank(from) != RANK_2){
+                moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), SpecialMove::NO_SPECIAL, make_piece(WHITE, southEastEnemyPiece)));
+            }
+            else{
+                Piece capturedPiece = make_piece(WHITE, southEastEnemyPiece);
+                moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), PROMOTION_BISHOP,  capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), PROMOTION_KNIGHT,  capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), PROMOTION_QUEEN,   capturedPiece));
+                moveList.set_move(make_move(from, Square120(from+SOUTH_EAST), PROMOTION_ROOK,    capturedPiece));
+            }
         }
     }
 }
@@ -331,7 +354,7 @@ void king_moves(const Position &position, MoveList &moveList){
 //Global
 void generate_all_moves(const Position &position, MoveList &moveList){
     //TODO cambiar a pasar c como parametro
-    Color c= position.get_side_to_move();
+    //Color c= position.get_side_to_move();
     if(position.get_side_to_move() == WHITE){
         white_pawn_moves(position, moveList);
         Knight_moves<Color::WHITE, MoveType::STANDARD>(position, moveList);
