@@ -43,7 +43,6 @@ void search(Position &position, SearchInfo &searchInfo){
             std::chrono::high_resolution_clock::now().time_since_epoch()).count() - searchInfo.startTime;
         
 
-
         PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
         bestMove = pvLine.moves[0];
 
