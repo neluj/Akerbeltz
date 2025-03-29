@@ -206,7 +206,8 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
     "time:" << searchInfo.moveTime << 
     " start:" << searchInfo.startTime << 
     " stop:" << searchInfo.stopTime <<
-    " depth:" << searchInfo.depth;
+    " depth:" << searchInfo.depth << 
+    std::endl;;
 
 }
 
