@@ -84,6 +84,10 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     ++searchInfo.nodes;
 
+    if(position.is_repetition() || position.get_fifty_moves_counter() >= 100){
+        return 0;
+    }
+
     MoveGen::MoveList moveList;
     MoveGen::generate_all_moves(position, moveList);
 
