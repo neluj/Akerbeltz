@@ -53,7 +53,8 @@ void search(Position &position, SearchInfo &searchInfo){
         " score cp " << bestMoveScore << 
         " move " << algebraic_move(bestMove) <<
         " nodes " << searchInfo.nodes <<
-        " time " << timeMs;
+        " time " << timeMs <<
+        " ordering " << searchInfo.FirstHitFirst/searchInfo.FirstHit;
 
         std::cout << " pv";
 
@@ -94,6 +95,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     Score score = -CHECKMATE_SCORE;
     Score oldAlpha = alpha;
     Move bestMove = 0;
+    int legal = 0;
 
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
 
@@ -101,8 +103,9 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         if(!position.do_move(move)){
             continue;
         }
-        //TODO imprimir para ver si se ejecuta el movimiento
 
+        ++legal;
+        
         score = -alpha_beta(position, searchInfo, -beta, -alpha, depth - 1);
         position.undo_move();
 
@@ -111,7 +114,16 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         }
         
         if(score>alpha){
+
+
             if(alpha>=beta){
+
+                if(legal == 1){
+                    searchInfo.FirstHitFirst++;
+                }
+
+                searchInfo.FirstHit++;
+
                 return beta;
             }
             alpha = score;
@@ -194,6 +206,8 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 
 void clean_search_info(SearchInfo &searchInfo){
     searchInfo.nodes = 0;
+    searchInfo.FirstHit = 0;
+    searchInfo.FirstHitFirst = 0;
 }
 
 void check_time(SearchInfo &searchInfo){
