@@ -114,9 +114,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         }
         
         if(score>alpha){
-
-
-            if(alpha>=beta){
+            if(score>=beta){
 
                 if(legal == 1){
                     searchInfo.FirstHitFirst++;
@@ -129,11 +127,6 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
             alpha = score;
             bestMove = move;
         }
-        //if(score >= beta)
-        //    return beta;
-        //if(score>alpha)
-        //    alpha = score;
-
     }
 
     if(alpha != oldAlpha){
