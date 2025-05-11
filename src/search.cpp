@@ -181,7 +181,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         }
         
         if(score>alpha){
-            if(alpha>=beta){
+            if(score>=beta){
                 return beta;
             }
             alpha = score;
