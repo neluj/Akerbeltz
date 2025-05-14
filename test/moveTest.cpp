@@ -17,10 +17,10 @@ TEST(MoveTest, PromotionMove){
     Square120 from = Square120::SQ120_A6;                       //1000111
     Square120 to = Square120::SQ120_A7;                         //1010001
     SpecialMove specialMove = SpecialMove::PROMOTION_QUEEN;  //1 0100
-    Piece capturedPiece = Piece::B_BISHOP;          //1001
+    Piece capturedPiece = Piece::B_BISHOP;          //1011
 
     Move moveQueenPromotion = make_move(from, to, specialMove, capturedPiece);
-    Move expected = 0b10011010010100011000111;
+    Move expected = 0b10111010010100011000111;
 
     EXPECT_EQ(moveQueenPromotion, expected);
 
@@ -31,10 +31,10 @@ TEST(MoveTest, CastlingMove){
     Square120 from = Square120::SQ120_A6;                           //1000111
     Square120 to = Square120::SQ120_A7;                             //1010001
     SpecialMove specialMove = SpecialMove::CASTLE;      //0 0011
-    Piece capturedPiece = Piece::B_BISHOP;              //1001
+    Piece capturedPiece = Piece::B_BISHOP;              //1011
     
     Move moveCasling = make_move(from, to, specialMove, capturedPiece);
-    Move expected = 0b10010001110100011000111;
+    Move expected = 0b10110001110100011000111;
 
     EXPECT_EQ(moveCasling, expected);
 
