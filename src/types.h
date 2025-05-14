@@ -18,8 +18,6 @@ using MovesSize = unsigned short int;
 using Key = unsigned long long;
 using Time = long long;
 
-constexpr std::size_t PIECE_SIZE = 13;
-constexpr std::size_t PIECETYPE_SIZE = 7;
 constexpr std::size_t SQUARE_SIZE_64 = 64;
 constexpr std::size_t SQUARE_SIZE_120 = 120;
 
@@ -42,16 +40,18 @@ enum PieceType{
   BISHOP, 
   ROOK, 
   QUEEN, 
-  KING
+  KING,
+  PIECETYPE_SIZE
 };
 
 enum Piece : int{
   NO_PIECE,
   W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING,
-  B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING
+  B_PAWN = 8 + W_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING,
+  PIECE_SIZE = 16
 };
 
-const std::string_view PIECE_NAMES{" PNBRQKpnbrqk"};
+const std::string_view PIECE_NAMES{" PNBRQK  pnbrqk "};
 
 /*  NOTE 
     IMPROVE 
@@ -66,27 +66,17 @@ enum Color : int{
   COLOR_NC,
   COLOR_SIZE
 };
-// TODO improve methods
+
 constexpr Piece make_piece(Color c, PieceType pt) { 
-  if(pt == NO_PIECE_TYPE)
-    return NO_PIECE;
-  return Piece(pt + (c * 6)); 
+  return Piece((c << 3) + pt); 
 }
-
+//REVIEW para que sirve
 constexpr Color piece_color(Piece piece) { 
-  if(W_PAWN <= piece && piece <= W_KING)
-    return Color::WHITE;
-  else if(B_PAWN <= piece && piece <= B_KING)
-    return Color::BLACK;
-  return COLOR_NC;
+  return Color(piece >> 3);
 }
 
-constexpr PieceType piece_type(Piece piece) { 
-  if(W_PAWN <= piece && piece <= W_KING)
-    return PieceType(piece);
-  else if(B_PAWN <= piece && piece <= B_KING)
-    return PieceType(piece-6);
-  return PieceType::NO_PIECE_TYPE;
+constexpr PieceType piece_type(Piece piece) {
+  return PieceType(0x7 & piece);
 }
 
 constexpr Color operator~(Color color) {
