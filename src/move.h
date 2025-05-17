@@ -10,15 +10,17 @@ namespace Xake{
 0000 0000 0000 0000 0000 0111 1111 1000 0000 -> To 0x7F
 0000 0000 0000 0000 0000 1000 0000 0000 0000 -> Special move flag
 0000 0000 0000 0000 0111 0000 0000 0000 0000 -> Promotion Piece
-0000 0000 0000 1111 1000 0000 0000 0000 0000 -> Captured piece type
-1111 1111 1110 1000 0000 0000 0000 0000 0000 -> Score
+0000 0000 0000 0111 1000 0000 0000 0000 0000 -> Captured piece
+1111 1111 1111 1000 0000 0000 0000 0000 0000 -> Score
 */
 
 typedef unsigned long int Move;
 
-/* 
-    NORMAL: Quiet and Capture moves
-*/
+enum MoveType{
+    QUIET,
+    CAPTURE
+};
+
 // VIDEO
 enum SpecialMove: int{
     NO_SPECIAL          = 0,
@@ -31,9 +33,16 @@ enum SpecialMove: int{
     PROMOTION_QUEEN     = QUEEN     << 2
 };
 
-//IMPROVE inline or constxpr? same for other functionsfff
-inline Move make_move(Square120 from, Square120 to, SpecialMove SpecialMove, Piece capturedPiece) {
+inline Move make_quiet_move(Square120 from, Square120 to, SpecialMove SpecialMove) {
+    return Move((SpecialMove << 14) + (to << 7) + from);
+}
+
+inline Move make_capture_move(Square120 from, Square120 to, SpecialMove SpecialMove, Piece attackerPiece , Piece capturedPiece) {
     return Move((capturedPiece << 19) | (SpecialMove << 14) + (to << 7) + from);
+}
+
+inline Move make_enpassant_move(Square120 from, Square120 to) {
+    return Move((ENPASSANT << 14) + (to << 7) + from);
 }
 
 inline Square120 move_from(Move move) {

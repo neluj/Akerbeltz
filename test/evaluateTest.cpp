@@ -50,7 +50,7 @@ TEST_F(EvaluateTest, Score){
 
     EXPECT_EQ(0, Evaluate::calc_score(pos));
 
-    pos.do_move(make_move(SQ120_D2, SQ120_D4, SpecialMove::NO_SPECIAL, NO_PIECE));
+    pos.do_move(make_quiet_move(SQ120_D2, SQ120_D4, SpecialMove::NO_SPECIAL));
 
     //Value is negative because side to move has move to black
     EXPECT_EQ(-35, Evaluate::calc_score(pos));
