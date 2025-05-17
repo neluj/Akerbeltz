@@ -41,9 +41,8 @@ TEST_F(PVTableTest, LoadPVLine){
     Square120 fromg3 = Square120::SQ120_G3;
     Square120 tog6 = Square120::SQ120_G6;
     SpecialMove spNo = SpecialMove::NO_SPECIAL;
-    Piece capNo = Piece::NO_PIECE;
 
-    Move mg3g6 = make_move(fromg3, tog6, spNo, capNo);
+    Move mg3g6 = make_quiet_move(fromg3, tog6, spNo);
     PVTable::insert_entry(position, mg3g6);
 
     PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
@@ -56,8 +55,9 @@ TEST_F(PVTableTest, LoadPVLine){
     Square120 fromd6 = Square120::SQ120_D6;
     Square120 toe5 = Square120::SQ120_E5;
     Piece capwk = Piece::W_KNIGHT;
+    Piece attbq = Piece::B_QUEEN;
 
-    Move md6e5 = make_move(fromd6, toe5, spNo, capwk);
+    Move md6e5 = make_capture_move(fromd6, toe5, spNo, attbq, capwk);
     PVTable::insert_entry(position, md6e5);
 
     PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
@@ -83,7 +83,7 @@ TEST_F(PVTableTest, LoadPVLine){
     Square120 fromb1 = Square120::SQ120_B1;
     Square120 toc3 = Square120::SQ120_C3;
 
-    Move mb1c3 = make_move(fromb1, toc3, spNo, capNo);
+    Move mb1c3 = make_quiet_move(fromb1, toc3, spNo);
     PVTable::insert_entry(position, mb1c3);
 
     PVTable::load_pv_line(pvLine, MAX_DEPTH, position);

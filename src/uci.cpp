@@ -133,8 +133,29 @@ Move make_move(const Position &pos, std::string algebraic_move){
     Piece capturedPiece = make_piece(WHITE, pos.get_mailbox_pieceType(WHITE, to));
     if(capturedPiece == NO_PIECE)
         capturedPiece = make_piece(BLACK, pos.get_mailbox_pieceType(BLACK, to));
+    if(capturedPiece == NO_PIECE)
+        return make_quiet_move(from, to, specialMove);
 
-    return make_move(from, to, specialMove, capturedPiece);
+    
+    Piece attackerPiece{NO_PIECE};
+
+    PieceType attackerPieceType = pos.get_mailbox_pieceType(BLACK, from);
+
+    if(attackerPieceType != NO_PIECE_TYPE){
+        attackerPiece = make_piece(BLACK, attackerPieceType);
+    }
+
+    attackerPieceType = pos.get_mailbox_pieceType(WHITE, from);
+
+    if((attackerPieceType != NO_PIECE_TYPE)) {
+        attackerPiece = make_piece(WHITE, attackerPieceType);
+    }
+
+    if(specialMove == ENPASSANT){
+        return make_enpassant_move(from, to);
+    }
+        
+    return make_capture_move(from, to, specialMove, attackerPiece, capturedPiece);
 }
 
 void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo){
@@ -207,7 +228,7 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
     " start:" << searchInfo.startTime << 
     " stop:" << searchInfo.stopTime <<
     " depth:" << searchInfo.depth << 
-    std::endl;;
+    std::endl;
 
 }
 

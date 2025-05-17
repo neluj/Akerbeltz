@@ -468,7 +468,7 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B4), PieceType::NO_PIECE_TYPE);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
-    Move moveb2b4 = make_move(Square120::SQ120_B2, Square120::SQ120_B4, SpecialMove::PAWN_START, Piece::NO_PIECE);    
+    Move moveb2b4 = make_quiet_move(Square120::SQ120_B2, Square120::SQ120_B4, SpecialMove::PAWN_START);    
     position.do_move(moveb2b4);
 
     EXPECT_EQ(position.get_side_to_move(), Color::BLACK);
@@ -495,7 +495,7 @@ TEST_F(PositionTest, UndoMove){
     EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square120::SQ120_B4), PieceType::NO_PIECE_TYPE);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
-    Move moveb2b4 = make_move(Square120::SQ120_B2, Square120::SQ120_B4, SpecialMove::PAWN_START, Piece::NO_PIECE); 
+    Move moveb2b4 = make_quiet_move(Square120::SQ120_B2, Square120::SQ120_B4, SpecialMove::PAWN_START); 
 
     //TODO do this using mocks on undo move   
     position.do_move(moveb2b4);
@@ -520,7 +520,7 @@ TEST_F(PositionTest, CalcKeyDoUndoBasicMoveWhite){
     position.set_FEN(POS1);
     Key keyPos1Before = position.get_key();
 
-    Move move = make_move(SQ120_F1, SQ120_G2, NO_SPECIAL, NO_PIECE);
+    Move move = make_quiet_move(SQ120_F1, SQ120_G2, NO_SPECIAL);
 
     position.do_move(move);
 
@@ -546,7 +546,7 @@ TEST_F(PositionTest, CalcKeyDoUndoBasicMoveBlack){
     position.set_FEN(POS1);
     Key keyPos1Before = position.get_key();
 
-    Move move = make_move(SQ120_E8, SQ120_F7, NO_SPECIAL, NO_PIECE);
+    Move move = make_quiet_move(SQ120_E8, SQ120_F7, NO_SPECIAL);
 
     position.do_move(move);
 
@@ -569,7 +569,7 @@ TEST_F(PositionTest, CalcKeyBasicCapture){
     position.set_FEN(POS1);
     Key keyBeforeCapture = position.get_key();
 
-    Move captureMove = make_move(SQ120_E4, SQ120_D5, NO_SPECIAL, B_PAWN);
+    Move captureMove = make_capture_move(SQ120_E4, SQ120_D5, NO_SPECIAL, W_PAWN, B_PAWN);
 
     position.do_move(captureMove);
 
@@ -596,7 +596,7 @@ TEST_F(PositionTest, CalcKeyDoUndoEnpassant){
     const std::string POS1 = "3kb3/8/8/8/4p3/8/3PPP2/4KB2 w - - 0 1";
     position.set_FEN(POS1);
     Key keyBeforeMovePawnstart = position.get_key();
-    Move movePawnstart = make_move(SQ120_D2, SQ120_D4, PAWN_START, NO_PIECE);
+    Move movePawnstart = make_quiet_move(SQ120_D2, SQ120_D4, PAWN_START);
 
     position.do_move(movePawnstart);
     Key keyAfterMovePawnstart = position.get_key();
@@ -614,8 +614,8 @@ TEST_F(PositionTest, CalcKeyDoUndoEnpassant){
     
     //making move with pawn start must be pos2's same key
     EXPECT_EQ(keyAfterMovePawnstart, keyPawnstart);
-
-    Move moveEnpassant = make_move(SQ120_E4, SQ120_D3, ENPASSANT, NO_PIECE);
+    //BUG si es enpassant move, no hayt que poner la pieza comida, o crear una nueva función para make_enpassant_move
+    Move moveEnpassant = make_enpassant_move(SQ120_E4, SQ120_D3);
 
     position.do_move(moveEnpassant);
     Key keyAfterMoveEnpassant = position.get_key();
@@ -629,10 +629,10 @@ TEST_F(PositionTest, CalcKeyDoUndoEnpassant){
     const std::string POS3= "3kb3/8/8/8/8/3p4/4PP2/4KB2 w - - 0 1";
     position.set_FEN(POS3);
 
-    Key keyEmpassant = position.get_key();
+    Key keyEnpassant = position.get_key();
 
     //making enpsassant move must be pos3's same key
-    EXPECT_EQ(keyAfterMoveEnpassant, keyEmpassant);
+    EXPECT_EQ(keyAfterMoveEnpassant, keyEnpassant);
 
 }
 
@@ -651,7 +651,7 @@ TEST_F(PositionTest, CalcKeyBasicCastling){
 
     Key keyBeforetWhiteCastling = position.get_key();
 
-    Move moveWhiteKCasling = make_move(SQ120_E1, SQ120_G1, CASTLE, NO_PIECE);
+    Move moveWhiteKCasling = make_quiet_move(SQ120_E1, SQ120_G1, CASTLE);
 
     position.do_move(moveWhiteKCasling);
     Key keyAftertWhiteKCastling = position.get_key();
@@ -675,7 +675,7 @@ TEST_F(PositionTest, CalcKeyBasicCastling){
     ////////////////////////
     position.set_FEN(POS_W_CAST);
 
-    Move moveWhiteQCasling = make_move(SQ120_E1, SQ120_C1, CASTLE, NO_PIECE);
+    Move moveWhiteQCasling = make_quiet_move(SQ120_E1, SQ120_C1, CASTLE);
 
     position.do_move(moveWhiteQCasling);
     Key keyAftertWhiteQCastling = position.get_key();
@@ -708,7 +708,7 @@ TEST_F(PositionTest, CalcKeyBasicCastling){
 
     Key keyBeforetBlackCastling = position.get_key();
 
-    Move moveBlackKCasling = make_move(SQ120_E8, SQ120_G8, CASTLE, NO_PIECE);
+    Move moveBlackKCasling = make_quiet_move(SQ120_E8, SQ120_G8, CASTLE);
 
     position.do_move(moveBlackKCasling);
     Key keyAftertBlackKCastling = position.get_key();
@@ -733,7 +733,7 @@ TEST_F(PositionTest, CalcKeyBasicCastling){
 
     position.set_FEN(POS_B_CAST);
 
-    Move moveBlackQCasling = make_move(SQ120_E8, SQ120_C8, CASTLE, NO_PIECE);
+    Move moveBlackQCasling = make_quiet_move(SQ120_E8, SQ120_C8, CASTLE);
 
     position.do_move(moveBlackQCasling);
     Key keyAftertBlackQCastling = position.get_key();
@@ -766,7 +766,7 @@ TEST_F(PositionTest, CalcKeyBasicPromotion){
 
     Key keyWhitePromotionBefore = position.get_key();
     
-    Move moveWPromBishop = make_move(SQ120_H7, SQ120_G8, PROMOTION_BISHOP, B_ROOK);
+    Move moveWPromBishop = make_capture_move(SQ120_H7, SQ120_G8, PROMOTION_BISHOP, W_PAWN, B_ROOK);
 
     position.do_move(moveWPromBishop);
     Key keyWhitePromotionAfter = position.get_key();
@@ -786,12 +786,12 @@ TEST_F(PositionTest, CalcKeyBasicPromotion){
     /////////Black/////////
     ///////////////////////
     
-    const std::string POS_B = "3nk3/8/8/8/8/1P6/P6p/1BK3R1 b - - 0 1 ";
+    const std::string POS_B = "3nk3/8/8/8/8/1P6/P6p/1BK3R1 b - - 0 1";
     position.set_FEN(POS_B);
 
     Key keyBlackPromotionBefore = position.get_key();
     
-    Move moveBPromBishop = make_move(SQ120_H2, SQ120_G1, PROMOTION_BISHOP, W_ROOK);
+    Move moveBPromBishop = make_capture_move(SQ120_H2, SQ120_G1, PROMOTION_BISHOP, B_PAWN, W_ROOK);
 
     position.do_move(moveBPromBishop);
     Key keyBlackPromotionAfter = position.get_key();
@@ -813,19 +813,19 @@ TEST_F(PositionTest, IsRepetition){
 
     position.set_FEN(FEN_INIT_POSITION);
 
-    Move move_wk = make_move(SQ120_B1, SQ120_A3, NO_SPECIAL, NO_PIECE);
+    Move move_wk = make_quiet_move(SQ120_B1, SQ120_A3, NO_SPECIAL);
     position.do_move(move_wk);
     EXPECT_EQ(position.is_repetition(), false);
 
-    Move move_bk = make_move(SQ120_B8, SQ120_A6 , NO_SPECIAL, NO_PIECE);
+    Move move_bk = make_quiet_move(SQ120_B8, SQ120_A6 , NO_SPECIAL);
     position.do_move(move_bk);
     EXPECT_EQ(position.is_repetition(), false);
 
-    Move unmove_wk = make_move(SQ120_A3, SQ120_B1, NO_SPECIAL, NO_PIECE);
+    Move unmove_wk = make_quiet_move(SQ120_A3, SQ120_B1, NO_SPECIAL);
     position.do_move(unmove_wk);
     EXPECT_EQ(position.is_repetition(), false);
 
-    Move unmove_bk = make_move(SQ120_A6, SQ120_B8, NO_SPECIAL, NO_PIECE);
+    Move unmove_bk = make_quiet_move(SQ120_A6, SQ120_B8, NO_SPECIAL);
     position.do_move(unmove_bk);
     EXPECT_EQ(position.is_repetition(), true);
 
