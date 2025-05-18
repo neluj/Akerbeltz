@@ -68,7 +68,7 @@ enum Color : int{
 };
 
 constexpr Piece make_piece(Color c, PieceType pt) { 
-  return Piece((c << 3) + pt); 
+  return Piece(((c << 3) + pt) & ~(1 << 4)); 
 }
 //REVIEW para que sirve
 constexpr Color piece_color(Piece piece) { 
