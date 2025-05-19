@@ -21,8 +21,9 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta);
 void clean_search_info(SearchInfo &searchInfo);
 void check_time(SearchInfo &searchInfo);
+void pick_move(std::size_t moveIndx, MoveGen::MoveList &moveList);
+
 //TODO isrepetition
-//TODO PickNextMove
 
 void search(Position &position, SearchInfo &searchInfo){
 
@@ -99,6 +100,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
 
+        pick_move(mIndx, moveList);
         Move move = moveList.moves[mIndx];
         if(!position.do_move(move)){
             continue;
@@ -168,6 +170,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
 
+        pick_move(mIndx, moveList);
         Move move = moveList.moves[mIndx];
         if(!position.do_move(move)){
             continue;
@@ -212,6 +215,25 @@ void check_time(SearchInfo &searchInfo){
             searchInfo.timeOver = true;
         }
     }
+}
+
+void pick_move(std::size_t moveIndx, MoveGen::MoveList &moveList){
+
+    MoveScore moveScr{0};
+    MoveScore bestScr{0};
+    std::size_t bestIndx = moveIndx;
+
+    for(std::size_t i = moveIndx; i < moveList.size; ++i){
+        moveScr = move_score(moveList.moves[i]);
+        if(moveScr > bestScr){
+            bestScr = moveScr;
+            bestIndx = i;
+        }
+    }
+
+    Move moveTemp = moveList.moves[moveIndx];
+    moveList.moves[moveIndx] = moveList.moves[bestIndx];
+    moveList.moves[bestIndx] = moveTemp;
 }
 
 
