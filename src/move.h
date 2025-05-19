@@ -14,8 +14,7 @@ namespace Xake{
 1111 1111 1111 1000 0000 0000 0000 0000 0000 -> Score
 */
 
-typedef unsigned long int Move;
-
+using Move = unsigned long int;
 using MoveScore = unsigned short int;
 
 enum MoveType{
@@ -35,16 +34,34 @@ enum SpecialMove: int{
     PROMOTION_QUEEN     = QUEEN     << 2
 };
 
+constexpr MoveScore MVVLVASCORE = 100;
+
+const MoveScore MVVLVAScores[PIECETYPE_SIZE][PIECETYPE_SIZE] = {
+    {0,  0,  0,  0,  0,  0, 0},
+    {0, 15, 25, 35, 45, 55, 0},
+    {0, 14, 24, 34, 44, 54, 0},
+    {0, 13, 23, 33, 43, 53, 0},
+    {0, 12, 22, 32, 42, 52, 0},
+    {0, 11, 21, 31, 41, 51, 0},
+    {0, 10, 20, 30, 40, 50, 0} 
+};
+
 inline Move make_quiet_move(Square120 from, Square120 to, SpecialMove SpecialMove) {
-    return Move((SpecialMove << 14) + (to << 7) + from);
+    return Move((SpecialMove << 14) | (to << 7) | from);
 }
 
 inline Move make_capture_move(Square120 from, Square120 to, SpecialMove SpecialMove, Piece attackerPiece , Piece capturedPiece) {
-    return Move((capturedPiece << 19) | (SpecialMove << 14) + (to << 7) + from);
+
+    PieceType attackerType = piece_type(attackerPiece);
+    PieceType capturedType = piece_type(capturedPiece);
+
+    MoveScore mScore = MVVLVASCORE + MVVLVAScores[attackerType][capturedType];
+
+    return Move((mScore << 23) | (capturedPiece << 19) | (SpecialMove << 14) | (to << 7) | from);
 }
 
 inline Move make_enpassant_move(Square120 from, Square120 to) {
-    return Move((ENPASSANT << 14) + (to << 7) + from);
+    return Move((ENPASSANT << 14) | (to << 7) | from);
 }
 
 inline Square120 move_from(Move move) {
