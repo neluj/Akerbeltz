@@ -42,4 +42,12 @@ TEST(MoveTest, CastlingMove){
 
 }
 
-//TODO
+TEST(MoveTest, MoveScoreFunction){
+
+    Move move = 0b111111111111100000000000000000000000;
+    MoveScore expectedScore = 8191;
+    MoveScore score = move_score(move);
+
+    EXPECT_EQ(score, expectedScore);
+
+}

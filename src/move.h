@@ -16,6 +16,8 @@ namespace Xake{
 
 typedef unsigned long int Move;
 
+using MoveScore = unsigned short int;
+
 enum MoveType{
     QUIET,
     CAPTURE
@@ -64,6 +66,10 @@ inline PieceType promoted_piece(Move move){
 inline Piece captured_piece(Move move){
     return Piece((move >> 19) & 0x0f);
 } 
+
+inline MoveScore move_score(Move move){
+    return move >> 23;
+}
 
 inline std::string algebraic_move(Move move) {
     std::string algebraic_move;
