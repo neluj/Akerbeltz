@@ -103,14 +103,14 @@ void Position::clear_position_info(){
 
     sideToMove = COLOR_NC;
 
-    historySize = 1;
+    ply = 1;
 
-    history[historySize-1].nextMove = 0;
-    history[historySize-1].castlingRight = NO_RIGHT;
-    history[historySize-1].fiftyMovesCounter = 0;
-    history[historySize-1].movesCounter = 1;
-    history[historySize-1].enpassantSquare = SQ120_NO_SQUARE;
-    history[historySize-1].positionKey = 0;
+    historyPly[ply-1].nextMove = 0;
+    historyPly[ply-1].castlingRight = NO_RIGHT;
+    historyPly[ply-1].fiftyMovesCounter = 0;
+    historyPly[ply-1].movesCounter = 1;
+    historyPly[ply-1].enpassantSquare = SQ120_NO_SQUARE;
+    historyPly[ply-1].positionKey = 0;
 
     materialScore[WHITE] = 0;
     materialScore[BLACK] = 0;
@@ -181,10 +181,10 @@ void Position::set_FEN(std::string fenNotation){
     {
         switch (token)
         {
-		case 'K': history[historySize-1].castlingRight |= WKCA; break;
-		case 'Q': history[historySize-1].castlingRight |= WQCA; break;
-		case 'k': history[historySize-1].castlingRight |= BKCA; break;
-		case 'q': history[historySize-1].castlingRight |= BQCA; break;
+		case 'K': historyPly[ply-1].castlingRight |= WKCA; break;
+		case 'Q': historyPly[ply-1].castlingRight |= WQCA; break;
+		case 'k': historyPly[ply-1].castlingRight |= BKCA; break;
+		case 'q': historyPly[ply-1].castlingRight |= BQCA; break;
         }
     }
 
@@ -195,14 +195,14 @@ void Position::set_FEN(std::string fenNotation){
     {
         File enpassantFile = File(field[0] - 97);
         Rank enpassantRank = Rank(field[1]  - 49);
-	    history[historySize-1].enpassantSquare = square120(enpassantRank, enpassantFile);
+	    historyPly[ply-1].enpassantSquare = square120(enpassantRank, enpassantFile);
     }
 
     //5.- Set fifty moves counter
-    iss >> history[historySize-1].fiftyMovesCounter;
+    iss >> historyPly[ply-1].fiftyMovesCounter;
 
     //6.- Set move counter
-    iss >>  history[historySize-1].movesCounter;
+    iss >>  historyPly[ply-1].movesCounter;
 
     calc_key();
 
@@ -288,21 +288,21 @@ void Position::calc_material_score(){
 
 void Position::calc_key(){
     
-    history[historySize-1].positionKey ^= Zobrist::castlingRight[history[historySize-1].castlingRight];
+    historyPly[ply-1].positionKey ^= Zobrist::castlingRight[historyPly[ply-1].castlingRight];
 
-    if(history[historySize-1].enpassantSquare != SQ120_NO_SQUARE)
-        history[historySize-1].positionKey ^= Zobrist::enpassantSquare[square_file(history[historySize-1].enpassantSquare)];
+    if(historyPly[ply-1].enpassantSquare != SQ120_NO_SQUARE)
+        historyPly[ply-1].positionKey ^= Zobrist::enpassantSquare[square_file(historyPly[ply-1].enpassantSquare)];
      
     if(sideToMove == BLACK)
-        history[historySize-1].positionKey ^= Zobrist::blackMoves;
+        historyPly[ply-1].positionKey ^= Zobrist::blackMoves;
 
 }
 
 bool Position::is_repetition() const {
 
-    for(int i = historySize-1 - history[historySize-1].fiftyMovesCounter; i < historySize - 1; ++i){
+    for(int i = ply-1 - historyPly[ply-1].fiftyMovesCounter; i < ply - 1; ++i){
 
-        if(history[historySize-1].positionKey == history[i].positionKey){
+        if(historyPly[ply-1].positionKey == historyPly[i].positionKey){
             return true;
         }
     }
@@ -392,15 +392,15 @@ bool Position::do_move(Move move){
     SpecialMove specialMove = move_special(move);
 
     //Set move to the move history
-    history[historySize-1].nextMove = move;
+    historyPly[ply-1].nextMove = move;
 
-    ++historySize;
-    history[historySize-1].positionKey = history[historySize-2].positionKey;
-    history[historySize-1].positionKey ^= Zobrist::castlingRight[history[historySize-2].castlingRight];
+    ++ply;
+    historyPly[ply-1].positionKey = historyPly[ply-2].positionKey;
+    historyPly[ply-1].positionKey ^= Zobrist::castlingRight[historyPly[ply-2].castlingRight];
 
     if(specialMove != SpecialMove::NO_SPECIAL){
         if(specialMove == SpecialMove::ENPASSANT){
-            history[historySize-1].positionKey ^= Zobrist::enpassantSquare[square_file(history[historySize-2].enpassantSquare)];
+            historyPly[ply-1].positionKey ^= Zobrist::enpassantSquare[square_file(historyPly[ply-2].enpassantSquare)];
             if(sideToMove==Color::WHITE){
                 remove_piece(Square120(to+Direction::SOUTH));
             }else{
@@ -431,38 +431,38 @@ bool Position::do_move(Move move){
     //Set in the new history
 
     //Castling rights
-    history[historySize-1].castlingRight = history[historySize-2].castlingRight & CASTLE_PERSMISION_UPDATES[from];
-    history[historySize-1].castlingRight &= CASTLE_PERSMISION_UPDATES[to];
-    history[historySize-1].positionKey ^= Zobrist::castlingRight[history[historySize-1].castlingRight];
+    historyPly[ply-1].castlingRight = historyPly[ply-2].castlingRight & CASTLE_PERSMISION_UPDATES[from];
+    historyPly[ply-1].castlingRight &= CASTLE_PERSMISION_UPDATES[to];
+    historyPly[ply-1].positionKey ^= Zobrist::castlingRight[historyPly[ply-1].castlingRight];
     
     //Set next move to empty
-    history[historySize-1].nextMove = 0;
+    historyPly[ply-1].nextMove = 0;
 
     //Set fifty moves counter
     Piece capturedPiece = captured_piece(move);
-    history[historySize-1].fiftyMovesCounter = history[historySize-2].fiftyMovesCounter+1;
+    historyPly[ply-1].fiftyMovesCounter = historyPly[ply-2].fiftyMovesCounter+1;
 
     if(capturedPiece != Piece::NO_PIECE){
         remove_piece(to);
-        history[historySize-1].fiftyMovesCounter = 0;
+        historyPly[ply-1].fiftyMovesCounter = 0;
     }
 
     //If black move, add 1 to moves counter
-    history[historySize-1].movesCounter = history[historySize-2].movesCounter;
+    historyPly[ply-1].movesCounter = historyPly[ply-2].movesCounter;
     if(sideToMove==Color::BLACK)
-        history[historySize-1].movesCounter = history[historySize-2].movesCounter+1;
+        historyPly[ply-1].movesCounter = historyPly[ply-2].movesCounter+1;
 
     //Set enpassant square
-    history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
+    historyPly[ply-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
     if(mailbox[Color::COLOR_NC][from] == PieceType::PAWN){
-        history[historySize-1].fiftyMovesCounter = 0;
+        historyPly[ply-1].fiftyMovesCounter = 0;
         
         if(sideToMove==Color::WHITE && specialMove == SpecialMove::PAWN_START){
-            history[historySize-1].enpassantSquare = Square120(from+10);
-            history[historySize-1].positionKey ^= Zobrist::enpassantSquare[square_file(history[historySize-1].enpassantSquare)];
+            historyPly[ply-1].enpassantSquare = Square120(from+10);
+            historyPly[ply-1].positionKey ^= Zobrist::enpassantSquare[square_file(historyPly[ply-1].enpassantSquare)];
         } else if(sideToMove==Color::BLACK && specialMove == SpecialMove::PAWN_START){
-            history[historySize-1].enpassantSquare = Square120(from-10);
-            history[historySize-1].positionKey ^= Zobrist::enpassantSquare[square_file(history[historySize-1].enpassantSquare)];
+            historyPly[ply-1].enpassantSquare = Square120(from-10);
+            historyPly[ply-1].positionKey ^= Zobrist::enpassantSquare[square_file(historyPly[ply-1].enpassantSquare)];
         }
     }
 
@@ -481,20 +481,20 @@ bool Position::do_move(Move move){
     if(square_is_attacked(pieceList[kingS][0])){
         //VIDEO
         sideToMove =~ sideToMove;
-        history[historySize-1].positionKey ^= Zobrist::blackMoves;
+        historyPly[ply-1].positionKey ^= Zobrist::blackMoves;
         undo_move();
         return false;
     }
 
     sideToMove =~ sideToMove;
-    history[historySize-1].positionKey ^= Zobrist::blackMoves;
+    historyPly[ply-1].positionKey ^= Zobrist::blackMoves;
 
     return true;
 }
 
 void Position::undo_move(){
     
-    Move move = history[historySize-2].nextMove;
+    Move move = historyPly[ply-2].nextMove;
     Square120 from = move_from(move);
     Square120 to = move_to(move);
     SpecialMove specialMove = move_special(move);
@@ -545,14 +545,14 @@ void Position::undo_move(){
         add_piece(from, sideToMove == Color::WHITE ? Piece::W_PAWN : Piece::B_PAWN);
     }
 
-    history[historySize-2].nextMove = 0;
-    history[historySize-1].castlingRight = NO_RIGHT;
-    history[historySize-1].fiftyMovesCounter = 0;
-    history[historySize-1].movesCounter = 0;
-    history[historySize-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
-    history[historySize-1].positionKey = 0;
+    historyPly[ply-2].nextMove = 0;
+    historyPly[ply-1].castlingRight = NO_RIGHT;
+    historyPly[ply-1].fiftyMovesCounter = 0;
+    historyPly[ply-1].movesCounter = 0;
+    historyPly[ply-1].enpassantSquare = Square120::SQ120_NO_SQUARE;
+    historyPly[ply-1].positionKey = 0;
 
-    --historySize;
+    --ply;
 
 }
 
@@ -593,8 +593,8 @@ void Position::move_piece(Square120 from, Square120 to){
     materialScore[pieceColor] += Evaluate::calc_material_table(pieceColor, pieceType, to);
 
     //Update key
-    history[historySize-1].positionKey ^= Zobrist::pieceSquare[piece][from];
-    history[historySize-1].positionKey ^= Zobrist::pieceSquare[piece][to];
+    historyPly[ply-1].positionKey ^= Zobrist::pieceSquare[piece][from];
+    historyPly[ply-1].positionKey ^= Zobrist::pieceSquare[piece][to];
 
 }
 
@@ -640,7 +640,7 @@ void Position::remove_piece(Square120 square){
     materialScore[pieceColor] -= Evaluate::calc_material_table(pieceColor, pieceType, square);
 
     //Update key
-    history[historySize-1].positionKey ^= Zobrist::pieceSquare[piece][square];
+    historyPly[ply-1].positionKey ^= Zobrist::pieceSquare[piece][square];
 }
 
 void Position::add_piece(Square120 square, Piece piece){
@@ -657,7 +657,7 @@ void Position::add_piece(Square120 square, Piece piece){
     materialScore[pieceColor] += Evaluate::calc_material_table(pieceColor, pieceType, square);
     
     //Update key
-    history[historySize-1].positionKey ^= Zobrist::pieceSquare[piece][square];
+    historyPly[ply-1].positionKey ^= Zobrist::pieceSquare[piece][square];
 
 }
 

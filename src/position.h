@@ -25,6 +25,7 @@ public:
     void set_FEN(std::string fenNotation);
     std::string get_FEN() const;
     Color get_side_to_move() const;
+    int get_ply() const;
     int get_castling_right() const;
     Square120 get_enpassant_square() const;
     unsigned short get_fifty_moves_counter() const;
@@ -62,8 +63,8 @@ private:
     Square120 pieceList[PIECE_SIZE][MAX_SAME_PIECE];
     Color sideToMove{COLOR_NC};
     //TODO esto meterlo en HistoryInfo?
-    int historySize;
-    HistoryInfo history[MAX_GAME_MOVES];
+    int ply;
+    HistoryInfo historyPly[MAX_GAME_MOVES];
     Evaluate::Score materialScore[COLOR_SIZE];
 
 };
@@ -73,17 +74,20 @@ std::ostream& operator<<(std::ostream& os, const Position& pos);
 inline Color Position::get_side_to_move() const{
     return sideToMove;
 }
+inline int Position::get_ply() const{
+    return ply;
+}
 inline int Position::get_castling_right() const{
-    return history[historySize-1].castlingRight;
+    return historyPly[ply-1].castlingRight;
 }
 inline Square120 Position::get_enpassant_square() const{
-    return history[historySize-1].enpassantSquare;
+    return historyPly[ply-1].enpassantSquare;
 }
 inline unsigned short Position::get_fifty_moves_counter() const{
-    return history[historySize-1].fiftyMovesCounter;
+    return historyPly[ply-1].fiftyMovesCounter;
 }
 inline unsigned short Position::get_moves_counter() const{
-    return history[historySize-1].movesCounter;
+    return historyPly[ply-1].movesCounter;
 }
 inline PieceType Position::get_mailbox_pieceType(Color color, Square120 square) const{
     return mailbox[color][square];
@@ -98,7 +102,7 @@ inline Evaluate::Score Position::get_material_score(Color color) const{
     return materialScore[color];
 }
 inline Key Position::get_key() const{
-    return history[historySize-1].positionKey;
+    return historyPly[ply-1].positionKey;
 }
 
 
