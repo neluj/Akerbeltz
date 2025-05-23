@@ -34,7 +34,7 @@ enum SpecialMove: int{
     PROMOTION_QUEEN     = QUEEN     << 2
 };
 
-constexpr MoveScore MVVLVASCORE = 100;
+constexpr MoveScore MVVLVASCORE = 900;
 
 const MoveScore MVVLVAScores[PIECETYPE_SIZE][PIECETYPE_SIZE] = {
     {0,  0,  0,  0,  0,  0, 0},
@@ -86,6 +86,10 @@ inline Piece captured_piece(Move move){
 
 inline MoveScore move_score(Move move){
     return move >> 23;
+}
+
+inline Move set_score(Move move, MoveScore moveScore){
+    return move | (moveScore << 23);
 }
 
 inline std::string algebraic_move(Move move) {

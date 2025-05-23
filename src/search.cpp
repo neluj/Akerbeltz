@@ -15,6 +15,12 @@ using namespace Evaluate;
 static NodesSize leafCounter;
 PVTable::PVLine pvLine;
 
+//Killer heuristic
+constexpr std::size_t MAX_KILLERMOVES = 2;
+constexpr MoveScore KILLERMOVE_SOCORE_0 = 850;
+constexpr MoveScore KILLERMOVE_SOCORE_1 = 800;
+Move killerMoves[MAX_KILLERMOVES][MAX_DEPTH];
+
 void perft(Position &position, DepthSize depth);
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth);
@@ -93,6 +99,15 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     MoveGen::MoveList moveList;
     MoveGen::generate_all_moves(position, moveList);
 
+    //Set move scores
+    for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
+        if(moveList.moves[mIndx] == killerMoves[0][position.get_ply()]){
+            moveList.moves[mIndx] = set_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
+        }else if(moveList.moves[mIndx] == killerMoves[1][position.get_ply()]){
+            moveList.moves[mIndx] = set_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
+        }
+    }
+
     Score score = -CHECKMATE_SCORE;
     Score oldAlpha = alpha;
     Move bestMove = 0;
@@ -123,6 +138,11 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
                 }
 
                 searchInfo.FirstHit++;
+                int ply = position.get_ply();
+                if(captured_piece(move) == NO_PIECE && move != killerMoves[0][ply]){
+                    killerMoves[1][ply] = killerMoves [0][ply];
+                    killerMoves[0][ply] = move;
+                }
 
                 return beta;
             }
@@ -204,6 +224,12 @@ void clean_search_info(SearchInfo &searchInfo){
     searchInfo.nodes = 0;
     searchInfo.FirstHit = 0;
     searchInfo.FirstHitFirst = 0;
+    
+    for(std::size_t i = 0; i < MAX_KILLERMOVES; ++i){
+        for(std::size_t x = 0; x < MAX_DEPTH; ++x){
+            killerMoves[i][x] = 0;
+        }
+    }
 }
 
 void check_time(SearchInfo &searchInfo){
