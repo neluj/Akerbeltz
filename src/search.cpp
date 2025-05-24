@@ -92,8 +92,8 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     ++searchInfo.nodes;
 
-    if(position.is_repetition() || position.get_fifty_moves_counter() >= 100){
-        return 0;
+    if(((position.is_repetition() || position.get_fifty_moves_counter() >= 100) && position.get_ply())){
+        return DRAW_SOCORE;
     }
 
     MoveGen::MoveList moveList;
@@ -127,7 +127,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         position.undo_move();
 
         if(searchInfo.timeOver){
-            return 0;
+            return DRAW_SOCORE;
         }
         
         if(score>alpha){
