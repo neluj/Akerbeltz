@@ -21,6 +21,9 @@ constexpr MoveScore KILLERMOVE_SOCORE_0 = 850;
 constexpr MoveScore KILLERMOVE_SOCORE_1 = 800;
 Move killerMoves[MAX_KILLERMOVES][MAX_DEPTH];
 
+//History Heuristic
+MoveScore searchHistory[SQUARE_SIZE_120][SQUARE_SIZE_120];
+
 void perft(Position &position, DepthSize depth);
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth);
@@ -105,6 +108,8 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
             moveList.moves[mIndx] = set_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
         }else if(moveList.moves[mIndx] == killerMoves[1][position.get_ply()]){
             moveList.moves[mIndx] = set_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
+        }else{
+            moveList.moves[mIndx] = set_score(moveList.moves[mIndx], searchHistory[move_from(moveList.moves[mIndx])][move_to(moveList.moves[mIndx])]);
         }
     }
 
@@ -148,6 +153,10 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
             }
             alpha = score;
             bestMove = move;
+
+            if(captured_piece(bestMove) == NO_PIECE){
+                searchHistory[move_from(bestMove)][move_to(bestMove)] += depth;
+            }
         }
     }
 
@@ -228,6 +237,11 @@ void clean_search_info(SearchInfo &searchInfo){
     for(std::size_t i = 0; i < MAX_KILLERMOVES; ++i){
         for(std::size_t x = 0; x < MAX_DEPTH; ++x){
             killerMoves[i][x] = 0;
+        }
+    }
+    for(std::size_t i = 0; i < SQUARE_SIZE_120; ++i){
+        for(std::size_t x = 0; x < SQUARE_SIZE_120; ++x){
+            searchHistory[i][x] = 0;
         }
     }
 }
