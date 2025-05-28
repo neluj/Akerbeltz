@@ -24,6 +24,9 @@ Move killerMoves[MAX_KILLERMOVES][MAX_DEPTH];
 //History Heuristic
 MoveScore searchHistory[SQUARE_SIZE_120][SQUARE_SIZE_120];
 
+//PV Move Ordering
+constexpr MoveScore PV_SCORE = 1000;
+
 void perft(Position &position, DepthSize depth);
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth);
@@ -102,9 +105,13 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     MoveGen::MoveList moveList;
     MoveGen::generate_all_moves(position, moveList);
 
+    Move pvMove = PVTable::prove_move(position);
+
     //Set move scores
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
-        if(moveList.moves[mIndx] == killerMoves[0][position.get_ply()]){
+        if(moveList.moves[mIndx] == pvMove){
+            moveList.moves[mIndx] = set_score(moveList.moves[mIndx], PV_SCORE);
+        }else if(moveList.moves[mIndx] == killerMoves[0][position.get_ply()]){
             moveList.moves[mIndx] = set_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
         }else if(moveList.moves[mIndx] == killerMoves[1][position.get_ply()]){
             moveList.moves[mIndx] = set_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
