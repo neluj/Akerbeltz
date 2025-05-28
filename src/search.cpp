@@ -203,6 +203,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     score = -CHECKMATE_SCORE;
     Score oldAlpha = alpha;
     Move bestMove = 0;
+    int legal = 0;
 
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
 
@@ -211,6 +212,8 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         if(!position.do_move(move)){
             continue;
         }
+
+        ++legal;
 
         score = -quiescence_search(position, searchInfo, -beta, -alpha);
         position.undo_move();
@@ -221,6 +224,12 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         
         if(score>alpha){
             if(score>=beta){
+
+                if(legal == 1){
+                    searchInfo.FirstHitFirst++;
+                }
+                searchInfo.FirstHit++;
+                
                 return beta;
             }
             alpha = score;
