@@ -102,6 +102,12 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         return DRAW_SOCORE;
     }
 
+    bool isCheck = position.square_is_attacked(position.get_piece_list(make_piece(position.get_side_to_move(), KING))[0]);
+
+    if(isCheck){
+        depth++;
+    }
+
     MoveGen::MoveList moveList;
     MoveGen::generate_all_moves(position, moveList);
 
@@ -229,7 +235,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
                     searchInfo.FirstHitFirst++;
                 }
                 searchInfo.FirstHit++;
-                
+
                 return beta;
             }
             alpha = score;
