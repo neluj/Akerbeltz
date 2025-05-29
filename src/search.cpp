@@ -129,7 +129,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     Score score = -CHECKMATE_SCORE;
     Score oldAlpha = alpha;
     Move bestMove = 0;
-    int legal = 0;
+    int legalMoves = 0;
 
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
 
@@ -139,7 +139,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
             continue;
         }
 
-        ++legal;
+        ++legalMoves;
         
         score = -alpha_beta(position, searchInfo, -beta, -alpha, depth - 1);
         position.undo_move();
@@ -151,7 +151,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         if(score>alpha){
             if(score>=beta){
 
-                if(legal == 1){
+                if(legalMoves == 1){
                     searchInfo.FirstHitFirst++;
                 }
 
@@ -171,6 +171,13 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
                 searchHistory[move_from(bestMove)][move_to(bestMove)] += depth;
             }
         }
+    }
+
+    if(legalMoves == 0){
+        if(isCheck)
+            return -CHECKMATE_SCORE + position.get_ply();
+        else
+            return DRAW_SOCORE;
     }
 
     if(alpha != oldAlpha){
@@ -209,7 +216,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     score = -CHECKMATE_SCORE;
     Score oldAlpha = alpha;
     Move bestMove = 0;
-    int legal = 0;
+    int legalMoves = 0;
 
     for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
 
@@ -219,7 +226,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
             continue;
         }
 
-        ++legal;
+        ++legalMoves;
 
         score = -quiescence_search(position, searchInfo, -beta, -alpha);
         position.undo_move();
@@ -231,7 +238,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         if(score>alpha){
             if(score>=beta){
 
-                if(legal == 1){
+                if(legalMoves == 1){
                     searchInfo.FirstHitFirst++;
                 }
                 searchInfo.FirstHit++;
