@@ -1,8 +1,8 @@
 add_library(src
-position.cpp
-movegen.cpp
-search.cpp
+#position.cpp
+#movegen.cpp
+#search.cpp
 evaluate.cpp
-uci.cpp
-pvtable.cpp
+#uci.cpp
+#pvtable.cpp
 )
