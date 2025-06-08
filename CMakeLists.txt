@@ -7,12 +7,12 @@ project(Xake)
 
 enable_testing()
 
-add_subdirectory(src)
+#add_subdirectory(src)
 add_subdirectory(test)
 
 add_executable(${PROJECT_NAME} 
 main.cpp)
 
-target_link_libraries( ${PROJECT_NAME} PUBLIC src)
+#target_link_libraries( ${PROJECT_NAME} PUBLIC src)
 
-target_include_directories(src PUBLIC src)
+#target_include_directories(src PUBLIC src)
