@@ -25,22 +25,22 @@ class EvaluateTest : public ::testing::Test
 
 TEST_F(EvaluateTest, MaterialTable){
 
-    EXPECT_EQ(Evaluate::calc_material_table(WHITE, PieceType::NO_PIECE_TYPE, SQ120_A1), 0);
-    EXPECT_EQ(Evaluate::calc_material_table(BLACK, PieceType::NO_PIECE_TYPE, SQ120_A1), 0);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::NO_PIECE, SQ64_A1), 0);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::NO_PIECE, SQ64_A1), 0);
 
 
-    EXPECT_EQ(Evaluate::calc_material_table(WHITE, PieceType::PAWN, SQ120_A1), 82);
-    EXPECT_EQ(Evaluate::calc_material_table(WHITE, PieceType::PAWN, SQ120_B1), 82);
-    EXPECT_EQ(Evaluate::calc_material_table(WHITE, PieceType::PAWN, SQ120_A2), 47);
-    EXPECT_EQ(Evaluate::calc_material_table(WHITE, PieceType::PAWN, SQ120_B7), 216);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::W_PAWN, SQ64_A1), 82);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::W_PAWN, SQ64_B1), 82);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::W_PAWN, SQ64_A2), 47);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::W_PAWN, SQ64_B7), 216);
 
-    EXPECT_EQ(Evaluate::calc_material_table(BLACK, PieceType::PAWN, SQ120_A8), 82);
-    EXPECT_EQ(Evaluate::calc_material_table(BLACK, PieceType::PAWN, SQ120_B8), 82);
-    EXPECT_EQ(Evaluate::calc_material_table(BLACK, PieceType::PAWN, SQ120_A7), 47);
-    EXPECT_EQ(Evaluate::calc_material_table(BLACK, PieceType::PAWN, SQ120_B2), 216);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::B_PAWN, SQ64_A8), 82);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::B_PAWN, SQ64_B8), 82);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::B_PAWN, SQ64_A7), 47);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::B_PAWN, SQ64_B2), 216);
 
-    EXPECT_EQ(Evaluate::calc_material_table(WHITE, PieceType::KING, SQ120_D5), 19973);
-    EXPECT_EQ(Evaluate::calc_material_table(BLACK, PieceType::KING, SQ120_D4), 19973);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::W_KING, SQ64_D5), 19973);
+    EXPECT_EQ(Evaluate::calc_material_table(Piece::B_KING, SQ64_D4), 19973);
 
 }
 
@@ -50,11 +50,10 @@ TEST_F(EvaluateTest, Score){
 
     EXPECT_EQ(0, Evaluate::calc_score(pos));
 
-    pos.do_move(make_quiet_move(SQ120_D2, SQ120_D4, SpecialMove::NO_SPECIAL));
+    pos.do_move(make_quiet_move(SQ64_D2, SQ64_D4, SpecialMove::NO_SPECIAL));
 
     //Value is negative because side to move has move to black
     EXPECT_EQ(-35, Evaluate::calc_score(pos));
-
 
 }
 

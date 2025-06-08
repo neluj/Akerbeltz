@@ -112,16 +112,13 @@ int* piecesTypes_tables[PIECETYPE_SIZE] = {
 
 Score material_table[PIECE_SIZE][SQUARE_SIZE_64];
 
-Score calc_material_table(Color color, PieceType pieceType, Square120 sq){
-    Piece p = make_piece(color, pieceType);
-    Square64 sq64 = square120_to_square64(sq);
-    return material_table[p][sq64];
+Score calc_material_table(Piece piece, Square64 square){
+    return material_table[piece][square];
 }
 
 Score calc_score(const Position &position){
 
     Score score = position.get_material_score(WHITE) - position.get_material_score(BLACK);
-
     return score * (~position.get_side_to_move() - position.get_side_to_move());
 
 }

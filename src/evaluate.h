@@ -15,7 +15,7 @@ namespace Evaluate{
 
     void init();
     
-    Score calc_material_table(Color color, PieceType pieceType, Square120 sq);
+    Score calc_material_table(Piece piece, Square64 square);
 
     Score calc_score(const Position &position);
 }
