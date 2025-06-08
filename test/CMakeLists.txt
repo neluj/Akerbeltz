@@ -9,7 +9,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME}-test 
 #positionTest.cpp
-#moveTest.cpp
+moveTest.cpp
 #movegenTest.cpp
 typesTest.cpp
 #perftTest.cpp
