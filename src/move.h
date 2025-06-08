@@ -4,14 +4,14 @@
 #include "types.h"
 
 namespace Xake{
-
+// VIDEO
 /*Move:
-0000 0000 0000 0000 0000 0000 0000 0111 1111 -> From 0x7F
-0000 0000 0000 0000 0000 0111 1111 1000 0000 -> To 0x7F
-0000 0000 0000 0000 0000 1000 0000 0000 0000 -> Special move flag
-0000 0000 0000 0000 0111 0000 0000 0000 0000 -> Promotion Piece
-0000 0000 0000 0111 1000 0000 0000 0000 0000 -> Captured piece
-1111 1111 1111 1000 0000 0000 0000 0000 0000 -> Score
+0000 0000 0000 0000 0000 0000 0000 0011 1111 -> From 0x7F
+0000 0000 0000 0000 0000 0000 1111 1100 0000 -> To 0x7F
+0000 0000 0000 0000 0000 0011 0000 0000 0000 -> Special move flag
+0000 0000 0000 0000 0001 1100 0000 0000 0000 -> Promotion Piece
+0000 0000 0000 0001 1110 0000 0000 0000 0000 -> Captured piece
+1111 1111 1111 1110 0000 0000 0000 0000 0000 -> Score
 */
 
 using Move = unsigned long int;
@@ -46,56 +46,56 @@ const MoveScore MVVLVAScores[PIECETYPE_SIZE][PIECETYPE_SIZE] = {
     {0, 10, 20, 30, 40, 50, 0} 
 };
 
-inline Move make_quiet_move(Square120 from, Square120 to, SpecialMove SpecialMove) {
-    return Move((SpecialMove << 14) | (to << 7) | from);
+inline Move make_quiet_move(Square64 from, Square64 to, SpecialMove SpecialMove) {
+    return Move((SpecialMove << 12) | (to << 6) | from);
 }
 
-inline Move make_capture_move(Square120 from, Square120 to, SpecialMove SpecialMove, Piece attackerPiece , Piece capturedPiece) {
+inline Move make_capture_move(Square64 from, Square64 to, SpecialMove SpecialMove, Piece attackerPiece , Piece capturedPiece) {
 
     PieceType attackerType = piece_type(attackerPiece);
     PieceType capturedType = piece_type(capturedPiece);
-
+    //TODO group with other move ordering and remove attackerpiece from paramters if not necessary
     MoveScore mScore = MVVLVASCORE + MVVLVAScores[attackerType][capturedType];
 
-    return Move((mScore << 23) | (capturedPiece << 19) | (SpecialMove << 14) | (to << 7) | from);
+    return Move((mScore << 21) | (capturedPiece << 17) | (SpecialMove << 12) | (to << 6) | from);
 }
 
-inline Move make_enpassant_move(Square120 from, Square120 to) {
-    return Move((ENPASSANT << 14) | (to << 7) | from);
+inline Move make_enpassant_move(Square64 from, Square64 to) {
+    return Move((ENPASSANT << 12) | (to << 6) | from);
 }
 
-inline Square120 move_from(Move move) {
-	return Square120(move & 0x7f);
+inline Square64 move_from(Move move) {
+	return Square64(move & 0x3f);
 }
 
-inline Square120 move_to(Move move) {
-	return Square120((move >> 7) & 0x7f);
+inline Square64 move_to(Move move) {
+	return Square64((move >> 6) & 0x3f);
 }
 
 inline SpecialMove move_special(Move move) {
-    return SpecialMove((move >> 14) & 0x1F);
+    return SpecialMove((move >> 12) & 0x1F);
 }
 
 inline PieceType promoted_piece(Move move){
-    return PieceType((move >> 16) & 0x07);
+    return PieceType((move >> 14) & 0x07);
 } 
 
 inline Piece captured_piece(Move move){
-    return Piece((move >> 19) & 0x0f);
+    return Piece((move >> 17) & 0x0f);
 } 
 
 inline MoveScore move_score(Move move){
-    return move >> 23;
+    return move >> 21;
 }
 
 inline Move set_score(Move move, MoveScore moveScore){
-    return move | (moveScore << 23);
+    return move | (moveScore << 21);
 }
 
 inline std::string algebraic_move(Move move) {
     std::string algebraic_move;
-    Square120 from   = move_from(move);
-    Square120 to     = move_to(move);
+    Square64 from   = move_from(move);
+    Square64 to     = move_to(move);
     algebraic_move = SQUARE_NAMES[from] + SQUARE_NAMES[to];
 
     PieceType promoted = promoted_piece(move);
