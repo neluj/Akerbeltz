@@ -8,7 +8,7 @@ FetchContent_MakeAvailable(googletest)
 ###############
 
 add_executable(${PROJECT_NAME}-test 
-#positionTest.cpp
+positionTest.cpp
 moveTest.cpp
 #movegenTest.cpp
 typesTest.cpp
@@ -18,7 +18,7 @@ evaluateTest.cpp
 #pvtableTest.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}-test  gtest_main)
+target_link_libraries(${PROJECT_NAME}-test  gtest_main src)
 
 file(COPY
 perftsuite.epd

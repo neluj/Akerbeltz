@@ -13,7 +13,7 @@ namespace Xake{
         CastlingRight castlingRight;
         unsigned short int fiftyMovesCounter;
         unsigned short int movesCounter;
-        Square120 enpassantSquare;
+        Square64 enpassantSquare;
         Key positionKey;
     };
 
@@ -27,23 +27,24 @@ public:
     Color get_side_to_move() const;
     int get_ply() const;
     int get_castling_right() const;
-    Square120 get_enpassant_square() const;
+    Square64 get_enpassant_square() const;
     unsigned short get_fifty_moves_counter() const;
     unsigned short get_moves_counter() const;
-    PieceType get_mailbox_pieceType(Color color, Square120 square) const;
+    PieceType get_mailbox_pieceType(Color color, Square64 square) const;
+    //DELETEME
     std::size_t get_piece_size(Piece piece) const;
-    const Square120* get_piece_list(Piece piece) const;
+    const Square64* get_piece_list(Piece piece) const;
     Key get_key() const;
-    bool square_is_attacked(Square120 square) const; 
+    //bool square_is_attacked(Square64 square) const; 
     Evaluate::Score get_material_score(Color color) const;
     bool is_repetition() const;
 
     //Move related functions
-    bool do_move(Move move);
+    //bool do_move(Move move);
     void undo_move();
-    void move_piece(Square120 from, Square120 to);
-    void remove_piece(Square120 square);
-    void add_piece(Square120 square, Piece piece);    
+    void move_piece(Square64 from, Square64 to);
+    void remove_piece(Square64 square);
+    void add_piece(Square64 square, Piece piece);    
 
 private:
 
@@ -58,9 +59,10 @@ private:
     void calc_key();
     
     // NOTE revisar si merece así o guardando piezas directamente?
-    PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_120];
+    PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_64];
+    //DELETEME
     std::size_t pieceCounter[PIECE_SIZE];
-    Square120 pieceList[PIECE_SIZE][MAX_SAME_PIECE];
+    Square64 pieceList[PIECE_SIZE][MAX_SAME_PIECE];
     Color sideToMove{COLOR_NC};
     //TODO esto meterlo en HistoryInfo?
     int ply;
@@ -80,7 +82,7 @@ inline int Position::get_ply() const{
 inline int Position::get_castling_right() const{
     return historyPly[ply-1].castlingRight;
 }
-inline Square120 Position::get_enpassant_square() const{
+inline Square64 Position::get_enpassant_square() const{
     return historyPly[ply-1].enpassantSquare;
 }
 inline unsigned short Position::get_fifty_moves_counter() const{
@@ -89,13 +91,13 @@ inline unsigned short Position::get_fifty_moves_counter() const{
 inline unsigned short Position::get_moves_counter() const{
     return historyPly[ply-1].movesCounter;
 }
-inline PieceType Position::get_mailbox_pieceType(Color color, Square120 square) const{
+inline PieceType Position::get_mailbox_pieceType(Color color, Square64 square) const{
     return mailbox[color][square];
 }
 inline std::size_t Position::get_piece_size(Piece piece) const{
     return pieceCounter[piece];
 }
-inline const Square120* Position::get_piece_list(Piece piece) const{
+inline const Square64* Position::get_piece_list(Piece piece) const{
     return pieceList[piece];
 }
 inline Evaluate::Score Position::get_material_score(Color color) const{

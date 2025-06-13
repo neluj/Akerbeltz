@@ -1,5 +1,5 @@
 add_library(src
-#position.cpp
+position.cpp
 #movegen.cpp
 #search.cpp
 evaluate.cpp

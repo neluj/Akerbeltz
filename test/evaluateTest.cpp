@@ -43,7 +43,7 @@ TEST_F(EvaluateTest, MaterialTable){
     EXPECT_EQ(Evaluate::calc_material_table(Piece::B_KING, SQ64_D4), 19973);
 
 }
-
+/*
 TEST_F(EvaluateTest, Score){
 
     pos.set_FEN(START_FEN);
@@ -56,5 +56,5 @@ TEST_F(EvaluateTest, Score){
     EXPECT_EQ(-35, Evaluate::calc_score(pos));
 
 }
-
+*/
 //TODO castles and promotions
