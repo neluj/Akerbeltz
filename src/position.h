@@ -31,9 +31,6 @@ public:
     unsigned short get_fifty_moves_counter() const;
     unsigned short get_moves_counter() const;
     PieceType get_mailbox_pieceType(Color color, Square64 square) const;
-    //DELETEME
-    std::size_t get_piece_size(Piece piece) const;
-    const Square64* get_piece_list(Piece piece) const;
     Key get_key() const;
     //bool square_is_attacked(Square64 square) const; 
     Evaluate::Score get_material_score(Color color) const;
@@ -52,7 +49,6 @@ private:
     static void zobris_prng();
 
     void clean_mailbox();
-    void clean_piece_list();
     void clear_position_info();
 
     void calc_material_score();
@@ -60,9 +56,6 @@ private:
     
     // NOTE revisar si merece así o guardando piezas directamente?
     PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_64];
-    //DELETEME
-    std::size_t pieceCounter[PIECE_SIZE];
-    Square64 pieceList[PIECE_SIZE][MAX_SAME_PIECE];
     Color sideToMove{COLOR_NC};
     //TODO esto meterlo en HistoryInfo?
     int ply;
@@ -93,12 +86,6 @@ inline unsigned short Position::get_moves_counter() const{
 }
 inline PieceType Position::get_mailbox_pieceType(Color color, Square64 square) const{
     return mailbox[color][square];
-}
-inline std::size_t Position::get_piece_size(Piece piece) const{
-    return pieceCounter[piece];
-}
-inline const Square64* Position::get_piece_list(Piece piece) const{
-    return pieceList[piece];
 }
 inline Evaluate::Score Position::get_material_score(Color color) const{
     return materialScore[color];

@@ -69,7 +69,6 @@ void Position::init(){
 void Position::clean_position(){
 
     clean_mailbox();
-    clean_piece_list();
     clear_position_info();
 
 }
@@ -83,17 +82,6 @@ void Position::clean_mailbox(){
     }
 }
 
-void Position::clean_piece_list(){
-    //clean piece list
-    for(std::size_t i = 0; i < PIECE_SIZE; ++i){
-        pieceCounter[i] = 0;
-    }
-    for(std::size_t pt = 0; pt < PIECE_SIZE; ++pt){
-        for(std::size_t pn = 0; pn < MAX_SAME_PIECE; ++pn){
-            pieceList[pt][pn] = SQ64_NO_SQUARE;
-        }    
-    }
-}
 
 void Position::clear_position_info(){
 
@@ -577,14 +565,6 @@ void Position::move_piece(Square64 from, Square64 to){
 
     Piece piece = make_piece(pieceColor, pieceType);
 
-    for(std::size_t i = 0; i < pieceCounter[piece]; ++i){
-        
-        if(pieceList[piece][i] == from){
-            pieceList[piece][i] = to;
-            break;
-        }
-    }
-
     //Update piece value from material
     materialScore[pieceColor] -= Evaluate::calc_material_table(piece, from);
     materialScore[pieceColor] += Evaluate::calc_material_table(piece, to);
@@ -623,16 +603,6 @@ void Position::remove_piece(Square64 square){
     //Knowing the piece color and piece type, make piece
     Piece piece = make_piece(pieceColor, pieceType);
 
-    //Find on concret piece list until find the piece that contains the square, for remove it 
-    for(std::size_t i = 0; i < pieceCounter[piece]; ++i){
-        if(pieceList[piece][i] == square){
-            pieceList[piece][i] = pieceList[piece][pieceCounter[piece]-1];
-            pieceList[piece][pieceCounter[piece]-1] = Square64::SQ64_NO_SQUARE;
-            --pieceCounter[piece];
-            break;
-        }
-    }
-
     //Remove piece value from material 
     materialScore[pieceColor] -= Evaluate::calc_material_table(piece, square);
 
@@ -646,9 +616,6 @@ void Position::add_piece(Square64 square, Piece piece){
     PieceType pieceType = piece_type(piece);
     mailbox[pieceColor][square] = pieceType;
     mailbox[Color::COLOR_NC][square] = pieceType;
-
-    pieceList[piece][pieceCounter[piece]] = square;
-    ++pieceCounter[piece];
 
     //Add piece value from material 
     materialScore[pieceColor] += Evaluate::calc_material_table(piece, square);

@@ -27,163 +27,6 @@ TEST_F(PositionTest, RandomSetPosition){
 
     position.set_FEN(RANDOM_FEN_POSITION);
 
-    //White pawns
-    ASSERT_EQ(position.get_piece_size(W_PAWN), 3);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[0], SQ64_A7);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[1], SQ64_B7);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[2], SQ64_H7);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_PAWN)[9], SQ64_NO_SQUARE);
-
-    //White knights
-    ASSERT_EQ(position.get_piece_size(W_KNIGHT), 1);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[0], SQ64_E5);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KNIGHT)[9], SQ64_NO_SQUARE);
-
-    //White bishops
-    ASSERT_EQ(position.get_piece_size(W_BISHOP), 1);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[0], SQ64_D7);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_BISHOP)[9], SQ64_NO_SQUARE);
-
-    //White rooks
-    ASSERT_EQ(position.get_piece_size(W_ROOK), 1);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[0], SQ64_A2);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_ROOK)[9], SQ64_NO_SQUARE);
-
-    ////White queen
-    ASSERT_EQ(position.get_piece_size(W_QUEEN), 1);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[0], SQ64_B5);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_QUEEN)[9], SQ64_NO_SQUARE);
-
-    ////White king
-    ASSERT_EQ(position.get_piece_size(W_KING), 1);
-    EXPECT_EQ(position.get_piece_list(W_KING)[0], SQ64_H3);
-    EXPECT_EQ(position.get_piece_list(W_KING)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KING)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KING)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KING)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KING)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KING)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KING)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KING)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(W_KING)[9], SQ64_NO_SQUARE);
-
-    //Black pawns
-    ASSERT_EQ(position.get_piece_size(B_PAWN), 5);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[0], SQ64_C7);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[1], SQ64_E7);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[2], SQ64_F7);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[3], SQ64_G7);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[4], SQ64_H2);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_PAWN)[9], SQ64_NO_SQUARE);
-
-    //Black knights
-    ASSERT_EQ(position.get_piece_size(B_KNIGHT), 1);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[0], SQ64_B8);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KNIGHT)[9], SQ64_NO_SQUARE);
-
-
-    //Black bishops
-    ASSERT_EQ(position.get_piece_size(B_BISHOP), 1);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[0], SQ64_C8);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_BISHOP)[9], SQ64_NO_SQUARE);
-
-    //Black rooks
-    ASSERT_EQ(position.get_piece_size(B_ROOK), 1);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[0], SQ64_A8);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_ROOK)[9], SQ64_NO_SQUARE);
-
-    ////Black queen
-    ASSERT_EQ(position.get_piece_size(B_QUEEN), 1);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[0], SQ64_D8);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_QUEEN)[9], SQ64_NO_SQUARE);
-
-    //Black king
-    ASSERT_EQ(position.get_piece_size(B_KING), 1);
-    EXPECT_EQ(position.get_piece_list(B_KING)[0], SQ64_E8);
-    EXPECT_EQ(position.get_piece_list(B_KING)[1], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KING)[2], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KING)[3], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KING)[4], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KING)[5], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KING)[6], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KING)[7], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KING)[8], SQ64_NO_SQUARE);
-    EXPECT_EQ(position.get_piece_list(B_KING)[9], SQ64_NO_SQUARE);
-
     //TODO UT for mailbox
     EXPECT_EQ(position.get_mailbox_pieceType(WHITE, SQ64_A7), PAWN);
     EXPECT_EQ(position.get_mailbox_pieceType(COLOR_NC, SQ64_A7), PAWN);
@@ -274,26 +117,6 @@ TEST_F(PositionTest, MovePiece){
     ASSERT_EQ(pieceTypewpbd4, PieceType::NO_PIECE_TYPE);
     ASSERT_EQ(pieceTypencbd4, PieceType::NO_PIECE_TYPE);
 
-    //Check piece list size
-    std::size_t sizewp = position.get_piece_size(Piece::W_PAWN);
-    ASSERT_EQ(sizewp, 8);
-
-    //piece list
-    bool findD2Before{false};
-    bool findD4Before{false};
-
-    const Square64* piecewp = position.get_piece_list(Piece::W_PAWN);
-
-    for(std::size_t i = 0; i < position.get_piece_size(Piece::W_PAWN); ++i){
-        if(piecewp[i] == Square64::SQ64_D2)
-            findD2Before = true;
-        if(piecewp[i] == Square64::SQ64_D4)
-            findD4Before = true;
-    }
-
-    ASSERT_EQ(findD2Before, true);
-    ASSERT_EQ(findD4Before, false);
-
     //2 move piece from D2 to D4
     position.move_piece(Square64::SQ64_D2, Square64::SQ64_D4);
 
@@ -312,25 +135,6 @@ TEST_F(PositionTest, MovePiece){
     ASSERT_EQ(pieceTypewpad4, PieceType::PAWN);
     ASSERT_EQ(pieceTypencad4, PieceType::PAWN);  
 
-    //Check piece list size
-    std::size_t sizewpr = position.get_piece_size(Piece::W_PAWN);
-    ASSERT_EQ(sizewpr, 8); 
-
-    //piece list
-    bool findD2After{false};
-    bool findD4After{false};
-    const Square64* piecenp = position.get_piece_list(Piece::W_PAWN);
-
-    for(std::size_t i = 0; i < position.get_piece_size(Piece::W_PAWN); ++i){
-        if(piecewp[i] == Square64::SQ64_D2)
-            findD2After = true;
-        if(piecewp[i] == Square64::SQ64_D4)
-            findD4After = true;
-    }
-
-    ASSERT_EQ(findD2After, false);
-    ASSERT_EQ(findD4After, true);
-
 }
 
 TEST_F(PositionTest, RemovePiece){
@@ -346,20 +150,6 @@ TEST_F(PositionTest, RemovePiece){
     ASSERT_EQ(pieceTypewp, PieceType::PAWN);
     ASSERT_EQ(pieceTypep, PieceType::PAWN);
 
-    //Check piece list size
-    std::size_t sizewp = position.get_piece_size(Piece::W_PAWN);
-    ASSERT_EQ(sizewp, 8);
-
-    //piece list
-    bool findwp{false};
-    const Square64* piecewp = position.get_piece_list(Piece::W_PAWN);
-
-    for(std::size_t i = 0; i < position.get_piece_size(Piece::W_PAWN); ++i){
-        if(piecewp[i] == Square64::SQ64_D2)
-            findwp = true;
-    }
-
-    ASSERT_EQ(findwp, true);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     //2 Remove piece located on D2
@@ -374,20 +164,6 @@ TEST_F(PositionTest, RemovePiece){
     ASSERT_EQ(pieceTypenptw, PieceType::NO_PIECE_TYPE);   
     ASSERT_EQ(pieceTypenptn, PieceType::NO_PIECE_TYPE);
 
-    //Check piece list size
-    std::size_t sizewpr = position.get_piece_size(Piece::W_PAWN);
-    ASSERT_EQ(sizewpr, 7); 
-
-    //piece list
-    bool findnp{false};
-    const Square64* piecenp = position.get_piece_list(Piece::W_PAWN);
-
-    for(std::size_t i = 0; i < position.get_piece_size(Piece::W_PAWN); ++i){
-        if(piecewp[i] == Square64::SQ64_D2)
-            findnp = true;
-    }
-
-    ASSERT_EQ(findnp, false);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23833);
 
 }
@@ -409,20 +185,6 @@ TEST_F(PositionTest, AddPiece){
     ASSERT_EQ(pieceTypewp, PieceType::NO_PIECE_TYPE);
     ASSERT_EQ(pieceTypep, PieceType::NO_PIECE_TYPE);
 
-    //Check piece list size
-    std::size_t sizewp = position.get_piece_size(Piece::W_PAWN);
-    ASSERT_EQ(sizewp, 7);
-
-    //piece list
-    bool findwp{false};
-    const Square64* piecewp = position.get_piece_list(Piece::W_PAWN);
-
-    for(std::size_t i = 0; i < position.get_piece_size(Piece::W_PAWN); ++i){
-        if(piecewp[i] == Square64::SQ64_D2)
-            findwp = true;
-    }
-
-    ASSERT_EQ(findwp, false);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23833);
 
     //2 Add piece on D2
@@ -437,20 +199,6 @@ TEST_F(PositionTest, AddPiece){
     ASSERT_EQ(pieceTypenptw, PieceType::PAWN);   
     ASSERT_EQ(pieceTypenptn, PieceType::PAWN);
 
-    //Check piece list size
-    std::size_t sizewpr = position.get_piece_size(Piece::W_PAWN);
-    ASSERT_EQ(sizewpr, 8); 
-
-    //piece list
-    bool findnp{false};
-    const Square64* piecenp = position.get_piece_list(Piece::W_PAWN);
-
-    for(std::size_t i = 0; i < position.get_piece_size(Piece::W_PAWN); ++i){
-        if(piecewp[i] == Square64::SQ64_D2)
-            findnp = true;
-    }
-
-    ASSERT_EQ(findnp, true);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
 }
