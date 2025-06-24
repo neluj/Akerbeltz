@@ -27,6 +27,103 @@ TEST_F(PositionTest, RandomSetPosition){
 
     position.set_FEN(RANDOM_FEN_POSITION);
 
+    //Piece Types Bitboard
+
+    //White Pawns
+    Bitboard whitePawns = position.get_pieceTypes_bitboard(WHITE, PAWN);
+    Bitboard expectedWhitePawns = (ONE << SQ64_A7) | (ONE << SQ64_B7) | (ONE << SQ64_H7);
+
+    EXPECT_EQ(whitePawns, expectedWhitePawns);
+    
+    //White Knights
+    Bitboard whiteKnights = position.get_pieceTypes_bitboard(WHITE, KNIGHT);
+    Bitboard expectedWhiteKnights = (ONE << SQ64_E5);
+
+    EXPECT_EQ(whiteKnights, expectedWhiteKnights);
+
+    //White Bishops
+    Bitboard whiteBishops = position.get_pieceTypes_bitboard(WHITE, BISHOP);
+    Bitboard expectedWhiteBishops = (ONE << SQ64_D7);
+
+    EXPECT_EQ(whiteBishops, expectedWhiteBishops);
+
+    //White Rooks
+    Bitboard whiteRooks = position.get_pieceTypes_bitboard(WHITE, ROOK);
+    Bitboard expectedWhiteRooks = (ONE << SQ64_A2);
+
+    EXPECT_EQ(whiteRooks, expectedWhiteRooks);
+
+    //White Queens
+    Bitboard whiteQueens = position.get_pieceTypes_bitboard(WHITE, QUEEN);
+    Bitboard expectedWhiteQueens = (ONE << SQ64_B5);
+
+    EXPECT_EQ(whiteQueens, expectedWhiteQueens);
+
+    //White Kings
+    Bitboard whiteKings = position.get_pieceTypes_bitboard(WHITE, KING);
+    Bitboard expectedWhiteKings = (ONE << SQ64_H3);
+
+    EXPECT_EQ(whiteKings, expectedWhiteKings);
+
+    //Black Pawns
+    Bitboard blackPawns = position.get_pieceTypes_bitboard(BLACK, PAWN);
+    Bitboard expectedBlackPawns = (ONE << SQ64_C7) | (ONE << SQ64_E7) | (ONE << SQ64_F7) | (ONE << SQ64_G7) | (ONE << SQ64_H2);
+
+    EXPECT_EQ(blackPawns, expectedBlackPawns);
+
+    //Black Knights
+    Bitboard blackKnights = position.get_pieceTypes_bitboard(BLACK, KNIGHT);
+    Bitboard expectedBlackKnights = (ONE << SQ64_B8);
+
+    EXPECT_EQ(blackKnights, expectedBlackKnights);
+
+    //Black Bishops
+    Bitboard blackBishops = position.get_pieceTypes_bitboard(BLACK, BISHOP);
+    Bitboard expectedBlackBishops = (ONE << SQ64_C8);
+
+    EXPECT_EQ(blackBishops, expectedBlackBishops);
+
+    //Black Rooks
+    Bitboard blackRooks = position.get_pieceTypes_bitboard(BLACK, ROOK);
+    Bitboard expectedBlackRooks = (ONE << SQ64_A8);
+
+    EXPECT_EQ(blackRooks, expectedBlackRooks);
+
+    //Black Queens
+    Bitboard blackQueens = position.get_pieceTypes_bitboard(BLACK, QUEEN);
+    Bitboard expectedBlackQueens = (ONE << SQ64_D8);
+
+    EXPECT_EQ(blackQueens, expectedBlackQueens);
+
+    //Black Kings
+    Bitboard blackKings = position.get_pieceTypes_bitboard(BLACK, KING);
+    Bitboard expectedBlackKings = (ONE << SQ64_E8);
+
+    EXPECT_EQ(blackKings, expectedBlackKings);
+
+    //Occupied Bitboard
+    //White
+    Bitboard whitePieces = position.get_occupied_bitboard(WHITE);
+    Bitboard expectedWhitePieces = 
+    (ONE << SQ64_A7) | (ONE << SQ64_B7) | (ONE << SQ64_D7) | (ONE << SQ64_H7)
+    | (ONE << SQ64_B5) | (ONE << SQ64_E5) | (ONE << SQ64_H3) | (ONE << SQ64_A2);
+
+    EXPECT_EQ(whitePieces, expectedWhitePieces);
+
+    //Black
+    Bitboard blackPieces = position.get_occupied_bitboard(BLACK);
+    Bitboard expectedBlackPieces = 
+    (ONE << SQ64_A8) | (ONE << SQ64_B8) | (ONE << SQ64_C8) | (ONE << SQ64_D8) | (ONE << SQ64_E8)
+    | (ONE << SQ64_C7) | (ONE << SQ64_E7) | (ONE << SQ64_F7) | (ONE << SQ64_G7) | (ONE << SQ64_H2);
+
+    EXPECT_EQ(blackPieces, expectedBlackPieces);
+
+    //Color NC
+    Bitboard ncPieces = position.get_occupied_bitboard(COLOR_NC);
+    Bitboard expectedNCPieces = expectedWhitePieces | expectedBlackPieces;
+
+    EXPECT_EQ(ncPieces, expectedNCPieces);
+
     //TODO UT for mailbox
     EXPECT_EQ(position.get_mailbox_pieceType(WHITE, SQ64_A7), PAWN);
     EXPECT_EQ(position.get_mailbox_pieceType(COLOR_NC, SQ64_A7), PAWN);
@@ -117,6 +214,16 @@ TEST_F(PositionTest, MovePiece){
     ASSERT_EQ(pieceTypewpbd4, PieceType::NO_PIECE_TYPE);
     ASSERT_EQ(pieceTypencbd4, PieceType::NO_PIECE_TYPE);
 
+    //Bitboards
+    Bitboard d2Mask = (ONE << SQ64_D2);
+    Bitboard d4Mask = (ONE << SQ64_D4);
+
+    ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , d2Mask);
+    ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d4Mask , ZERO);
+
+    ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , d2Mask);
+    ASSERT_EQ(position.get_occupied_bitboard(COLOR_NC) & d4Mask , ZERO);
+
     //2 move piece from D2 to D4
     position.move_piece(Square64::SQ64_D2, Square64::SQ64_D4);
 
@@ -133,7 +240,15 @@ TEST_F(PositionTest, MovePiece){
     PieceType pieceTypencad4 = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D4);
 
     ASSERT_EQ(pieceTypewpad4, PieceType::PAWN);
-    ASSERT_EQ(pieceTypencad4, PieceType::PAWN);  
+    ASSERT_EQ(pieceTypencad4, PieceType::PAWN);
+
+    //Bitboards
+
+    ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , ZERO);
+    ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d4Mask , d4Mask);
+
+    ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , ZERO);
+    ASSERT_EQ(position.get_occupied_bitboard(COLOR_NC) & d4Mask , d4Mask);
 
 }
 
@@ -150,6 +265,13 @@ TEST_F(PositionTest, RemovePiece){
     ASSERT_EQ(pieceTypewp, PieceType::PAWN);
     ASSERT_EQ(pieceTypep, PieceType::PAWN);
 
+    //Bitboards
+    Bitboard d2Mask = (ONE << SQ64_D2);
+
+    ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , d2Mask);
+    ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , d2Mask);
+
+    //Score
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     //2 Remove piece located on D2
@@ -164,6 +286,11 @@ TEST_F(PositionTest, RemovePiece){
     ASSERT_EQ(pieceTypenptw, PieceType::NO_PIECE_TYPE);   
     ASSERT_EQ(pieceTypenptn, PieceType::NO_PIECE_TYPE);
 
+    //Bitboards
+    ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , ZERO);
+    ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , ZERO);
+
+    //Score
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23833);
 
 }
@@ -185,6 +312,12 @@ TEST_F(PositionTest, AddPiece){
     ASSERT_EQ(pieceTypewp, PieceType::NO_PIECE_TYPE);
     ASSERT_EQ(pieceTypep, PieceType::NO_PIECE_TYPE);
 
+    //Bitboards
+    Bitboard d2Mask = (ONE << SQ64_D2);
+
+    ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , ZERO);
+    ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , ZERO);
+
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23833);
 
     //2 Add piece on D2
@@ -198,6 +331,10 @@ TEST_F(PositionTest, AddPiece){
 
     ASSERT_EQ(pieceTypenptw, PieceType::PAWN);   
     ASSERT_EQ(pieceTypenptn, PieceType::PAWN);
+
+    //Bitboards
+    ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , d2Mask);
+    ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , d2Mask);
 
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 

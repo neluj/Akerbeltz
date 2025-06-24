@@ -66,22 +66,12 @@ void Position::init(){
     zobris_prng();
 }
 
-void Position::clean_position(){
-
-    clean_mailbox();
+void Position::clear_position(){
     clear_position_info();
-
+    clear_pieceTypes_bitboards();
+    clear_occupied_bitboards();
+    clear_mailbox();
 }
-
-void Position::clean_mailbox(){
-    //clean mailbox
-    for(std::size_t c = 0; c < COLOR_SIZE; ++c){
-        for(std::size_t i = 0; i < SQUARE_SIZE_64; ++i){
-            mailbox[c][i] = NO_PIECE_TYPE;
-        }
-    }
-}
-
 
 void Position::clear_position_info(){
 
@@ -100,6 +90,32 @@ void Position::clear_position_info(){
     materialScore[BLACK] = 0;
     materialScore[COLOR_NC] = 0;
 
+}
+
+void Position::clear_pieceTypes_bitboards(){
+    //clear pieceTypes bitboards
+    for(std::size_t c = 0; c < COLOR_SIZE; ++c){
+        for(std::size_t p = 0; p < PIECETYPE_SIZE; ++p){
+            pieceTypesBitboards[c][p] = ZERO;
+        }
+    }
+}
+
+void Position::clear_occupied_bitboards(){
+    //clear occupied bitboards
+    for(std::size_t c = 0; c < COLOR_SIZE; ++c){
+        occupiedBitboards[c] = ZERO;
+        
+    }
+}
+
+void Position::clear_mailbox(){
+    //clear mailbox
+    for(std::size_t c = 0; c < COLOR_SIZE; ++c){
+        for(std::size_t i = 0; i < SQUARE_SIZE_64; ++i){
+            mailbox[c][i] = NO_PIECE_TYPE;
+        }
+    }
 }
 
 void Position::zobris_prng(){
@@ -126,7 +142,7 @@ void Position::set_FEN(std::string fenNotation){
 
     std::string field;
 
-    clean_position();
+    clear_position();
 
     Rank rank = RANK_8;
     File file = FILE_A;
@@ -563,6 +579,10 @@ void Position::move_piece(Square64 from, Square64 to){
     mailbox[Color::COLOR_NC][from] = PieceType::NO_PIECE_TYPE;
     mailbox[Color::COLOR_NC][to] = pieceType;
 
+    Bitboards::move_piece(pieceTypesBitboards[pieceColor][pieceType], from, to);
+    Bitboards::move_piece(occupiedBitboards[pieceColor], from, to);
+    Bitboards::move_piece(occupiedBitboards[Color::COLOR_NC], from, to);
+
     Piece piece = make_piece(pieceColor, pieceType);
 
     //Update piece value from material
@@ -603,6 +623,10 @@ void Position::remove_piece(Square64 square){
     //Knowing the piece color and piece type, make piece
     Piece piece = make_piece(pieceColor, pieceType);
 
+    Bitboards::clear_piece(pieceTypesBitboards[pieceColor][pieceType], square);
+    Bitboards::clear_piece(occupiedBitboards[pieceColor], square);
+    Bitboards::clear_piece(occupiedBitboards[Color::COLOR_NC], square);
+
     //Remove piece value from material 
     materialScore[pieceColor] -= Evaluate::calc_material_table(piece, square);
 
@@ -616,6 +640,10 @@ void Position::add_piece(Square64 square, Piece piece){
     PieceType pieceType = piece_type(piece);
     mailbox[pieceColor][square] = pieceType;
     mailbox[Color::COLOR_NC][square] = pieceType;
+
+    Bitboards::set_piece(pieceTypesBitboards[pieceColor][pieceType], square);
+    Bitboards::set_piece(occupiedBitboards[pieceColor], square);
+    Bitboards::set_piece(occupiedBitboards[Color::COLOR_NC], square);
 
     //Add piece value from material 
     materialScore[pieceColor] += Evaluate::calc_material_table(piece, square);
