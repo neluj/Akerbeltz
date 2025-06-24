@@ -1,6 +1,7 @@
 #ifndef INCLUDE_POSITION_H
 #define INCLUDE_POSITION_H
 
+#include "bitboard.h"
 #include "move.h"
 #include "evaluate.h"
 #include <sstream>
@@ -31,6 +32,8 @@ public:
     unsigned short get_fifty_moves_counter() const;
     unsigned short get_moves_counter() const;
     PieceType get_mailbox_pieceType(Color color, Square64 square) const;
+    Bitboard get_pieceTypes_bitboard(Color color, PieceType pieceType) const;
+    Bitboard get_occupied_bitboard(Color color) const;
     Key get_key() const;
     //bool square_is_attacked(Square64 square) const; 
     Evaluate::Score get_material_score(Color color) const;
@@ -45,16 +48,19 @@ public:
 
 private:
 
-    void clean_position();
+    void clear_position();
     static void zobris_prng();
 
-    void clean_mailbox();
     void clear_position_info();
+    void clear_pieceTypes_bitboards();
+    void clear_occupied_bitboards();
+    void clear_mailbox();
 
     void calc_material_score();
     void calc_key();
     
-    // NOTE revisar si merece así o guardando piezas directamente?
+    Bitboard pieceTypesBitboards[COLOR_SIZE][PIECETYPE_SIZE];
+    Bitboard occupiedBitboards[COLOR_SIZE];
     PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_64];
     Color sideToMove{COLOR_NC};
     //TODO esto meterlo en HistoryInfo?
@@ -86,6 +92,12 @@ inline unsigned short Position::get_moves_counter() const{
 }
 inline PieceType Position::get_mailbox_pieceType(Color color, Square64 square) const{
     return mailbox[color][square];
+}
+inline Bitboard Position::get_pieceTypes_bitboard(Color color, PieceType pieceType) const{
+    return pieceTypesBitboards[color][pieceType];
+}
+inline Bitboard Position::get_occupied_bitboard(Color color) const{
+    return occupiedBitboards[color];
 }
 inline Evaluate::Score Position::get_material_score(Color color) const{
     return materialScore[color];
