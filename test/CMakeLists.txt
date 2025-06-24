@@ -16,6 +16,7 @@ typesTest.cpp
 evaluateTest.cpp
 #uciTest.cpp
 #pvtableTest.cpp
+bitboardTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}-test  gtest_main src)
