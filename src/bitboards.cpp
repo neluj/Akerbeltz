@@ -1,4 +1,4 @@
-#include "bitboard.h"
+#include "bitboards.h"
 
 namespace Xake{
 

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "bitboard.h"
+#include "bitboards.h"
 
 using namespace Xake;
 

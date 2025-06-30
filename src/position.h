@@ -1,7 +1,7 @@
 #ifndef INCLUDE_POSITION_H
 #define INCLUDE_POSITION_H
 
-#include "bitboard.h"
+#include "bitboards.h"
 #include "move.h"
 #include "evaluate.h"
 #include <sstream>
