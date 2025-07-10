@@ -10,13 +10,14 @@ FetchContent_MakeAvailable(googletest)
 add_executable(${PROJECT_NAME}-test 
 positionTest.cpp
 moveTest.cpp
-#movegenTest.cpp
+#movegenTest.cpps
 typesTest.cpp
 #perftTest.cpp
 evaluateTest.cpp
 #uciTest.cpp
 #pvtableTest.cpp
 bitboardsTest.cpp
+attacksTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}-test  gtest_main src)

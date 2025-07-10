@@ -1,6 +1,7 @@
 add_library(src
 position.cpp
 bitboards.cpp
+attacks.cpp
 #movegen.cpp
 #search.cpp
 evaluate.cpp
