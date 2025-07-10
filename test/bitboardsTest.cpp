@@ -2,51 +2,54 @@
 #include "bitboards.h"
 
 using namespace Xake;
+using namespace Bitboards;
 
-TEST(BitboardTest, SetPiece){                               
+TEST(BitboardTest, SetPieces){                               
 
-    Bitboard bitboard = ZERO;
-
-    Bitboards::set_piece(bitboard, SQ64_C2);
+    Bitboard bitboard = set_pieces(SQ64_C2);
     Bitboard expected = 0b10000000000;
 
     EXPECT_EQ(bitboard, expected);
 
-    Bitboards::set_piece(bitboard, SQ64_C2);
-    expected = 0b10000000000;
+    bitboard =  set_pieces(bitboard, SQ64_C2);
 
     EXPECT_EQ(bitboard, expected);
 
-    Bitboards::set_piece(bitboard, SQ64_A3);
+    bitboard = set_pieces(bitboard, SQ64_A3);
     expected = 0b10000010000000000;
 
     EXPECT_EQ(bitboard, expected);
 
+    bitboard = set_pieces(SQ64_C2, SQ64_A3);
+    EXPECT_EQ(bitboard, expected);
+
 }
 
-TEST(BitboardTest, ClearPiece){     
+TEST(BitboardTest, ClearPieces){     
     
     Bitboard bitboard = 0b10000010000000000;
 
-    Bitboards::clear_piece(bitboard, SQ64_C2);
+    bitboard = clear_pieces(bitboard, SQ64_C2);
     Bitboard expected = 0b10000000000000000;
 
     EXPECT_EQ(bitboard, expected);
 
-    Bitboards::clear_piece(bitboard, SQ64_A3);
+    bitboard = clear_pieces(bitboard, SQ64_A3);
     expected = ZERO;
 
     EXPECT_EQ(bitboard, expected);   
 
-}
+    //Try to clean a piece that does not exist 
+    bitboard = clear_pieces(bitboard, SQ64_A3);
+    expected = ZERO;
 
-TEST(BitboardTest, movePiece){   
+    EXPECT_EQ(bitboard, expected); 
     
-    Bitboard bitboard = 0b10000000000000010;
+    bitboard = 0b10000010000000000;
 
-    Bitboards::move_piece(bitboard, SQ64_A3, SQ64_C2);
-    Bitboard expected = 0b10000000010;
-
-    EXPECT_EQ(bitboard, expected);
+    bitboard = clear_pieces(bitboard, SQ64_C2, SQ64_A3);
+    EXPECT_EQ(bitboard, ZERO); 
 
 }
+
+
