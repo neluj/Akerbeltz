@@ -35,12 +35,12 @@ public:
     Bitboard get_pieceTypes_bitboard(Color color, PieceType pieceType) const;
     Bitboard get_occupied_bitboard(Color color) const;
     Key get_key() const;
-    //bool square_is_attacked(Square64 square) const; 
+    bool square_is_attacked(Square64 square) const; 
     Evaluate::Score get_material_score(Color color) const;
     bool is_repetition() const;
 
     //Move related functions
-    //bool do_move(Move move);
+    bool do_move(Move move);
     void undo_move();
     void move_piece(Square64 from, Square64 to);
     void remove_piece(Square64 square);
