@@ -1,6 +1,6 @@
 #include "position.h"
+#include "attacks.h"
 
-#include <iostream>
 #include <random>
 
 namespace Xake
@@ -315,77 +315,18 @@ const std::size_t DIRECTION_SIDES = 4;
 const Direction sizes[DIRECTION_SIDES] = {EAST, WEST, NORTH, SOUTH};
 const Direction diagonals[DIRECTION_SIDES] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
 
-/*
-bool Position::square_is_attacked(Square64 square) const{
+
+bool Position::square_is_attacked(Square64 sq64) const{
 
     //Pawns
-    if(sideToMove==Color::WHITE){
-        if(mailbox[Color::BLACK][Square64(square+NORTH_EAST)] == PieceType::PAWN || mailbox[Color::BLACK][Square64(square+NORTH_WEST)] == PieceType::PAWN){
-            return true;
-        }
-    }
-    if(sideToMove==Color::BLACK){
-        if(mailbox[Color::WHITE][Square64(square+SOUTH_EAST)] == PieceType::PAWN || mailbox[Color::WHITE][Square64(square+SOUTH_WEST)] == PieceType::PAWN){
-            return true;
-        }
-    }
+    return   (Attacks::pawnAttacks[sideToMove][sq64] & pieceTypesBitboards[~sideToMove][PAWN])
+           | (Attacks::knightAttacks[sq64] & pieceTypesBitboards[~sideToMove][KNIGHT])
+           | (Attacks::kingAttacks[sq64] &  pieceTypesBitboards[~sideToMove][KING])
+           | (Attacks::sliding_diagonal_attacks(occupiedBitboards[COLOR_NC], sq64) & (pieceTypesBitboards[~sideToMove][BISHOP] | pieceTypesBitboards[~sideToMove][QUEEN]))
+           | (Attacks::sliding_side_attacks(occupiedBitboards[COLOR_NC], sq64) & (pieceTypesBitboards[~sideToMove][ROOK] | pieceTypesBitboards[~sideToMove][QUEEN]));
+}
 
-    //Knights
-    bool isKnightAttack =   (mailbox[~sideToMove][Square64(square + NORTH_NORTH_WEST )] == PieceType::KNIGHT || mailbox[~sideToMove][Square64(square+NORTH_NORTH_EAST )] == PieceType::KNIGHT ||
-                             mailbox[~sideToMove][Square64(square + NORTH_WEST_WEST  )] == PieceType::KNIGHT || mailbox[~sideToMove][Square64(square+NORTH_EAST_EAST  )] == PieceType::KNIGHT ||
-                             mailbox[~sideToMove][Square64(square + SOUTH_WEST_WEST  )] == PieceType::KNIGHT || mailbox[~sideToMove][Square64(square+SOUTH_EAST_EAST  )] == PieceType::KNIGHT ||
-                             mailbox[~sideToMove][Square64(square + SOUTH_SOUTH_WEST )] == PieceType::KNIGHT || mailbox[~sideToMove][Square64(square+SOUTH_SOUTH_EAST )] == PieceType::KNIGHT) 
-                            ? true : false;
-    if(isKnightAttack){
-        return true;
-    }
 
-    //bishops, queens
-    for(Direction dir : diagonals){
-        int toSquareIndex = square + dir;
-        Square64 toSquare = SQUARES_120[toSquareIndex];
-        while(toSquare != Square120::SQ120_OFFBOARD && mailbox[Color::COLOR_NC][toSquare] == NO_PIECE_TYPE) {
-            toSquareIndex += dir;
-            toSquare = SQUARES_120[toSquareIndex];
-        }
-        if(mailbox[~sideToMove][toSquare] == PieceType::BISHOP || mailbox[~sideToMove][toSquare] == PieceType::QUEEN){
-            return true;
-        }
-    }
-
-    //rooks, queens
-    for(Direction dir : sizes){
-        int toSquareIndex = square + dir;
-        Square120 toSquare = SQUARES_120[toSquareIndex];
-        while(toSquare != Square120::SQ120_OFFBOARD && mailbox[Color::COLOR_NC][toSquare] == NO_PIECE_TYPE) {
-            toSquareIndex += dir;
-            toSquare = SQUARES_120[toSquareIndex];
-        }
-        if(mailbox[~sideToMove][toSquare] == PieceType::ROOK || mailbox[~sideToMove][toSquare] == PieceType::QUEEN){
-            return true;
-        }
-    }
-
-    //king
-    for(Direction dir : diagonals){
-        int toSquareIndex = square + dir;
-        Square120 toSquare = SQUARES_120[toSquareIndex];
-        if(mailbox[~sideToMove][toSquare] == PieceType::KING){
-            return true;
-        }
-    }
-    for(Direction dir : sizes){
-        int toSquareIndex = square + dir;
-        Square120 toSquare = SQUARES_120[toSquareIndex];
-        if(mailbox[~sideToMove][toSquare] == PieceType::KING){
-            return true;
-        }
-    }
-
-    return false;
-} 
-*/
-/*
 bool Position::do_move(Move move){
 
     Square64 from = move_from(move);
@@ -478,8 +419,10 @@ bool Position::do_move(Move move){
         add_piece(to, promPiece);
     }
 
-    Piece kingS = make_piece(sideToMove, PieceType::KING);
-    if(square_is_attacked(pieceList[kingS][0])){
+    Bitboard kingBitboard = pieceTypesBitboards[sideToMove][KING];
+    Square64 kingsq64{__builtin_ctzll(kingBitboard)};
+
+    if(square_is_attacked(kingsq64)){
         //VIDEO
         sideToMove =~ sideToMove;
         historyPly[ply-1].positionKey ^= Zobrist::blackMoves;
@@ -492,7 +435,7 @@ bool Position::do_move(Move move){
 
     return true;
 }
-*/
+
 void Position::undo_move(){
     
     Move move = historyPly[ply-2].nextMove;
@@ -579,9 +522,17 @@ void Position::move_piece(Square64 from, Square64 to){
     mailbox[Color::COLOR_NC][from] = PieceType::NO_PIECE_TYPE;
     mailbox[Color::COLOR_NC][to] = pieceType;
 
-    Bitboards::move_piece(pieceTypesBitboards[pieceColor][pieceType], from, to);
-    Bitboards::move_piece(occupiedBitboards[pieceColor], from, to);
-    Bitboards::move_piece(occupiedBitboards[Color::COLOR_NC], from, to);
+    pieceTypesBitboards[pieceColor][pieceType] = Bitboards::clear_pieces(pieceTypesBitboards[pieceColor][pieceType], from);
+    occupiedBitboards[pieceColor] = Bitboards::clear_pieces(occupiedBitboards[pieceColor], from);
+    occupiedBitboards[Color::COLOR_NC] = Bitboards::clear_pieces(occupiedBitboards[Color::COLOR_NC],from);
+
+    pieceTypesBitboards[pieceColor][pieceType] = Bitboards::set_pieces(pieceTypesBitboards[pieceColor][pieceType], to);
+    occupiedBitboards[pieceColor] = Bitboards::set_pieces(occupiedBitboards[pieceColor], to);
+    occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC],to);
+
+    //Bitboards::move_piece(pieceTypesBitboards[pieceColor][pieceType], from, to);
+    //Bitboards::move_piece(occupiedBitboards[pieceColor], from, to);
+    //Bitboards::move_piece(occupiedBitboards[Color::COLOR_NC], from, to);
 
     Piece piece = make_piece(pieceColor, pieceType);
 
@@ -623,9 +574,9 @@ void Position::remove_piece(Square64 square){
     //Knowing the piece color and piece type, make piece
     Piece piece = make_piece(pieceColor, pieceType);
 
-    Bitboards::clear_piece(pieceTypesBitboards[pieceColor][pieceType], square);
-    Bitboards::clear_piece(occupiedBitboards[pieceColor], square);
-    Bitboards::clear_piece(occupiedBitboards[Color::COLOR_NC], square);
+    pieceTypesBitboards[pieceColor][pieceType] = Bitboards::clear_pieces(pieceTypesBitboards[pieceColor][pieceType], square);
+    occupiedBitboards[pieceColor] = Bitboards::clear_pieces(occupiedBitboards[pieceColor], square);
+    occupiedBitboards[Color::COLOR_NC] = Bitboards::clear_pieces(occupiedBitboards[Color::COLOR_NC], square);
 
     //Remove piece value from material 
     materialScore[pieceColor] -= Evaluate::calc_material_table(piece, square);
@@ -641,9 +592,9 @@ void Position::add_piece(Square64 square, Piece piece){
     mailbox[pieceColor][square] = pieceType;
     mailbox[Color::COLOR_NC][square] = pieceType;
 
-    Bitboards::set_piece(pieceTypesBitboards[pieceColor][pieceType], square);
-    Bitboards::set_piece(occupiedBitboards[pieceColor], square);
-    Bitboards::set_piece(occupiedBitboards[Color::COLOR_NC], square);
+    pieceTypesBitboards[pieceColor][pieceType] = Bitboards::set_pieces(pieceTypesBitboards[pieceColor][pieceType], square);
+    occupiedBitboards[pieceColor] = Bitboards::set_pieces(occupiedBitboards[pieceColor], square);
+    occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC], square);
 
     //Add piece value from material 
     materialScore[pieceColor] += Evaluate::calc_material_table(piece, square);

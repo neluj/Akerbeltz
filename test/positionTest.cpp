@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "position.h"
+#include "attacks.h"
 //TODO use gmock
 using namespace Xake;
 
@@ -10,6 +11,7 @@ class PositionTest : public ::testing::Test
      {  
         Position::init();    
         Evaluate::init();
+        Attacks::init();
      }
 
      virtual void TearDown()
@@ -137,64 +139,90 @@ TEST_F(PositionTest, RandomSetPosition){
         
     EXPECT_EQ(position.get_moves_counter(), 1);
 }
-/*
+
 TEST_F(PositionTest, SquareAttacked){
 
     //Position position;
 
     //Attacks
 
+    const std::string ATTACK_PAWN_POSITION = "8/8/8/2p5/3P4/8/8/8 w - - 0 1";
+
+    position.set_FEN(ATTACK_PAWN_POSITION);
+
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_D4), true);
+
     const std::string ATTACK_ROOK_POSITION = "8/8/8/8/5r2/8/8/2R2P2 w - - 0 1";
 
     position.set_FEN(ATTACK_ROOK_POSITION);
 
-    ASSERT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
 
     const std::string ATTACK_BISHOP_POSITION = "8/8/8/8/8/3B3b/8/5P2 w - - 0 1";
 
     position.set_FEN(ATTACK_BISHOP_POSITION);
 
-    ASSERT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
 
     const std::string ATTACK_QUEEN_POSITION = "8/8/8/8/5q2/8/8/2R2P2 w - - 0 1";
 
     position.set_FEN(ATTACK_QUEEN_POSITION);
 
-    ASSERT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
 
     const std::string ATTACK_KNIGHT_POSITION = "8/8/8/8/8/3B4/7n/5P2 w - - 0 1";
 
     position.set_FEN(ATTACK_KNIGHT_POSITION);
 
-    ASSERT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
 
     //No attacks
+
+    const std::string NON_ATTACK_PAWN_POSITION = "8/8/8/8/3P4/2p1P3/8/8 w - - 0 1";
+
+    position.set_FEN(NON_ATTACK_PAWN_POSITION);
+
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_D4), false);
 
     const std::string NON_ATTACK_ROOK_POSITION = "8/8/8/8/5R2/8/8/2R2P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_ROOK_POSITION);
 
-    ASSERT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
 
     const std::string NON_ATTACK_BISHOP_POSITION = "8/8/8/8/8/3B3B/8/5P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_BISHOP_POSITION);
 
-    ASSERT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
 
     const std::string NON_ATTACK_QUEEN_POSITION = "8/8/8/8/5Q2/8/8/2R2P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_QUEEN_POSITION);
 
-    ASSERT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
 
     const std::string NON_ATTACK_KNIGHT_POSITION = "8/8/8/8/8/3B4/7N/5P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_KNIGHT_POSITION);
 
-    ASSERT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+
+    const std::string NON_ATTACK_NEIGHBORING_POSITION = "8/8/8/8/8/8/4BBB1/4BPB1 w - - 0 1";
+
+    position.set_FEN(NON_ATTACK_NEIGHBORING_POSITION);
+
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+
+    const std::string NON_ATTACK_OBSTRUCTION_POSITION = "8/8/8/8/2b5/3B4/8/5P2 w - - 0 1";
+
+    position.set_FEN(NON_ATTACK_OBSTRUCTION_POSITION);
+
+    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+
+    //TODO meter ataques con piezas en medio, peones, y piezas sin movimiento
 }
-*/
+
 TEST_F(PositionTest, MovePiece){
 
     position.set_FEN(FEN_INIT_POSITION);
@@ -339,7 +367,7 @@ TEST_F(PositionTest, AddPiece){
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
 }
-/*
+
 TEST_F(PositionTest, DoMove){
 
     position.set_FEN(FEN_INIT_POSITION);
@@ -354,8 +382,9 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     Move moveb2b4 = make_quiet_move(Square64::SQ64_B2, Square64::SQ64_B4, SpecialMove::PAWN_START);    
-    position.do_move(moveb2b4);
+    bool legalb2b4 = position.do_move(moveb2b4);
 
+    EXPECT_EQ(legalb2b4, true);
     EXPECT_EQ(position.get_side_to_move(), Color::BLACK);
     EXPECT_EQ(position.get_castling_right(), (CastlingRight::WKCA | CastlingRight::WQCA | CastlingRight::BKCA | CastlingRight::BQCA));
     EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_B3);
@@ -365,10 +394,33 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B4), PieceType::PAWN);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23891);
 
-}
-*/
+    //InCheck
 
-/*
+    position.set_FEN("4k3/8/8/8/3r4/8/3K2Q1/8 w - - 0 1");
+
+    EXPECT_EQ(position.get_side_to_move(), Color::WHITE);
+    EXPECT_EQ(position.get_castling_right(), CastlingRight::NO_RIGHT);
+    EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_NO_SQUARE );
+    EXPECT_EQ(position.get_fifty_moves_counter(), 0);
+    EXPECT_EQ(position.get_moves_counter(), 1);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2), PieceType::KING);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D3), PieceType::NO_PIECE_TYPE);
+
+    Move moved2d3 = make_quiet_move(Square64::SQ64_D2, Square64::SQ64_D3, SpecialMove::NO_SPECIAL);    
+    bool legald2d3 = position.do_move(moved2d3);
+
+    EXPECT_EQ(legald2d3, false);
+    EXPECT_EQ(position.get_side_to_move(), Color::WHITE);
+    EXPECT_EQ(position.get_castling_right(), CastlingRight::NO_RIGHT);
+    EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_NO_SQUARE);
+    EXPECT_EQ(position.get_fifty_moves_counter(), 0);
+    EXPECT_EQ(position.get_moves_counter(), 1);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2), PieceType::KING);
+    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D3), PieceType::NO_PIECE_TYPE);
+}
+
+
+
 TEST_F(PositionTest, UndoMove){
 
     position.set_FEN(FEN_INIT_POSITION);
@@ -384,7 +436,6 @@ TEST_F(PositionTest, UndoMove){
 
     Move moveb2b4 = make_quiet_move(Square64::SQ64_B2, Square64::SQ64_B4, SpecialMove::PAWN_START); 
 
-    //TODO do this using mocks on undo move   
     position.do_move(moveb2b4);
     position.undo_move();
 
@@ -399,10 +450,9 @@ TEST_F(PositionTest, UndoMove){
 
 }
 
-*/
 
-/*
-//TODO ajustar esto...que se quiere probar? y que se quiere obtener? probar uno por uno...esto seria mas un test complementario, no unitario
+
+
 TEST_F(PositionTest, CalcKeyDoUndoBasicMoveWhite){
 
     //Position position;
@@ -428,9 +478,9 @@ TEST_F(PositionTest, CalcKeyDoUndoBasicMoveWhite){
     EXPECT_EQ(keyPos1Aft, keyPos2Bef);    
 
 }
-*/
 
-/*
+
+
 TEST_F(PositionTest, CalcKeyDoUndoBasicMoveBlack){
 
     //Position position;
@@ -455,9 +505,9 @@ TEST_F(PositionTest, CalcKeyDoUndoBasicMoveBlack){
     
     EXPECT_EQ(keyPos1Aft, keyPos2Bef);    
 }
-*/
 
-/*
+
+
 TEST_F(PositionTest, CalcKeyBasicCapture){
     const std::string POS1 = "3kb3/4p3/8/3p4/4P3/8/5P2/4KB2 w - - 0 1";
 
@@ -485,8 +535,8 @@ TEST_F(PositionTest, CalcKeyBasicCapture){
      
  
 }
-*/
-/*
+
+
 TEST_F(PositionTest, CalcKeyDoUndoEnpassant){
 
     const std::string POS1 = "3kb3/8/8/8/4p3/8/3PPP2/4KB2 w - - 0 1";
@@ -531,8 +581,8 @@ TEST_F(PositionTest, CalcKeyDoUndoEnpassant){
     EXPECT_EQ(keyAfterMoveEnpassant, keyEnpassant);
 
 }
-*/
-/*
+
+
 TEST_F(PositionTest, CalcKeyBasicCastling){
 
     ////////////////////////
@@ -651,8 +701,8 @@ TEST_F(PositionTest, CalcKeyBasicCastling){
     
  
 }
-*/
-/*
+
+
 TEST_F(PositionTest, CalcKeyBasicPromotion){
 
     ////////////////////////
@@ -706,8 +756,7 @@ TEST_F(PositionTest, CalcKeyBasicPromotion){
     EXPECT_EQ(keyBlackPromotion, keyBlackPromotionAfter);
 
 }
-*/
-/*
+
 TEST_F(PositionTest, IsRepetition){
 
     position.set_FEN(FEN_INIT_POSITION);
@@ -729,4 +778,3 @@ TEST_F(PositionTest, IsRepetition){
     EXPECT_EQ(position.is_repetition(), true);
 
 }
-*/
