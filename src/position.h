@@ -27,11 +27,11 @@ public:
     std::string get_FEN() const;
     Color get_side_to_move() const;
     int get_ply() const;
-    int get_castling_right() const;
+    CastlingRight get_castling_right() const;
     Square64 get_enpassant_square() const;
     unsigned short get_fifty_moves_counter() const;
     unsigned short get_moves_counter() const;
-    PieceType get_mailbox_pieceType(Color color, Square64 square) const;
+    Piece get_mailbox_piece(Square64 square) const;
     Bitboard get_pieceTypes_bitboard(Color color, PieceType pieceType) const;
     Bitboard get_occupied_bitboard(Color color) const;
     Key get_key() const;
@@ -61,7 +61,7 @@ private:
     
     Bitboard pieceTypesBitboards[COLOR_SIZE][PIECETYPE_SIZE];
     Bitboard occupiedBitboards[COLOR_SIZE];
-    PieceType mailbox[COLOR_SIZE][SQUARE_SIZE_64];
+    Piece mailbox[SQUARE_SIZE_64];
     Color sideToMove{COLOR_NC};
     //TODO esto meterlo en HistoryInfo?
     int ply;
@@ -78,7 +78,7 @@ inline Color Position::get_side_to_move() const{
 inline int Position::get_ply() const{
     return ply;
 }
-inline int Position::get_castling_right() const{
+inline CastlingRight Position::get_castling_right() const{
     return historyPly[ply-1].castlingRight;
 }
 inline Square64 Position::get_enpassant_square() const{
@@ -90,8 +90,8 @@ inline unsigned short Position::get_fifty_moves_counter() const{
 inline unsigned short Position::get_moves_counter() const{
     return historyPly[ply-1].movesCounter;
 }
-inline PieceType Position::get_mailbox_pieceType(Color color, Square64 square) const{
-    return mailbox[color][square];
+inline Piece Position::get_mailbox_piece(Square64 square) const{
+    return mailbox[square];
 }
 inline Bitboard Position::get_pieceTypes_bitboard(Color color, PieceType pieceType) const{
     return pieceTypesBitboards[color][pieceType];

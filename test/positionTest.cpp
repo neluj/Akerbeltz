@@ -127,8 +127,7 @@ TEST_F(PositionTest, RandomSetPosition){
     EXPECT_EQ(ncPieces, expectedNCPieces);
 
     //TODO UT for mailbox
-    EXPECT_EQ(position.get_mailbox_pieceType(WHITE, SQ64_A7), PAWN);
-    EXPECT_EQ(position.get_mailbox_pieceType(COLOR_NC, SQ64_A7), PAWN);
+    EXPECT_EQ(position.get_mailbox_piece(SQ64_A7), PAWN);
     EXPECT_EQ(position.get_side_to_move(), WHITE);
 
     EXPECT_EQ(position.get_castling_right(), 0xF);
@@ -230,17 +229,13 @@ TEST_F(PositionTest, MovePiece){
     //1 Check if the square D2 is taken by a pawn and D4 is empty
 
     //mailbox
-    PieceType pieceTypewpbd2 = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2);
-    PieceType pieceTypencbd2 = position.get_mailbox_pieceType(Color::COLOR_NC, Square64::SQ64_D2);
+    Piece pieceTypewpbd2 = position.get_mailbox_piece(Square64::SQ64_D2);
 
     ASSERT_EQ(pieceTypewpbd2, PieceType::PAWN);
-    ASSERT_EQ(pieceTypencbd2, PieceType::PAWN);
 
-    PieceType pieceTypewpbd4 = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D4);
-    PieceType pieceTypencbd4 = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D4);
+    Piece pieceTypewpbd4 = position.get_mailbox_piece(Square64::SQ64_D4);
 
     ASSERT_EQ(pieceTypewpbd4, PieceType::NO_PIECE_TYPE);
-    ASSERT_EQ(pieceTypencbd4, PieceType::NO_PIECE_TYPE);
 
     //Bitboards
     Bitboard d2Mask = (ONE << SQ64_D2);
@@ -258,17 +253,13 @@ TEST_F(PositionTest, MovePiece){
     //3 Check D2 square
 
     //mailbox
-    PieceType pieceTypewpad2 = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2);
-    PieceType pieceTypencad2 = position.get_mailbox_pieceType(Color::COLOR_NC, Square64::SQ64_D2);
+    Piece pieceTypewpad2 = position.get_mailbox_piece(Square64::SQ64_D2);
 
-    ASSERT_EQ(pieceTypewpad2, PieceType::NO_PIECE_TYPE);
-    ASSERT_EQ(pieceTypencad2, PieceType::NO_PIECE_TYPE);
+    ASSERT_EQ(pieceTypewpad2, Piece::NO_PIECE);
 
-    PieceType pieceTypewpad4 = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D4);
-    PieceType pieceTypencad4 = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D4);
+    Piece pieceTypewpad4 = position.get_mailbox_piece(Square64::SQ64_D4);
 
     ASSERT_EQ(pieceTypewpad4, PieceType::PAWN);
-    ASSERT_EQ(pieceTypencad4, PieceType::PAWN);
 
     //Bitboards
 
@@ -287,11 +278,9 @@ TEST_F(PositionTest, RemovePiece){
     //1 Check if the square D2 is taken by a pawn
 
     //mailbox
-    PieceType pieceTypewp = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2);
-    PieceType pieceTypep = position.get_mailbox_pieceType(Color::COLOR_NC, Square64::SQ64_D2);
+    Piece pieceTypewp = position.get_mailbox_piece(Square64::SQ64_D2);
 
-    ASSERT_EQ(pieceTypewp, PieceType::PAWN);
-    ASSERT_EQ(pieceTypep, PieceType::PAWN);
+    ASSERT_EQ(pieceTypewp, Piece::W_PAWN);
 
     //Bitboards
     Bitboard d2Mask = (ONE << SQ64_D2);
@@ -308,11 +297,9 @@ TEST_F(PositionTest, RemovePiece){
     //3 Check D2 square
 
     //mailbox
-    PieceType pieceTypenptw = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2);
-    PieceType pieceTypenptn = position.get_mailbox_pieceType(Color::COLOR_NC, Square64::SQ64_D2);
+    Piece pieceTypenptw = position.get_mailbox_piece(Square64::SQ64_D2);
 
-    ASSERT_EQ(pieceTypenptw, PieceType::NO_PIECE_TYPE);   
-    ASSERT_EQ(pieceTypenptn, PieceType::NO_PIECE_TYPE);
+    ASSERT_EQ(pieceTypenptw, Piece::NO_PIECE);   
 
     //Bitboards
     ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , ZERO);
@@ -334,11 +321,9 @@ TEST_F(PositionTest, AddPiece){
     //1 Check if the square D2 is empty
 
     //mailbox
-    PieceType pieceTypewp = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2);
-    PieceType pieceTypep = position.get_mailbox_pieceType(Color::COLOR_NC, Square64::SQ64_D2);
-
+    Piece pieceTypewp = position.get_mailbox_piece(Square64::SQ64_D2);
+    // DELETEME
     ASSERT_EQ(pieceTypewp, PieceType::NO_PIECE_TYPE);
-    ASSERT_EQ(pieceTypep, PieceType::NO_PIECE_TYPE);
 
     //Bitboards
     Bitboard d2Mask = (ONE << SQ64_D2);
@@ -354,11 +339,9 @@ TEST_F(PositionTest, AddPiece){
     //3 Check D2 square
 
     //mailbox
-    PieceType pieceTypenptw = position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2);
-    PieceType pieceTypenptn = position.get_mailbox_pieceType(Color::COLOR_NC, Square64::SQ64_D2);
+    Piece pieceTypenptw = position.get_mailbox_piece(Square64::SQ64_D2);
 
-    ASSERT_EQ(pieceTypenptw, PieceType::PAWN);   
-    ASSERT_EQ(pieceTypenptn, PieceType::PAWN);
+    ASSERT_EQ(pieceTypenptw, Piece::W_PAWN);   
 
     //Bitboards
     ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , d2Mask);
@@ -377,8 +360,8 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_NO_SQUARE);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B2), PieceType::PAWN);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B4), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B2), Piece::W_PAWN);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B4), Piece::NO_PIECE);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     Move moveb2b4 = make_quiet_move(Square64::SQ64_B2, Square64::SQ64_B4, SpecialMove::PAWN_START);    
@@ -390,8 +373,8 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_B3);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B2), PieceType::NO_PIECE_TYPE);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B4), PieceType::PAWN);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B2), Piece::NO_PIECE);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B4), Piece::W_PAWN);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23891);
 
     //InCheck
@@ -403,8 +386,8 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_NO_SQUARE );
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2), PieceType::KING);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D3), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_D2), Piece::W_KING);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_D3), Piece::NO_PIECE);
 
     Move moved2d3 = make_quiet_move(Square64::SQ64_D2, Square64::SQ64_D3, SpecialMove::NO_SPECIAL);    
     bool legald2d3 = position.do_move(moved2d3);
@@ -415,8 +398,8 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_NO_SQUARE);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D2), PieceType::KING);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_D3), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_D2), Piece::W_KING);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_D3), Piece::NO_PIECE);
 }
 
 
@@ -430,8 +413,8 @@ TEST_F(PositionTest, UndoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_NO_SQUARE);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B2), PieceType::PAWN);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B4), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B2), Piece::W_PAWN);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B4), Piece::NO_PIECE);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     Move moveb2b4 = make_quiet_move(Square64::SQ64_B2, Square64::SQ64_B4, SpecialMove::PAWN_START); 
@@ -444,8 +427,8 @@ TEST_F(PositionTest, UndoMove){
     EXPECT_EQ(position.get_enpassant_square(), Square64::SQ64_NO_SQUARE);
     EXPECT_EQ(position.get_fifty_moves_counter(), 0);
     EXPECT_EQ(position.get_moves_counter(), 1);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B2), PieceType::PAWN);
-    EXPECT_EQ(position.get_mailbox_pieceType(Color::WHITE, Square64::SQ64_B4), PieceType::NO_PIECE_TYPE);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B2), Piece::W_PAWN);
+    EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B4), Piece::NO_PIECE);
     EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
 }

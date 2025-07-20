@@ -35,18 +35,7 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
         for (File file = FILE_A; file <= FILE_H; ++file)
         {
             Square64 square = make_square64(rank, file);
-            PieceType pieceType{NO_PIECE_TYPE};
-            Color color{COLOR_NC};
-            if(pos.get_mailbox_pieceType(WHITE, square) != NO_PIECE_TYPE){
-                pieceType = pos.get_mailbox_pieceType(WHITE, square);
-                color = WHITE;
-            }else if(pos.get_mailbox_pieceType(BLACK, square) != NO_PIECE_TYPE){
-                pieceType = pos.get_mailbox_pieceType(BLACK, square);
-                color = BLACK;
-            }
-
-            os << PIECE_NAMES[make_piece(color, pieceType)] << " | ";
-
+            os << PIECE_NAMES[pos.get_mailbox_piece(square)] << " | ";
         }
 
         os << rank + 1 << std::endl << "+---+---+---+---+---+---+---+---+" << std::endl; 
@@ -111,10 +100,8 @@ void Position::clear_occupied_bitboards(){
 
 void Position::clear_mailbox(){
     //clear mailbox
-    for(std::size_t c = 0; c < COLOR_SIZE; ++c){
-        for(std::size_t i = 0; i < SQUARE_SIZE_64; ++i){
-            mailbox[c][i] = NO_PIECE_TYPE;
-        }
+    for(std::size_t i = 0; i < SQUARE_SIZE_64; ++i){
+        mailbox[i] = NO_PIECE;
     }
 }
 
@@ -219,7 +206,7 @@ std::string Position::get_FEN() const{
         {
             Square64 square = make_square64(rank, file);
             PieceType pieceType{NO_PIECE_TYPE};
-            for(emptySquaresCounter = 0; mailbox[COLOR_NC][square] == NO_PIECE_TYPE && file <= FILE_H;++file){
+            for(emptySquaresCounter = 0; mailbox[square] == NO_PIECE && file <= FILE_H; ++file){
                 ++emptySquaresCounter;
                 square = make_square64(rank, file + 1);                    
             }
@@ -227,14 +214,7 @@ std::string Position::get_FEN() const{
             if(emptySquaresCounter)
                 oss << emptySquaresCounter;
             
-            if(mailbox[WHITE][square] != NO_PIECE_TYPE){
-                pieceType = mailbox[WHITE][square];
-                oss << PIECE_NAMES[make_piece(WHITE, pieceType)];
-
-            }else if(mailbox[BLACK][square] != NO_PIECE_TYPE){
-                pieceType = mailbox[BLACK][square];
-                oss << PIECE_NAMES[make_piece(BLACK, pieceType)];
-            }
+            oss << PIECE_NAMES[mailbox[square]];
         }
 
         if(rank > RANK_1)
@@ -243,7 +223,7 @@ std::string Position::get_FEN() const{
 
     oss << (sideToMove == WHITE ? " w " : " b ");
 
-    int castlingRights = get_castling_right();
+    CastlingRight castlingRights = get_castling_right();
 
     if(castlingRights & CastlingRight::WKCA)
         oss << 'K';
@@ -274,14 +254,12 @@ std::string Position::get_FEN() const{
 
 void Position::calc_material_score(){
 
-    for(std::size_t sq = 0; sq < SQUARE_SIZE_64; ++sq){
-        if(mailbox[WHITE][sq] != NO_PIECE_TYPE)
-            materialScore[WHITE] += Evaluate::calc_material_table(make_piece(WHITE, mailbox[WHITE][sq]), Square64(sq));
-    }
-
-    for(std::size_t sq = 0; sq < SQUARE_SIZE_64; ++sq){
-        if(mailbox[BLACK][sq] != NO_PIECE_TYPE)
-            materialScore[BLACK] += Evaluate::calc_material_table(make_piece(BLACK, mailbox[BLACK][sq]), Square64(sq));
+    for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64){
+        if(mailbox[sq64] != NO_PIECE)
+            if( piece_color(mailbox[sq64]) ==  WHITE)
+                materialScore[WHITE] += Evaluate::calc_material_table(mailbox[sq64], sq64);
+            else    
+                materialScore[BLACK] += Evaluate::calc_material_table(mailbox[sq64], sq64);
     }
 
 }
@@ -349,7 +327,7 @@ bool Position::do_move(Move move){
                 remove_piece(Square64(to+Direction::NORTH));
             }
         }
-        if(specialMove == SpecialMove::CASTLE){
+        else if(specialMove == SpecialMove::CASTLE){
             switch (to)
             {
             case Square64::SQ64_C1:
@@ -396,7 +374,7 @@ bool Position::do_move(Move move){
 
     //Set enpassant square
     historyPly[ply-1].enpassantSquare = Square64::SQ64_NO_SQUARE;
-    if(mailbox[Color::COLOR_NC][from] == PieceType::PAWN){
+    if(piece_type(mailbox[from]) == PieceType::PAWN){
         historyPly[ply-1].fiftyMovesCounter = 0;
         
         if(sideToMove==Color::WHITE && specialMove == SpecialMove::PAWN_START){
@@ -502,25 +480,11 @@ void Position::undo_move(){
 
 void Position::move_piece(Square64 from, Square64 to){
 
-    Color pieceColor{Color::COLOR_NC};
-    PieceType pieceType{PieceType::NO_PIECE_TYPE};
-
-    if(mailbox[Color::WHITE][from] != PieceType::NO_PIECE_TYPE){
-        pieceType = mailbox[Color::WHITE][from];
-        mailbox[Color::WHITE][from] = PieceType::NO_PIECE_TYPE;
-        mailbox[Color::WHITE][to] = pieceType;
-        pieceColor = Color::WHITE;
-    }else if(mailbox[Color::BLACK][from] != PieceType::NO_PIECE_TYPE){
-        pieceType = mailbox[Color::BLACK][from];
-        mailbox[Color::BLACK][from] = PieceType::NO_PIECE_TYPE;
-        mailbox[Color::BLACK][to] = pieceType;
-        pieceColor = Color::BLACK;
-    }else{
-        pieceColor = Color::COLOR_NC;
-    }
-
-    mailbox[Color::COLOR_NC][from] = PieceType::NO_PIECE_TYPE;
-    mailbox[Color::COLOR_NC][to] = pieceType;
+    Piece piece = mailbox[from];
+    mailbox[from] =  NO_PIECE;
+    mailbox[to] =  piece;
+    PieceType pieceType = piece_type(piece);
+    Color pieceColor = piece_color(piece);
 
     pieceTypesBitboards[pieceColor][pieceType] = Bitboards::clear_pieces(pieceTypesBitboards[pieceColor][pieceType], from);
     occupiedBitboards[pieceColor] = Bitboards::clear_pieces(occupiedBitboards[pieceColor], from);
@@ -529,12 +493,6 @@ void Position::move_piece(Square64 from, Square64 to){
     pieceTypesBitboards[pieceColor][pieceType] = Bitboards::set_pieces(pieceTypesBitboards[pieceColor][pieceType], to);
     occupiedBitboards[pieceColor] = Bitboards::set_pieces(occupiedBitboards[pieceColor], to);
     occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC],to);
-
-    //Bitboards::move_piece(pieceTypesBitboards[pieceColor][pieceType], from, to);
-    //Bitboards::move_piece(occupiedBitboards[pieceColor], from, to);
-    //Bitboards::move_piece(occupiedBitboards[Color::COLOR_NC], from, to);
-
-    Piece piece = make_piece(pieceColor, pieceType);
 
     //Update piece value from material
     materialScore[pieceColor] -= Evaluate::calc_material_table(piece, from);
@@ -546,33 +504,12 @@ void Position::move_piece(Square64 from, Square64 to){
 
 }
 
-//TODO usar templates para evitar if else
 void Position::remove_piece(Square64 square){
 
-    Color pieceColor{Color::COLOR_NC};
-    PieceType pieceType{PieceType::NO_PIECE_TYPE};
-
-    // Check witch piece is located on the square of each color mailbox
-    if(mailbox[Color::WHITE][square] != PieceType::NO_PIECE_TYPE){
-        //Save piece type
-        pieceType = mailbox[Color::WHITE][square];
-        //Remove piece from corresponding mailbox
-        mailbox[Color::WHITE][square] = PieceType::NO_PIECE_TYPE;
-        //Save piece color
-        pieceColor = Color::WHITE;
-    }else if(mailbox[Color::BLACK][square] != PieceType::NO_PIECE_TYPE){
-        pieceType = mailbox[Color::BLACK][square];
-        mailbox[Color::BLACK][square] = PieceType::NO_PIECE_TYPE;
-        pieceColor = Color::BLACK;
-    }else{
-        pieceColor = Color::COLOR_NC;
-    }
-
-    //Update both color mailbox
-    mailbox[Color::COLOR_NC][square] = PieceType::NO_PIECE_TYPE;
-
-    //Knowing the piece color and piece type, make piece
-    Piece piece = make_piece(pieceColor, pieceType);
+    Piece piece = mailbox[square];
+    mailbox[square] = NO_PIECE;
+    Color pieceColor = piece_color(piece);
+    PieceType pieceType = piece_type(piece);
 
     pieceTypesBitboards[pieceColor][pieceType] = Bitboards::clear_pieces(pieceTypesBitboards[pieceColor][pieceType], square);
     occupiedBitboards[pieceColor] = Bitboards::clear_pieces(occupiedBitboards[pieceColor], square);
@@ -589,9 +526,8 @@ void Position::add_piece(Square64 square, Piece piece){
 
     Color pieceColor = piece_color(piece);
     PieceType pieceType = piece_type(piece);
-    mailbox[pieceColor][square] = pieceType;
-    mailbox[Color::COLOR_NC][square] = pieceType;
 
+    mailbox[square] = piece;
     pieceTypesBitboards[pieceColor][pieceType] = Bitboards::set_pieces(pieceTypesBitboards[pieceColor][pieceType], square);
     occupiedBitboards[pieceColor] = Bitboards::set_pieces(occupiedBitboards[pieceColor], square);
     occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC], square);
