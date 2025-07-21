@@ -159,6 +159,9 @@ enum Direction: int{
 constexpr Square64 operator+(Square64& sq1, int sq2) { return Square64(int(sq1) + sq2); }
 inline Square64& operator++(Square64& sq) { return sq = Square64(int(sq) + 1); }
 
+constexpr Square64 operator-(Square64& sq1, int sq2) { return Square64(int(sq1) - sq2); }
+inline Square64& operator--(Square64& sq) { return sq = Square64(int(sq) - 1); }
+
 inline File& operator++(File& f) { return f = File(int(f) + 1); }
 constexpr File operator+(File f1, int f2) { return File (int(f1) + f2); }
 inline File&   operator+=(File& f1, int f2) { return f1 = f1 + f2; }

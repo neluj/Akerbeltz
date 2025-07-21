@@ -5,6 +5,18 @@
 using namespace Xake;
 //Pseudo-legal basic unit test, using random position 
 
+TEST(MovegeneratorTest, WithePawnCapture){
+    
+    const std::string WHITE_PAWN_CAPTURE_FEN_POSITION = "3krrb1/5P2/3p1p2/3PP1Pp/Pp1p4/2p5/3P4/3K4 w - h6 1 1";
+    Position position;
+    position.set_FEN(WHITE_PAWN_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 13);
+
+}
+/*
 TEST(MovegeneratorTest, WhitePawns){
 
     const std::string WITHE_PAWN_FEN_POSITION = "3k1p2/6P1/8/pPp1pp2/3P1P2/1pP2P1p/P6P/4K3 w - a6 0 1";
@@ -17,6 +29,7 @@ TEST(MovegeneratorTest, WhitePawns){
     EXPECT_EQ(moveList.size, 23);
 
 }
+
 
 TEST(MovegeneratorTest, BlackPawns){
     const std::string BLACK_PAWN_FEN_POSITION = "4k3/p6p/1Pp2p1P/3p1p2/PpP1PP2/8/6p1/3K1P2 b - a3 0 1";
@@ -149,20 +162,6 @@ TEST(MovegeneratorTest, BlackCastling){
 
 } 
 
-//Captures
-
-TEST(MovegeneratorTest, WithePawnCapture){
-    
-    const std::string WHITE_PAWN_CAPTURE_FEN_POSITION = "3k4/8/3p4/3PP1Pp/Pp1p4/2p5/3P4/3K4 w - h6 1 1";
-    Position position;
-    position.set_FEN(WHITE_PAWN_CAPTURE_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_capture_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 3);
-
-}
-
 TEST(MovegeneratorTest, BlackPawnCapture){
     
     const std::string BLACK_PAWN_CAPTURE_FEN_POSITION = "3k4/8/3p4/3PP1Pp/Pp1p4/2p5/3P4/3K4 b - a3 1 1";
@@ -291,3 +290,5 @@ TEST(MovegeneratorTest, BlackKingCapture){
     EXPECT_EQ(moveList.size, 1);
 
 }
+
+*/
