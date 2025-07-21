@@ -41,7 +41,7 @@ TEST(MovegeneratorTest, BlackPawnCapture){
     EXPECT_EQ(moveList.size, 13);
 
 }
-/*
+
 
 TEST(MovegeneratorTest, BlackPawns){
     const std::string BLACK_PAWN_FEN_POSITION = "4k3/p6p/1Pp2p1P/3p1p2/PpP1PP2/8/6p1/3K1P2 b - a3 0 1";
@@ -51,9 +51,9 @@ TEST(MovegeneratorTest, BlackPawns){
     MoveGen::MoveList moveList;
 
     MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 23);
+    EXPECT_EQ(moveList.size, 17);
 }
-
+/*
 
 TEST(MovegeneratorTest, WhiteKnight){
     

@@ -14,6 +14,7 @@ void white_pawn_quiet_moves(const Position &pos, MoveList &moveList);
 
 void black_pawn_moves(const Position &pos, MoveList &moveList);
 void black_pawn_capture_moves(const Position &pos, MoveList &moveList);
+void black_pawn_quiet_moves(const Position &pos, MoveList &moveList);
 
 template<Direction D, SpecialMove SM>
 void extract_quiet_moves(Bitboard toBitboard, MoveList &moveList);
@@ -46,6 +47,7 @@ void white_pawn_moves(const Position &pos, MoveList &moveList){
 
 void black_pawn_moves(const Position &pos, MoveList &moveList){
     black_pawn_capture_moves(pos, moveList);
+    black_pawn_quiet_moves(pos, moveList);
 }
 
 void white_pawn_capture_moves(const Position &pos, MoveList &moveList){
@@ -130,6 +132,22 @@ void black_pawn_capture_moves(const Position &pos, MoveList &moveList){
             moveList.set_move(make_enpassant_move(enpassantSquare-SOUTH_WEST, enpassantSquare));
         }
     }
+
+}
+
+void black_pawn_quiet_moves(const Position &pos, MoveList &moveList){
+
+    Bitboard quietSimpleMoves = (pos.get_pieceTypes_bitboard(BLACK, PAWN) >> 8) & ~pos.get_occupied_bitboard(COLOR_NC);
+    Bitboard notPromotionQuietMoves = quietSimpleMoves & ~Bitboards::RANK_1_MASK;
+    extract_quiet_moves<SOUTH, SpecialMove::NO_SPECIAL>(notPromotionQuietMoves, moveList);
+    Bitboard startMoves = ((quietSimpleMoves & Bitboards::RANK_6_MASK) >> 8) & ~pos.get_occupied_bitboard(COLOR_NC);
+    extract_quiet_moves<SOUTH_SOUTH, SpecialMove::PAWN_START>(startMoves, moveList);
+
+    Bitboard promotionQuietMoves = quietSimpleMoves & Bitboards::RANK_1_MASK;
+    extract_quiet_moves<SOUTH, PROMOTION_BISHOP>(promotionQuietMoves, moveList);
+    extract_quiet_moves<SOUTH, PROMOTION_KNIGHT>(promotionQuietMoves, moveList);
+    extract_quiet_moves<SOUTH, PROMOTION_QUEEN> (promotionQuietMoves, moveList);
+    extract_quiet_moves<SOUTH, PROMOTION_ROOK>  (promotionQuietMoves, moveList);
 
 }
 
