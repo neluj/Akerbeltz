@@ -19,6 +19,8 @@ namespace Bitboards {
     const Bitboard FILE_H_MASK = 0x8080808080808080ULL;
     const Bitboard RANK_1_MASK = 0x00000000000000FFULL;
     const Bitboard RANK_2_MASK = 0x000000000000FF00ULL;
+    const Bitboard RANK_3_MASK = 0x0000000000FF0000ULL;
+    const Bitboard RANK_6_MASK = 0x0000FF0000000000ULL;
     const Bitboard RANK_7_MASK = 0x00FF000000000000ULL;
     const Bitboard RANK_8_MASK = 0xFF00000000000000ULL;
 

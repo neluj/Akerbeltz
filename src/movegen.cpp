@@ -6,29 +6,27 @@ namespace Xake{
 
 namespace MoveGen{
 
+void white_pawn_moves(const Position &pos, MoveList &moveList);
+void white_pawn_capture_moves(const Position &pos, MoveList &moveList);
+void white_pawn_quiet_moves(const Position &pos, MoveList &moveList);
+
+template<Direction D, SpecialMove SM>
+void extract_quiet_moves(Bitboard toBitboard, MoveList &moveList);
+
 template<Direction D, SpecialMove SM>
 void extract_capture_moves(const Position &pos, Bitboard toBitboard, MoveList &moveList);
 
-void white_pawn_capture_moves(const Position &pos, MoveList &moveList);
-
 void generate_all_moves(const Position &pos, MoveList &moveList){
-
+    white_pawn_moves(pos, moveList);
 }
 
 void generate_capture_moves(Position &pos, MoveList &moveList){
     white_pawn_capture_moves(pos, moveList);
 }
 
-template<Direction D, SpecialMove SM>
-void extract_capture_moves(const Position &pos, Bitboard toBitboard, MoveList &moveList){
-
-    while (toBitboard) {
-        Square64 moveTo{__builtin_ctzll(toBitboard)};
-        Square64 moveFrom{moveTo - D};
-        moveList.set_move(make_capture_move(moveFrom, moveTo, SM, pos.get_mailbox_piece(moveFrom), pos.get_mailbox_piece(moveTo)));
-        toBitboard &= toBitboard - 1;
-    }
-
+void white_pawn_moves(const Position &pos, MoveList &moveList){
+    white_pawn_capture_moves(pos, moveList);
+    white_pawn_quiet_moves(pos, moveList);
 }
 
 void white_pawn_capture_moves(const Position &pos, MoveList &moveList){
@@ -61,6 +59,46 @@ void white_pawn_capture_moves(const Position &pos, MoveList &moveList){
         else if(northWestMoves & enpassantMask){
             moveList.set_move(make_enpassant_move(enpassantSquare-NORTH_WEST, enpassantSquare));
         }
+    }
+
+}
+
+void white_pawn_quiet_moves(const Position &pos, MoveList &moveList){
+
+    Bitboard quietSimpleMoves = (pos.get_pieceTypes_bitboard(WHITE, PAWN) << NORTH) & ~pos.get_occupied_bitboard(COLOR_NC);
+    Bitboard notPromotionQuietMoves = quietSimpleMoves & ~Bitboards::RANK_8_MASK;
+    extract_quiet_moves<NORTH, SpecialMove::NO_SPECIAL>(notPromotionQuietMoves, moveList);
+    Bitboard startMoves = ((quietSimpleMoves & Bitboards::RANK_3_MASK) << NORTH) & ~pos.get_occupied_bitboard(COLOR_NC);
+    extract_quiet_moves<NORTH_NORTH, SpecialMove::PAWN_START>(startMoves, moveList);
+
+    Bitboard promotionQuietMoves = quietSimpleMoves & Bitboards::RANK_8_MASK;
+    extract_quiet_moves<NORTH, PROMOTION_BISHOP>(promotionQuietMoves, moveList);
+    extract_quiet_moves<NORTH, PROMOTION_KNIGHT>(promotionQuietMoves, moveList);
+    extract_quiet_moves<NORTH, PROMOTION_QUEEN> (promotionQuietMoves, moveList);
+    extract_quiet_moves<NORTH, PROMOTION_ROOK>  (promotionQuietMoves, moveList);
+
+}
+
+template<Direction D, SpecialMove SM>
+void extract_quiet_moves(Bitboard toBitboard, MoveList &moveList){
+
+    while (toBitboard) {
+        Square64 moveTo{__builtin_ctzll(toBitboard)};
+        Square64 moveFrom{moveTo - D};
+        moveList.set_move(make_quiet_move(moveFrom, moveTo, SM));
+        toBitboard &= toBitboard - 1;
+    }
+
+}
+
+template<Direction D, SpecialMove SM>
+void extract_capture_moves(const Position &pos, Bitboard toBitboard, MoveList &moveList){
+
+    while (toBitboard) {
+        Square64 moveTo{__builtin_ctzll(toBitboard)};
+        Square64 moveFrom{moveTo - D};
+        moveList.set_move(make_capture_move(moveFrom, moveTo, SM, pos.get_mailbox_piece(moveFrom), pos.get_mailbox_piece(moveTo)));
+        toBitboard &= toBitboard - 1;
     }
 
 }
