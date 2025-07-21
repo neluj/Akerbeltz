@@ -29,6 +29,18 @@ TEST(MovegeneratorTest, WhitePawns){
     EXPECT_EQ(moveList.size, 18);
 
 }
+
+TEST(MovegeneratorTest, BlackPawnCapture){
+    
+    const std::string BLACK_PAWN_CAPTURE_FEN_POSITION = "3k4/3p4/2P5/pP1P4/3pp1pP/3P1P2/5p2/3KRRB1 b - h3 1 1";
+    Position position;
+    position.set_FEN(BLACK_PAWN_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 13);
+
+}
 /*
 
 TEST(MovegeneratorTest, BlackPawns){
@@ -161,18 +173,6 @@ TEST(MovegeneratorTest, BlackCastling){
     EXPECT_EQ(moveList.size, 11);
 
 } 
-
-TEST(MovegeneratorTest, BlackPawnCapture){
-    
-    const std::string BLACK_PAWN_CAPTURE_FEN_POSITION = "3k4/8/3p4/3PP1Pp/Pp1p4/2p5/3P4/3K4 b - a3 1 1";
-    Position position;
-    position.set_FEN(BLACK_PAWN_CAPTURE_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_capture_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 3);
-
-}
 
 TEST(MovegeneratorTest, WhiteKnightCapture){
     
