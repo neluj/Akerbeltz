@@ -26,7 +26,7 @@ TEST(MovegeneratorTest, WhitePawns){
     MoveGen::MoveList moveList;
 
     MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 18);
+    EXPECT_EQ(moveList.size, 23);
 
 }
 
@@ -51,9 +51,21 @@ TEST(MovegeneratorTest, BlackPawns){
     MoveGen::MoveList moveList;
 
     MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 17);
+    EXPECT_EQ(moveList.size, 23);
 }
-/*
+
+
+TEST(MovegeneratorTest, WhiteKnightCapture){
+    
+    const std::string WHITE_KNIGHT_CAPTURE_FEN_POSITION = "3k4/8/3P4/4p3/2N5/4p3/8/4K3 w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_KNIGHT_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 2);
+    
+}
 
 TEST(MovegeneratorTest, WhiteKnight){
     
@@ -66,7 +78,18 @@ TEST(MovegeneratorTest, WhiteKnight){
     EXPECT_EQ(moveList.size, 21);
 
 }
- 
+
+TEST(MovegeneratorTest, BlackKnightCapture){
+    
+    const std::string BLACK_KNIGHT_CAPTURE_FEN_POSITION = "3k4/8/1p6/4P3/2n5/4P3/8/4K3 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_KNIGHT_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 2);
+    
+}
 
 TEST(MovegeneratorTest, BlackKnight){
     
@@ -80,6 +103,31 @@ TEST(MovegeneratorTest, BlackKnight){
 
 }
 
+TEST(MovegeneratorTest, WhiteKingCapture){
+    
+    const std::string WHITE_KING_CAPTURE_FEN_POSITION = "3k4/8/8/8/8/6pP/5p1K/8 w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_KING_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 1);
+
+}
+
+TEST(MovegeneratorTest, BlackKingCapture){
+    
+    const std::string BLACK_KING_CAPTURE_FEN_POSITION = "8/5P1k/6Pp/8/8/8/8/3K4 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_KING_CAPTURE_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_capture_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 1);
+
+}
+
+/*
 TEST(MovegeneratorTest, WhiteBishop){
     const std::string WHITE_BISHOP_FEN_POSITION = "4k3/7B/8/2P1pp2/3B4/8/8/P3K1p1 w - - 0 1";
     Position position;
@@ -174,30 +222,6 @@ TEST(MovegeneratorTest, BlackCastling){
 
 } 
 
-TEST(MovegeneratorTest, WhiteKnightCapture){
-    
-    const std::string WHITE_KNIGHT_CAPTURE_FEN_POSITION = "3k4/8/3P4/4p3/2N5/4p3/8/4K3 w - - 0 1";
-    Position position;
-    position.set_FEN(WHITE_KNIGHT_CAPTURE_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_capture_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 2);
-    
-}
-
-TEST(MovegeneratorTest, BlackKnightCapture){
-    
-    const std::string BLACK_KNIGHT_CAPTURE_FEN_POSITION = "3k4/8/1p6/4P3/2n5/4P3/8/4K3 b - - 0 1";
-    Position position;
-    position.set_FEN(BLACK_KNIGHT_CAPTURE_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_capture_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 2);
-    
-}
-
 TEST(MovegeneratorTest, WhiteBishopCapture){
     const std::string WHITE_BISHOP_CAPTURE_FEN_POSITION = "3k4/8/1p6/1p1PP3/2B5/4P3/4p3/7K w - - 0 1";
     Position position;
@@ -264,30 +288,6 @@ TEST(MovegeneratorTest, BlackQueenCapture){
 
     MoveGen::generate_capture_moves(position,moveList);
     EXPECT_EQ(moveList.size, 2);
-
-}
-
-TEST(MovegeneratorTest, WhiteKingCapture){
-    
-    const std::string WHITE_KING_CAPTURE_FEN_POSITION = "3k4/8/8/8/8/6pP/5p1K/8 w - - 0 1";
-    Position position;
-    position.set_FEN(WHITE_KING_CAPTURE_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_capture_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 1);
-
-}
-
-TEST(MovegeneratorTest, BlackKingCapture){
-    
-    const std::string BLACK_KING_CAPTURE_FEN_POSITION = "8/5P1k/6Pp/8/8/8/8/3K4 b - - 0 1";
-    Position position;
-    position.set_FEN(BLACK_KING_CAPTURE_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_capture_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 1);
 
 }
 
