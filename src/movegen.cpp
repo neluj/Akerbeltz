@@ -16,6 +16,9 @@ void black_pawn_moves(const Position &pos, MoveList &moveList);
 void black_pawn_capture_moves(const Position &pos, MoveList &moveList);
 void black_pawn_quiet_moves(const Position &pos, MoveList &moveList);
 
+template<Color C>
+void castling_moves(const Position &pos, MoveList &moveList);
+
 template<Color C, PieceType PT, MoveType MT>
 void no_special_moves(const Position &pos, MoveList &moveList);
 
@@ -41,6 +44,7 @@ void generate_all_moves(const Position &pos, MoveList &moveList){
         no_special_moves<WHITE, KNIGHT, QUIET>(pos, moveList);
         no_special_moves<WHITE, KING, CAPTURE>(pos, moveList);
         no_special_moves<WHITE, KING, QUIET>(pos, moveList);
+        castling_moves<WHITE>(pos, moveList);
     }
     else{
         black_pawn_moves(pos, moveList);
@@ -48,6 +52,7 @@ void generate_all_moves(const Position &pos, MoveList &moveList){
         no_special_moves<BLACK, KNIGHT, QUIET>(pos, moveList);
         no_special_moves<BLACK, KING, CAPTURE>(pos, moveList);
         no_special_moves<BLACK, KING, QUIET>(pos, moveList);
+        castling_moves<BLACK>(pos, moveList);
     }  
 }
 
@@ -196,6 +201,43 @@ void no_special_moves(const Position &pos, MoveList &moveList){
     }
 
 
+}
+
+template<Color C>
+void castling_moves(const Position &pos, MoveList &moveList){
+    CastlingRight castlingRights = pos.get_castling_right();
+    if constexpr(C == WHITE){
+        if(castlingRights & CastlingRight::WKCA){
+        if((pos.get_occupied_bitboard(COLOR_NC) & 0x0000000000000060) == 0){
+                if(!pos.square_is_attacked(SQ64_F1) && !pos.square_is_attacked(SQ64_E1)){
+                    moveList.set_move(make_quiet_move(SQ64_E1, SQ64_G1, SpecialMove::CASTLE));
+                }
+            }
+        }
+        if(castlingRights & CastlingRight::WQCA){
+        if((pos.get_occupied_bitboard(COLOR_NC) & 0x000000000000000E) == 0){
+                if(!pos.square_is_attacked(SQ64_E1) && !pos.square_is_attacked(SQ64_D1)){
+                    moveList.set_move(make_quiet_move(SQ64_E1, SQ64_C1, SpecialMove::CASTLE));
+                }
+            }
+        }
+    }
+    else if constexpr(C == BLACK){
+        if(castlingRights & CastlingRight::BKCA){
+        if((pos.get_occupied_bitboard(COLOR_NC) & 0x6000000000000000) == 0){
+                if(!pos.square_is_attacked(SQ64_E8) && !pos.square_is_attacked(SQ64_F8)){
+                    moveList.set_move(make_quiet_move(SQ64_E8, SQ64_G8, SpecialMove::CASTLE));
+                }
+            }
+        }
+        if(castlingRights & CastlingRight::BQCA){
+        if((pos.get_occupied_bitboard(COLOR_NC) & 0x0E00000000000000) == 0){
+                if(!pos.square_is_attacked(SQ64_E8) && !pos.square_is_attacked(SQ64_D8)){
+                    moveList.set_move(make_quiet_move(SQ64_E8, SQ64_C8, SpecialMove::CASTLE));
+                }
+            }
+        }
+    }  
 }
 
 template<PieceType PT>

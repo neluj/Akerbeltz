@@ -127,6 +127,54 @@ TEST(MovegeneratorTest, BlackKingCapture){
 
 }
 
+TEST(MovegeneratorTest, WhiteKingCastling){
+    
+    const std::string WHITE_CASTLING_FEN_POSITION = "4k3/8/8/8/8/8/4P2P/3PK2R w K - 0 1";
+    Position position;
+    position.set_FEN(WHITE_CASTLING_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 9);
+
+}
+
+TEST(MovegeneratorTest, BlackKingCastling){
+    
+    const std::string BLACK_CASTLING_FEN_POSITION = "4k2r/4p2p/8/8/8/8/8/4K3 b k - 0 1";
+    Position position;
+    position.set_FEN(BLACK_CASTLING_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 9);
+
+}
+
+TEST(MovegeneratorTest, WhiteQueenCastling){
+    
+    const std::string WHITE_CASTLING_FEN_POSITION = "4k3/8/8/8/8/8/P3P3/R3K3 w Q - 1 1";
+    Position position;
+    position.set_FEN(WHITE_CASTLING_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 9);
+
+}
+
+TEST(MovegeneratorTest, BlackQueenCastling){
+    
+    const std::string BLACK_CASTLING_FEN_POSITION = "r3k3/p3p3/8/8/8/8/8/4K3 b q - 1 1";
+    Position position;
+    position.set_FEN(BLACK_CASTLING_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 9);
+
+} 
+
 /*
 TEST(MovegeneratorTest, WhiteBishop){
     const std::string WHITE_BISHOP_FEN_POSITION = "4k3/7B/8/2P1pp2/3B4/8/8/P3K1p1 w - - 0 1";
@@ -197,30 +245,6 @@ TEST(MovegeneratorTest, BlackQueen){
     EXPECT_EQ(moveList.size, 45);
 
 }
-
-TEST(MovegeneratorTest, WhiteCastling){
-    
-    const std::string WHITE_CASTLING_FEN_POSITION = "4k3/8/8/8/8/8/4P2P/3PK2R w K - 0 1";
-    Position position;
-    position.set_FEN(WHITE_CASTLING_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 11);
-
-}
-
-TEST(MovegeneratorTest, BlackCastling){
-    
-    const std::string BLACK_CASTLING_FEN_POSITION = "3pk2r/4p2p/8/8/8/8/8/4K3 b k - 0 1";
-    Position position;
-    position.set_FEN(BLACK_CASTLING_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 11);
-
-} 
 
 TEST(MovegeneratorTest, WhiteBishopCapture){
     const std::string WHITE_BISHOP_CAPTURE_FEN_POSITION = "3k4/8/1p6/1p1PP3/2B5/4P3/4p3/7K w - - 0 1";
