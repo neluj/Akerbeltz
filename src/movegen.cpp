@@ -16,9 +16,20 @@ void black_pawn_moves(const Position &pos, MoveList &moveList);
 void black_pawn_capture_moves(const Position &pos, MoveList &moveList);
 void black_pawn_quiet_moves(const Position &pos, MoveList &moveList);
 
+//CASTLING
 template<Color C>
 void castling_moves(const Position &pos, MoveList &moveList);
 
+template<Color C, MoveType MT>
+void bishop_moves(const Position &pos, MoveList &moveList);
+
+template<Color C, MoveType MT>
+void rook_moves(const Position &pos, MoveList &moveList);
+
+template<Color C, MoveType MT>
+void queen_moves(const Position &pos, MoveList &moveList);
+
+//HELPERS
 template<Color C, PieceType PT, MoveType MT>
 void no_special_moves(const Position &pos, MoveList &moveList);
 
@@ -36,7 +47,8 @@ void extract_capture_moves(const Position &pos, Square64 from, Bitboard toBitboa
 
 template<PieceType PT>
 constexpr const Bitboard* non_sliding_attack_table();
-//TODO cómo hacer para evitar repeticiones de código
+
+//DEFINITIONS
 void generate_all_moves(const Position &pos, MoveList &moveList){
     if(pos.get_side_to_move() == WHITE){
         white_pawn_moves(pos, moveList);
@@ -45,6 +57,12 @@ void generate_all_moves(const Position &pos, MoveList &moveList){
         no_special_moves<WHITE, KING, CAPTURE>(pos, moveList);
         no_special_moves<WHITE, KING, QUIET>(pos, moveList);
         castling_moves<WHITE>(pos, moveList);
+        bishop_moves<WHITE, CAPTURE>(pos, moveList);
+        bishop_moves<WHITE, QUIET>(pos, moveList); 
+        rook_moves<WHITE, CAPTURE>(pos, moveList);
+        rook_moves<WHITE, QUIET>(pos, moveList);  
+        queen_moves<WHITE, CAPTURE>(pos, moveList);
+        queen_moves<WHITE, QUIET>(pos, moveList);  
     }
     else{
         black_pawn_moves(pos, moveList);
@@ -53,6 +71,12 @@ void generate_all_moves(const Position &pos, MoveList &moveList){
         no_special_moves<BLACK, KING, CAPTURE>(pos, moveList);
         no_special_moves<BLACK, KING, QUIET>(pos, moveList);
         castling_moves<BLACK>(pos, moveList);
+        bishop_moves<BLACK, CAPTURE>(pos, moveList);
+        bishop_moves<BLACK, QUIET>(pos, moveList);
+        rook_moves<BLACK, CAPTURE>(pos, moveList);
+        rook_moves<BLACK, QUIET>(pos, moveList);   
+        queen_moves<BLACK, CAPTURE>(pos, moveList);
+        queen_moves<BLACK, QUIET>(pos, moveList);    
     }  
 }
 
@@ -71,11 +95,17 @@ void generate_capture_moves(Position &pos, MoveList &moveList){
         white_pawn_capture_moves(pos, moveList);
         no_special_moves<WHITE, KNIGHT, CAPTURE>(pos, moveList);
         no_special_moves<WHITE, KING, CAPTURE>(pos, moveList);
+        bishop_moves<WHITE, CAPTURE>(pos, moveList);
+        rook_moves<WHITE, CAPTURE>(pos, moveList);
+        queen_moves<WHITE, CAPTURE>(pos, moveList);
     }
     else{
         black_pawn_capture_moves(pos, moveList);
         no_special_moves<BLACK, KNIGHT, CAPTURE>(pos, moveList);
         no_special_moves<BLACK, KING, CAPTURE>(pos, moveList);
+        bishop_moves<BLACK, CAPTURE>(pos, moveList);
+        rook_moves<BLACK, CAPTURE>(pos, moveList);
+        queen_moves<BLACK, CAPTURE>(pos, moveList);
     }   
 }
 
@@ -110,7 +140,6 @@ void white_pawn_capture_moves(const Position &pos, MoveList &moveList){
             moveList.set_move(make_enpassant_move(enpassantSquare-NORTH_WEST, enpassantSquare));
         }
     }
-
 }
 
 void white_pawn_quiet_moves(const Position &pos, MoveList &moveList){
@@ -161,7 +190,6 @@ void black_pawn_capture_moves(const Position &pos, MoveList &moveList){
             moveList.set_move(make_enpassant_move(enpassantSquare-SOUTH_WEST, enpassantSquare));
         }
     }
-
 }
 
 void black_pawn_quiet_moves(const Position &pos, MoveList &moveList){
@@ -238,6 +266,67 @@ void castling_moves(const Position &pos, MoveList &moveList){
             }
         }
     }  
+}
+
+template<Color C, MoveType MT>
+void bishop_moves(const Position &pos, MoveList &moveList){
+
+    Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, BISHOP);
+    while (fromBitboard) {
+        Square64 from{__builtin_ctzll(fromBitboard)};
+        Bitboard attacks = Attacks::sliding_diagonal_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
+        Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
+        
+        if constexpr(MT == QUIET){
+            Bitboard quietAttacks = attacks & ~captureAttacks &  ~pos.get_occupied_bitboard(C);
+            extract_quiet_moves<NO_SPECIAL>(from, quietAttacks, moveList);
+        }
+        if constexpr(MT == CAPTURE){
+            extract_capture_moves<NO_SPECIAL>(pos, from, captureAttacks, moveList);
+        }
+        fromBitboard &= fromBitboard - 1;
+    }
+}
+
+template<Color C, MoveType MT>
+void rook_moves(const Position &pos, MoveList &moveList){
+
+    Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, ROOK);
+    while (fromBitboard) {
+        Square64 from{__builtin_ctzll(fromBitboard)};
+        Bitboard attacks = Attacks::sliding_side_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
+        Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
+        
+        if constexpr(MT == QUIET){
+            Bitboard quietAttacks = attacks & ~captureAttacks &  ~pos.get_occupied_bitboard(C);
+            extract_quiet_moves<NO_SPECIAL>(from, quietAttacks, moveList);
+        }
+        if constexpr(MT == CAPTURE){
+            extract_capture_moves<NO_SPECIAL>(pos, from, captureAttacks, moveList);
+        }
+        fromBitboard &= fromBitboard - 1;
+    }
+}
+
+template<Color C, MoveType MT>
+void queen_moves(const Position &pos, MoveList &moveList){
+
+    Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, QUEEN);
+    while (fromBitboard) {
+        Square64 from{__builtin_ctzll(fromBitboard)};
+        Bitboard attacks =   Attacks::sliding_diagonal_attacks(pos.get_occupied_bitboard(COLOR_NC), from)
+                           | Attacks::sliding_side_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
+        Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
+        
+        if constexpr(MT == QUIET){
+            Bitboard quietAttacks = attacks & ~captureAttacks & ~pos.get_occupied_bitboard(C);
+            extract_quiet_moves<NO_SPECIAL>(from, quietAttacks, moveList);
+        }
+        if constexpr(MT == CAPTURE){
+            extract_capture_moves<NO_SPECIAL>(pos, from, captureAttacks, moveList);
+        }
+        fromBitboard &= fromBitboard - 1;
+    }
 }
 
 template<PieceType PT>

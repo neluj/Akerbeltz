@@ -135,7 +135,7 @@ TEST(MovegeneratorTest, WhiteKingCastling){
     MoveGen::MoveList moveList;
 
     MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 9);
+    EXPECT_EQ(moveList.size, 11);
 
 }
 
@@ -147,7 +147,7 @@ TEST(MovegeneratorTest, BlackKingCastling){
     MoveGen::MoveList moveList;
 
     MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 9);
+    EXPECT_EQ(moveList.size, 11);
 
 }
 
@@ -159,7 +159,7 @@ TEST(MovegeneratorTest, WhiteQueenCastling){
     MoveGen::MoveList moveList;
 
     MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 9);
+    EXPECT_EQ(moveList.size, 12);
 
 }
 
@@ -171,80 +171,9 @@ TEST(MovegeneratorTest, BlackQueenCastling){
     MoveGen::MoveList moveList;
 
     MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 9);
+    EXPECT_EQ(moveList.size, 12);
 
 } 
-
-/*
-TEST(MovegeneratorTest, WhiteBishop){
-    const std::string WHITE_BISHOP_FEN_POSITION = "4k3/7B/8/2P1pp2/3B4/8/8/P3K1p1 w - - 0 1";
-    Position position;
-    position.set_FEN(WHITE_BISHOP_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 16);
-
-}
-
-TEST(MovegeneratorTest, BlackBishop){
-    const std::string BLACK_BISHOP_FEN_POSITION = "p3k1P1/8/8/3b4/2p1PP2/8/7b/4K3 b - - 0 1";
-    Position position;
-    position.set_FEN(BLACK_BISHOP_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 16);
-} 
-
-TEST(MovegeneratorTest, WhiteRook){
-    
-    const std::string WHITE_ROOK_FEN_POSITION = "4kp2/8/2p2R2/2P5/2R5/2p5/8/5K2 w - - 0 1";
-    Position position;
-    position.set_FEN(WHITE_ROOK_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 24);
-
-}
-
-TEST(MovegeneratorTest, BlackRook){
-    
-    const std::string BLACK_ROOK_FEN_POSITION = "5k2/8/2P5/2r5/2p5/2P2r2/8/4KP2 b - - 0 1";
-    Position position;
-    position.set_FEN(BLACK_ROOK_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 24);
-
-} 
-
-TEST(MovegeneratorTest, WhiteQueen){
-    
-    const std::string WHITE_QUEEN_FEN_POSITION = "4kp2/8/5Q2/2P5/2Q5/2p2P2/8/5K2 w - - 0 1";
-    Position position;
-    position.set_FEN(WHITE_QUEEN_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 45);
-
-}
- 
-
-TEST(MovegeneratorTest, BlackQueen){
-    
-    const std::string BLACK_QUEEN_FEN_POSITION = "5k2/8/2P2p2/2q5/2p5/5q2/8/4KP2 b - - 0 1";
-    Position position;
-    position.set_FEN(BLACK_QUEEN_FEN_POSITION);
-    MoveGen::MoveList moveList;
-
-    MoveGen::generate_all_moves(position,moveList);
-    EXPECT_EQ(moveList.size, 45);
-
-}
 
 TEST(MovegeneratorTest, WhiteBishopCapture){
     const std::string WHITE_BISHOP_CAPTURE_FEN_POSITION = "3k4/8/1p6/1p1PP3/2B5/4P3/4p3/7K w - - 0 1";
@@ -254,6 +183,17 @@ TEST(MovegeneratorTest, WhiteBishopCapture){
 
     MoveGen::generate_capture_moves(position,moveList);
     EXPECT_EQ(moveList.size, 2);
+
+}
+
+TEST(MovegeneratorTest, WhiteBishop){
+    const std::string WHITE_BISHOP_FEN_POSITION = "4k3/7B/8/2P1pp2/3B4/8/8/P3K1p1 w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_BISHOP_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 16);
 
 }
 
@@ -267,6 +207,16 @@ TEST(MovegeneratorTest, BlackBishopCapture){
     EXPECT_EQ(moveList.size, 2);
 }
 
+TEST(MovegeneratorTest, BlackBishop){
+    const std::string BLACK_BISHOP_FEN_POSITION = "p3k1P1/8/8/3b4/2p1PP2/8/7b/4K3 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_BISHOP_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 16);
+}
+
 TEST(MovegeneratorTest, WhiteRookCapture){
     
     const std::string WHITE_ROOK_CAPTURE_FEN_POSITION = "7k/2p5/8/2R2P2/8/8/8/3K4 w - - 0 1";
@@ -276,6 +226,18 @@ TEST(MovegeneratorTest, WhiteRookCapture){
 
     MoveGen::generate_capture_moves(position,moveList);
     EXPECT_EQ(moveList.size, 1);
+
+}
+
+TEST(MovegeneratorTest, WhiteRook){
+    
+    const std::string WHITE_ROOK_FEN_POSITION = "4kp2/8/2p2R2/2P5/2R5/2p5/8/5K2 w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_ROOK_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 24);
 
 }
 
@@ -291,6 +253,18 @@ TEST(MovegeneratorTest, BlackRookCapture){
 
 }
 
+TEST(MovegeneratorTest, BlackRook){
+    
+    const std::string BLACK_ROOK_FEN_POSITION = "5k2/8/2P5/2r5/2p5/2P2r2/8/4KP2 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_ROOK_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 24);
+
+} 
+
 TEST(MovegeneratorTest, WhiteQueenCapture){
     
     const std::string WHITE_QUEEN_CAPTURE_FEN_POSITION = "3k4/8/8/3p4/2Q2p2/1P6/2P5/7K w - - 0 1";
@@ -300,6 +274,18 @@ TEST(MovegeneratorTest, WhiteQueenCapture){
 
     MoveGen::generate_capture_moves(position,moveList);
     EXPECT_EQ(moveList.size, 2);
+
+}
+
+TEST(MovegeneratorTest, WhiteQueen){
+    
+    const std::string WHITE_QUEEN_FEN_POSITION = "4kp2/8/5Q2/2P5/2Q5/2p2P2/8/5K2 w - - 0 1";
+    Position position;
+    position.set_FEN(WHITE_QUEEN_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 45);
 
 }
 
@@ -315,4 +301,14 @@ TEST(MovegeneratorTest, BlackQueenCapture){
 
 }
 
-*/
+TEST(MovegeneratorTest, BlackQueen){
+    
+    const std::string BLACK_QUEEN_FEN_POSITION = "5k2/8/2P2p2/2q5/2p5/5q2/8/4KP2 b - - 0 1";
+    Position position;
+    position.set_FEN(BLACK_QUEEN_FEN_POSITION);
+    MoveGen::MoveList moveList;
+
+    MoveGen::generate_all_moves(position,moveList);
+    EXPECT_EQ(moveList.size, 45);
+
+}
