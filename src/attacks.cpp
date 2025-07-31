@@ -25,17 +25,17 @@ void init(){
     init_sliding_diagonal_attacks();
     
 }
-
+//TODO unify as non sliding attacks
 void init_pawn_attacks(){
 
     for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64)
     {
 
-        pawnAttacks[WHITE][sq64] = Bitboards::make_direction<NORTH_WEST>(sq64) 
-                                 | Bitboards::make_direction<NORTH_EAST>(sq64); 
+        pawnAttacks[WHITE][sq64] = Bitboards::make_direction<NORTH_WEST>(Bitboards::set_pieces(sq64)) 
+                                 | Bitboards::make_direction<NORTH_EAST>(Bitboards::set_pieces(sq64)); 
 
-        pawnAttacks[BLACK][sq64] = Bitboards::make_direction<SOUTH_WEST>(sq64) 
-                                 | Bitboards::make_direction<SOUTH_EAST>(sq64); 
+        pawnAttacks[BLACK][sq64] = Bitboards::make_direction<SOUTH_WEST>(Bitboards::set_pieces(sq64)) 
+                                 | Bitboards::make_direction<SOUTH_EAST>(Bitboards::set_pieces(sq64)); 
     }
     
 }
@@ -45,14 +45,14 @@ void init_knight_attacks(){
     for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64)
     {
 
-        knightAttacks[sq64] = Bitboards::make_direction<NORTH_NORTH_WEST>(sq64)
-                            | Bitboards::make_direction<NORTH_NORTH_EAST>(sq64)
-                            | Bitboards::make_direction<NORTH_EAST_EAST> (sq64)
-                            | Bitboards::make_direction<SOUTH_EAST_EAST> (sq64)
-                            | Bitboards::make_direction<SOUTH_SOUTH_EAST>(sq64)
-                            | Bitboards::make_direction<SOUTH_SOUTH_WEST>(sq64)
-                            | Bitboards::make_direction<SOUTH_WEST_WEST> (sq64)
-                            | Bitboards::make_direction<NORTH_WEST_WEST> (sq64)
+        knightAttacks[sq64] = Bitboards::make_direction<NORTH_NORTH_WEST>(Bitboards::set_pieces(sq64))
+                            | Bitboards::make_direction<NORTH_NORTH_EAST>(Bitboards::set_pieces(sq64))
+                            | Bitboards::make_direction<NORTH_EAST_EAST> (Bitboards::set_pieces(sq64))
+                            | Bitboards::make_direction<SOUTH_EAST_EAST> (Bitboards::set_pieces(sq64))
+                            | Bitboards::make_direction<SOUTH_SOUTH_EAST>(Bitboards::set_pieces(sq64))
+                            | Bitboards::make_direction<SOUTH_SOUTH_WEST>(Bitboards::set_pieces(sq64))
+                            | Bitboards::make_direction<SOUTH_WEST_WEST> (Bitboards::set_pieces(sq64))
+                            | Bitboards::make_direction<NORTH_WEST_WEST> (Bitboards::set_pieces(sq64))
                             ;
     }
 
@@ -63,14 +63,14 @@ void init_king_attacks(){
     for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64)
     {
 
-        kingAttacks[sq64] = Bitboards::make_direction<NORTH>      (sq64)
-                          | Bitboards::make_direction<SOUTH>      (sq64)
-                          | Bitboards::make_direction<EAST>       (sq64)
-                          | Bitboards::make_direction<WEST>       (sq64)
-                          | Bitboards::make_direction<NORTH_EAST> (sq64)
-                          | Bitboards::make_direction<NORTH_WEST> (sq64)
-                          | Bitboards::make_direction<SOUTH_EAST> (sq64)
-                          | Bitboards::make_direction<SOUTH_WEST> (sq64)
+        kingAttacks[sq64] = Bitboards::make_direction<NORTH>      (Bitboards::set_pieces(sq64))
+                          | Bitboards::make_direction<SOUTH>      (Bitboards::set_pieces(sq64))
+                          | Bitboards::make_direction<EAST>       (Bitboards::set_pieces(sq64))
+                          | Bitboards::make_direction<WEST>       (Bitboards::set_pieces(sq64))
+                          | Bitboards::make_direction<NORTH_EAST> (Bitboards::set_pieces(sq64))
+                          | Bitboards::make_direction<NORTH_WEST> (Bitboards::set_pieces(sq64))
+                          | Bitboards::make_direction<SOUTH_EAST> (Bitboards::set_pieces(sq64))
+                          | Bitboards::make_direction<SOUTH_WEST> (Bitboards::set_pieces(sq64))
                           ;
     }
 
