@@ -3,8 +3,8 @@ position.cpp
 bitboards.cpp
 attacks.cpp
 movegen.cpp
-#search.cpp
+search.cpp
 evaluate.cpp
 #uci.cpp
-#pvtable.cpp
+pvtable.cpp
 )

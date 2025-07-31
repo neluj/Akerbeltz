@@ -38,8 +38,8 @@ TEST_F(PVTableTest, LoadPVLine){
     const std::string WAC1_POSITION = "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - - 0 1";
     position.set_FEN(WAC1_POSITION);
 
-    Square120 fromg3 = Square120::SQ120_G3;
-    Square120 tog6 = Square120::SQ120_G6;
+    Square64 fromg3 = Square64::SQ64_G3;
+    Square64 tog6 = Square64::SQ64_G6;
     SpecialMove spNo = SpecialMove::NO_SPECIAL;
 
     Move mg3g6 = make_quiet_move(fromg3, tog6, spNo);
@@ -52,8 +52,8 @@ TEST_F(PVTableTest, LoadPVLine){
 
     position.do_move(mg3g6);
 
-    Square120 fromd6 = Square120::SQ120_D6;
-    Square120 toe5 = Square120::SQ120_E5;
+    Square64 fromd6 = Square64::SQ64_D6;
+    Square64 toe5 = Square64::SQ64_E5;
     Piece capwk = Piece::W_KNIGHT;
     Piece attbq = Piece::B_QUEEN;
 
@@ -80,8 +80,8 @@ TEST_F(PVTableTest, LoadPVLine){
                                     
     EXPECT_EQ(0, pvLine.depth);
 
-    Square120 fromb1 = Square120::SQ120_B1;
-    Square120 toc3 = Square120::SQ120_C3;
+    Square64 fromb1 = Square64::SQ64_B1;
+    Square64 toc3 = Square64::SQ64_C3;
 
     Move mb1c3 = make_quiet_move(fromb1, toc3, spNo);
     PVTable::insert_entry(position, mb1c3);

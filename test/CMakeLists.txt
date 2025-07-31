@@ -15,7 +15,7 @@ typesTest.cpp
 #perftTest.cpp
 evaluateTest.cpp
 #uciTest.cpp
-#pvtableTest.cpp
+pvtableTest.cpp
 bitboardsTest.cpp
 attacksTest.cpp
 )

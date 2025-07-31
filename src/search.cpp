@@ -22,7 +22,7 @@ constexpr MoveScore KILLERMOVE_SOCORE_1 = 800;
 Move killerMoves[MAX_KILLERMOVES][MAX_DEPTH];
 
 //History Heuristic
-MoveScore searchHistory[SQUARE_SIZE_120][SQUARE_SIZE_120];
+MoveScore searchHistory[SQUARE_SIZE_64][SQUARE_SIZE_64];
 
 //PV Move Ordering
 constexpr MoveScore PV_SCORE = 1000;
@@ -102,7 +102,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         return DRAW_SOCORE;
     }
 
-    bool isCheck = position.square_is_attacked(position.get_piece_list(make_piece(position.get_side_to_move(), KING))[0]);
+    bool isCheck = position.square_is_attacked( Square64(__builtin_ctzll(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING) )));
 
     if(isCheck){
         depth++;
@@ -268,8 +268,8 @@ void clean_search_info(SearchInfo &searchInfo){
             killerMoves[i][x] = 0;
         }
     }
-    for(std::size_t i = 0; i < SQUARE_SIZE_120; ++i){
-        for(std::size_t x = 0; x < SQUARE_SIZE_120; ++x){
+    for(std::size_t i = 0; i < SQUARE_SIZE_64; ++i){
+        for(std::size_t x = 0; x < SQUARE_SIZE_64; ++x){
             searchHistory[i][x] = 0;
         }
     }
