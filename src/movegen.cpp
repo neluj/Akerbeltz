@@ -133,10 +133,9 @@ void white_pawn_capture_moves(const Position &pos, MoveList &moveList){
         Square64 enpassantSquare = pos.get_enpassant_square();
         Bitboard enpassantMask = Bitboards::set_pieces(enpassantSquare);
         if(northEastMoves & enpassantMask){
-            pos.get_enpassant_square();
             moveList.set_move(make_enpassant_move(enpassantSquare-NORTH_EAST, enpassantSquare));
         }
-        else if(northWestMoves & enpassantMask){
+        if(northWestMoves & enpassantMask){
             moveList.set_move(make_enpassant_move(enpassantSquare-NORTH_WEST, enpassantSquare));
         }
     }
@@ -183,10 +182,9 @@ void black_pawn_capture_moves(const Position &pos, MoveList &moveList){
         Square64 enpassantSquare = pos.get_enpassant_square();
         Bitboard enpassantMask = Bitboards::set_pieces(enpassantSquare);
         if(southEastMoves & enpassantMask){
-            pos.get_enpassant_square();
             moveList.set_move(make_enpassant_move(enpassantSquare-SOUTH_EAST, enpassantSquare));
         }
-        else if(southWestMoves & enpassantMask){
+        if(southWestMoves & enpassantMask){
             moveList.set_move(make_enpassant_move(enpassantSquare-SOUTH_WEST, enpassantSquare));
         }
     }
