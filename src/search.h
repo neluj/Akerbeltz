@@ -16,6 +16,7 @@ namespace Search{
         float FirstHitFirst;
         Xake::Time startTime;
         Xake::Time stopTime;
+        Xake::Time totalTime;
         Xake::Time moveTime;
         bool timeOver;
     };

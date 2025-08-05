@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <fstream>
+#include <filesystem>
 #include <istream>
 #include <sstream>
 #include <vector>
@@ -20,9 +21,20 @@ struct PerftSample{
 
 void loadPerftSampleLine(std::vector<PerftSample>& samples){
 
-  std::fstream fileIn; 
+    namespace fs = std::filesystem;
 
-  fileIn.open("perftsuite.epd", std::ios::in); 
+    fs::path relativePath = "perftsuite.epd";
+    fs::path fullPath = fs::current_path() / relativePath;
+
+    std::cout << "Intentando abrir: " << fullPath << std::endl;
+
+    std::fstream fileIn;
+    fileIn.open(fullPath, std::ios::in);
+
+    if (!fileIn.is_open()) {
+        std::cerr << "Error: No se pudo abrir el archivo: " << fullPath << "\n";
+        return;
+    }
 
   std::string line; 
 
@@ -71,6 +83,7 @@ TEST(PerftTest, FileTest) {
 
   loadPerftSampleLine(samples);
   std::size_t lineNumber = 0;
+  Xake::Time totalTimeMS = 0;
 
   for(auto &sample: samples){
 
@@ -88,11 +101,19 @@ TEST(PerftTest, FileTest) {
 
       std::cout << "Depth " << ind+1 << " :" << "\n";
       searchInfo.depth = ind+1;
+      //Start counting time
+      searchInfo.startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+
       NodesSize searchedNodes = Search::perftTest(position, searchInfo);
+
+      totalTimeMS += searchInfo.totalTime;
       
       EXPECT_EQ(searchedNodes, sample.depthNodes.at(ind));
       
     }
+
+    std::cout << "\n" << "Total ms: " << totalTimeMS << "\n\n";
 
   }
 

@@ -360,6 +360,9 @@ NodesSize perftTest(Position &position, SearchInfo &searchInfo){
 
     }
 
+    searchInfo.totalTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+    std::chrono::high_resolution_clock::now().time_since_epoch()).count() - searchInfo.startTime;
+
     std::cout << "\n" << "Total nodes size: " << allNodesCounter << "\n\n";
     return allNodesCounter;
 
