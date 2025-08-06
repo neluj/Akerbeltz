@@ -100,15 +100,31 @@ void position(Position & pos, std::istringstream &is){
 Move make_move(const Position &pos, std::string algebraic_move){
     
     //return error
-    if( 4 > algebraic_move.size() || algebraic_move.size() > 5 )
+    if( algebraic_move.size() < 4 || algebraic_move.size() > 5 ){
         return 0;
+    }
     
-	Square120 from = Square120((algebraic_move[1] - '1') * 10 + (algebraic_move[0] - 'a' + 1) + 20);
-	Square120 to = Square120((algebraic_move[3] - '1') * 10 + (algebraic_move[2] - 'a' + 1) + 20);
+    if(algebraic_move[0] - 'a' > 8 || algebraic_move[0] - 'a' < 0){
+        return 0;
+    }
 
-    PieceType pieceTypeToMove = pos.get_mailbox_pieceType(COLOR_NC, from);
-       
+    if(algebraic_move[2] - 'a' > 8 || algebraic_move[2] - 'a' < 0){
+        return 0;
+    }
+    
+    if(algebraic_move[1] - '1' > 8 || algebraic_move[1] - '1' < 0){
+        return 0;
+    }
 
+    if(algebraic_move[3] - '1' > 8 || algebraic_move[3] - '1' < 0){
+        return 0;
+    }
+
+	Square64 from = Square64(((algebraic_move[1] - '1') * 8 ) + (algebraic_move[0] - 'a'));
+	Square64 to   = Square64(((algebraic_move[3] - '1') * 8 ) + (algebraic_move[2] - 'a')); 
+          
+
+    Piece piece = pos.get_mailbox_piece(from);
     SpecialMove specialMove{SpecialMove::NO_SPECIAL};
 
     if(algebraic_move.size() == 5){
@@ -118,44 +134,26 @@ Move make_move(const Position &pos, std::string algebraic_move){
             case 'b':   specialMove = PROMOTION_BISHOP; break;
             case 'r':   specialMove = PROMOTION_ROOK; break;
             case 'q':   specialMove = PROMOTION_QUEEN; break;
+            default:
+                return 0;
         }
-    }else if(pieceTypeToMove == PAWN){ 
+    }else if(piece_type(piece) == PAWN){ 
         if(abs(to - from) == NORTH_NORTH){
             specialMove = PAWN_START;
         }
         else if(to == pos.get_enpassant_square()){
-            specialMove = ENPASSANT;
+            return make_enpassant_move(from, to);
         }
-    }else if(pieceTypeToMove == KING && abs(to - from) == 2){
+    }else if(piece_type(piece) == KING && abs(to - from) == 2){
         specialMove = CASTLE;
     }
 
-    Piece capturedPiece = make_piece(WHITE, pos.get_mailbox_pieceType(WHITE, to));
-    if(capturedPiece == NO_PIECE)
-        capturedPiece = make_piece(BLACK, pos.get_mailbox_pieceType(BLACK, to));
+    Piece capturedPiece = pos.get_mailbox_piece(to);
+
     if(capturedPiece == NO_PIECE)
         return make_quiet_move(from, to, specialMove);
-
-    
-    Piece attackerPiece{NO_PIECE};
-
-    PieceType attackerPieceType = pos.get_mailbox_pieceType(BLACK, from);
-
-    if(attackerPieceType != NO_PIECE_TYPE){
-        attackerPiece = make_piece(BLACK, attackerPieceType);
-    }
-
-    attackerPieceType = pos.get_mailbox_pieceType(WHITE, from);
-
-    if((attackerPieceType != NO_PIECE_TYPE)) {
-        attackerPiece = make_piece(WHITE, attackerPieceType);
-    }
-
-    if(specialMove == ENPASSANT){
-        return make_enpassant_move(from, to);
-    }
         
-    return make_capture_move(from, to, specialMove, attackerPiece, capturedPiece);
+    return make_capture_move(from, to, specialMove, piece, capturedPiece);
 }
 
 void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo){

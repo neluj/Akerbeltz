@@ -5,6 +5,6 @@ attacks.cpp
 movegen.cpp
 search.cpp
 evaluate.cpp
-#uci.cpp
+uci.cpp
 pvtable.cpp
 )
