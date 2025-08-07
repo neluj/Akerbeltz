@@ -180,8 +180,9 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
     std::string arg;
     searchInfo.depth = MAX_DEPTH;
     searchInfo.stopTime = Xake::NO_TIME;
-    searchInfo.moveTime = Xake::NO_TIME;
     searchInfo.startTime = Xake::NO_TIME;
+    searchInfo.moveTime = Xake::NO_TIME;
+    searchInfo.realTime = Xake::NO_TIME;
     searchInfo.timeOver = false;
     Xake::Time colorTime = Xake::NO_TIME;    
     Xake::Time moveTime = Xake::NO_TIME; 
@@ -222,19 +223,17 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
     }
 
     std::cout <<
-    "time:" << searchInfo.moveTime << 
-    " start:" << searchInfo.startTime << 
-    " stop:" << searchInfo.stopTime <<
-    " depth:" << searchInfo.depth << 
-    std::endl;
+    "max time ms: " << searchInfo.moveTime << 
+    " depth: " << searchInfo.depth << 
+    "\n";
 
 }
 
 void uci_info(){
 
-    std::cout << "id name Xake 0.0.1" << std::endl;
-    std::cout << "id author Julen Aristondo" << std::endl;
-    std::cout << "uciok" << std::endl;
+    std::cout << "id name Xake 0.0.1" << "\n";
+    std::cout << "id author Julen Aristondo" << "\n";
+    std::cout << "uciok" << "\n";
 
 }
 

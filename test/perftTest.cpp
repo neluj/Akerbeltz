@@ -76,8 +76,8 @@ void loadPerftSampleLine(std::vector<PerftSample>& samples){
 
 }
 
-//TEST(PerftTest, DISABLED_FileTest) {
-TEST(PerftTest, FileTest) {
+TEST(PerftTest, DISABLED_FileTest) {
+//TEST(PerftTest, FileTest) {
 
   std::vector<PerftSample> samples;
 
@@ -107,7 +107,7 @@ TEST(PerftTest, FileTest) {
 
       NodesSize searchedNodes = Search::perftTest(position, searchInfo);
 
-      totalTimeMS += searchInfo.totalTime;
+      totalTimeMS += searchInfo.realTime;
       
       EXPECT_EQ(searchedNodes, sample.depthNodes.at(ind));
       

@@ -52,7 +52,7 @@ void search(Position &position, SearchInfo &searchInfo){
             break;
         }
         
-        Xake::Time timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+        searchInfo.realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now().time_since_epoch()).count() - searchInfo.startTime;
         
 
@@ -66,7 +66,7 @@ void search(Position &position, SearchInfo &searchInfo){
         " score cp " << bestMoveScore << 
         " move " << algebraic_move(bestMove) <<
         " nodes " << searchInfo.nodes <<
-        " time " << timeMs <<
+        " time " << searchInfo.realTime <<
         " ordering " << searchInfo.FirstHitFirst/searchInfo.FirstHit;
 
         std::cout << " pv";
@@ -75,13 +75,13 @@ void search(Position &position, SearchInfo &searchInfo){
             std::cout << " " << algebraic_move(pvLine.moves[pvLineDepth]);
         }
 
-        std::cout << std::endl;
+        std::cout << "\n";
         //std::cout << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
         //std::cout << "move:" << algebraic_move(veryBestMove) << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
         
     }
 
-    std::cout << "bestmove " << algebraic_move(bestMove) << std::endl; 
+    std::cout << "bestmove " << algebraic_move(bestMove) << "\n\n"; 
 
 }
 
@@ -332,6 +332,7 @@ void perft(Position &position, DepthSize depth){
 
 NodesSize perftTest(Position &position, SearchInfo &searchInfo){
 
+    clean_search_info(searchInfo);
     leafCounter = 0;
     NodesSize allNodesCounter = 0;
     DepthSize actualDepth = searchInfo.depth-1;
@@ -360,10 +361,14 @@ NodesSize perftTest(Position &position, SearchInfo &searchInfo){
 
     }
 
-    searchInfo.totalTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+    searchInfo.realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
     std::chrono::high_resolution_clock::now().time_since_epoch()).count() - searchInfo.startTime;
 
-    std::cout << "\n" << "Total nodes size: " << allNodesCounter << "\n\n";
+    std::cout << "\n" << 
+    "total nodes size: " << allNodesCounter << 
+    " time ms: " << searchInfo.realTime <<
+    "\n\n";
+
     return allNodesCounter;
 
 }
