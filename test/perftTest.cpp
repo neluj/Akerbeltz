@@ -82,7 +82,7 @@ TEST(PerftTest, DISABLED_FileTest) {
   std::vector<PerftSample> samples;
 
   loadPerftSampleLine(samples);
-  std::size_t lineNumber = 0;
+  int lineNumber = 0;
   Xake::Time totalTimeMS = 0;
 
   for(auto &sample: samples){

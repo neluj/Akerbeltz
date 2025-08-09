@@ -17,7 +17,7 @@ struct MoveList{
         ++size;
     }
     Move moves[MAX_POSITION_MOVES_SIZE];
-    std::size_t size{0};
+    int size{0};
 };
 
 

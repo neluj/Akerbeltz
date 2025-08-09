@@ -9,22 +9,19 @@
 #include <chrono>
 
 namespace Xake{
-//TODO quitar size_t pero cuando se pueda, los size que sean el ultimo valor de enum o sino meter todos aqui
-//Enum sizes
 
-using DepthSize = unsigned short int;
-using NodesSize = unsigned long long int;
-using MovesSize = unsigned short int;
-using Key = unsigned long long;
+using DepthSize = int;
+using NodesSize = int;
+using MovesSize = int;
+using Key = uint64_t;
 using Time = long long;
 
-//
-constexpr std::size_t MAX_POSITION_MOVES_SIZE = 256;
-constexpr std::size_t MAX_GAME_MOVES = 2048;
-constexpr std::size_t MAX_SAME_PIECE = 10;
-constexpr std::size_t MAX_DEPTH = 64;
+constexpr int MAX_POSITION_MOVES_SIZE = 255;
+constexpr int MAX_GAME_MOVES = 2048;
+constexpr int MAX_SAME_PIECE = 10;
+constexpr int MAX_DEPTH = 64;
 
-constexpr unsigned short int CASTLING_POSIBILITIES = 4 * 4;
+constexpr int CASTLING_POSIBILITIES = 4 * 4;
 
 constexpr int CHECKMATE_SCORE = 30000;
 constexpr int DRAW_SOCORE = 0;

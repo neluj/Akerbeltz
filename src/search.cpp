@@ -16,7 +16,7 @@ static NodesSize leafCounter;
 PVTable::PVLine pvLine;
 
 //Killer heuristic
-constexpr std::size_t MAX_KILLERMOVES = 2;
+constexpr int MAX_KILLERMOVES = 2;
 constexpr MoveScore KILLERMOVE_SOCORE_0 = 850;
 constexpr MoveScore KILLERMOVE_SOCORE_1 = 800;
 Move killerMoves[MAX_KILLERMOVES][MAX_DEPTH];
@@ -33,7 +33,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta);
 void clean_search_info(SearchInfo &searchInfo);
 void check_time(SearchInfo &searchInfo);
-void pick_move(std::size_t moveIndx, MoveGen::MoveList &moveList);
+void pick_move(int moveIndx, MoveGen::MoveList &moveList);
 
 //TODO isrepetition
 
@@ -114,7 +114,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     Move pvMove = PVTable::prove_move(position);
 
     //Set move scores
-    for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
+    for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
         if(moveList.moves[mIndx] == pvMove){
             moveList.moves[mIndx] = set_score(moveList.moves[mIndx], PV_SCORE);
         }else if(moveList.moves[mIndx] == killerMoves[0][position.get_ply()]){
@@ -131,7 +131,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     Move bestMove = 0;
     int legalMoves = 0;
 
-    for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
+    for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
 
         pick_move(mIndx, moveList);
         Move move = moveList.moves[mIndx];
@@ -218,7 +218,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     Move bestMove = 0;
     int legalMoves = 0;
 
-    for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
+    for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
 
         pick_move(mIndx, moveList);
         Move move = moveList.moves[mIndx];
@@ -263,13 +263,13 @@ void clean_search_info(SearchInfo &searchInfo){
     searchInfo.FirstHit = 0;
     searchInfo.FirstHitFirst = 0;
     
-    for(std::size_t i = 0; i < MAX_KILLERMOVES; ++i){
-        for(std::size_t x = 0; x < MAX_DEPTH; ++x){
+    for(int i = 0; i < MAX_KILLERMOVES; ++i){
+        for(int x = 0; x < MAX_DEPTH; ++x){
             killerMoves[i][x] = 0;
         }
     }
-    for(std::size_t i = 0; i < SQUARE_SIZE_64; ++i){
-        for(std::size_t x = 0; x < SQUARE_SIZE_64; ++x){
+    for(int i = 0; i < SQUARE_SIZE_64; ++i){
+        for(int x = 0; x < SQUARE_SIZE_64; ++x){
             searchHistory[i][x] = 0;
         }
     }
@@ -286,13 +286,13 @@ void check_time(SearchInfo &searchInfo){
     }
 }
 
-void pick_move(std::size_t moveIndx, MoveGen::MoveList &moveList){
+void pick_move(int moveIndx, MoveGen::MoveList &moveList){
 
     MoveScore moveScr{0};
     MoveScore bestScr{0};
-    std::size_t bestIndx = moveIndx;
+    int bestIndx = moveIndx;
 
-    for(std::size_t i = moveIndx; i < moveList.size; ++i){
+    for(int i = moveIndx; i < moveList.size; ++i){
         moveScr = move_score(moveList.moves[i]);
         if(moveScr > bestScr){
             bestScr = moveScr;
@@ -316,7 +316,7 @@ void perft(Position &position, DepthSize depth){
     MoveGen::MoveList moveList;
     MoveGen::generate_all_moves(position, moveList);
 
-    for(std::size_t mIndx = 0; mIndx < moveList.size; ++mIndx){
+    for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
         
         Move move = moveList.moves[mIndx];
         if(!position.do_move(move)){
@@ -342,7 +342,7 @@ NodesSize perftTest(Position &position, SearchInfo &searchInfo){
 
     std::cout << "\n";
     
-    for(std::size_t mIndx = 0; mIndx < moveList.size;++mIndx){
+    for(int mIndx = 0; mIndx < moveList.size;++mIndx){
 
         Move move = moveList.moves[mIndx];
         if(!position.do_move(move)){

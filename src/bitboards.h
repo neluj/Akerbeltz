@@ -6,7 +6,7 @@
 namespace Xake{
 
 
-using Bitboard = unsigned long int;
+using Bitboard = uint64_t;
 
 constexpr Bitboard ONE = 1;
 constexpr Bitboard ZERO = 0;

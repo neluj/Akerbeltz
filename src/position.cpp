@@ -83,8 +83,8 @@ void Position::clear_position_info(){
 
 void Position::clear_pieceTypes_bitboards(){
     //clear pieceTypes bitboards
-    for(std::size_t c = 0; c < COLOR_SIZE; ++c){
-        for(std::size_t p = 0; p < PIECETYPE_SIZE; ++p){
+    for(int c = 0; c < COLOR_SIZE; ++c){
+        for(int p = 0; p < PIECETYPE_SIZE; ++p){
             pieceTypesBitboards[c][p] = ZERO;
         }
     }
@@ -92,7 +92,7 @@ void Position::clear_pieceTypes_bitboards(){
 
 void Position::clear_occupied_bitboards(){
     //clear occupied bitboards
-    for(std::size_t c = 0; c < COLOR_SIZE; ++c){
+    for(int c = 0; c < COLOR_SIZE; ++c){
         occupiedBitboards[c] = ZERO;
         
     }
@@ -100,7 +100,7 @@ void Position::clear_occupied_bitboards(){
 
 void Position::clear_mailbox(){
     //clear mailbox
-    for(std::size_t i = 0; i < SQUARE_SIZE_64; ++i){
+    for(int i = 0; i < SQUARE_SIZE_64; ++i){
         mailbox[i] = NO_PIECE;
     }
 }
@@ -289,7 +289,7 @@ bool Position::is_repetition() const {
 
 
 
-const std::size_t DIRECTION_SIDES = 4;
+const int DIRECTION_SIDES = 4;
 const Direction sizes[DIRECTION_SIDES] = {EAST, WEST, NORTH, SOUTH};
 const Direction diagonals[DIRECTION_SIDES] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
 
