@@ -1,4 +1,4 @@
-#include "movegen_.h"
+#include "movegen.h"
 #include "position.h"
 #include "attacks.h"
 
@@ -110,19 +110,20 @@ void generate_capture_moves(Position &pos, MoveList &moveList){
 }
 
 void white_pawn_capture_moves(const Position &pos, MoveList &moveList){
-
-    Bitboard northEastMoves = (pos.get_pieceTypes_bitboard(WHITE, PAWN) << NORTH_EAST) & ~Bitboards::FILE_A_MASK;
-    Bitboard northEastCaptures = northEastMoves & pos.get_occupied_bitboard(BLACK) & ~Bitboards::RANK_8_MASK;
+    
+    Bitboard northEastMoves = Bitboards::make_direction<NORTH_EAST>(pos.get_pieceTypes_bitboard(WHITE, PAWN));
+    Bitboard occupiedBlackBitboard = pos.get_occupied_bitboard(BLACK);
+    Bitboard northEastCaptures = northEastMoves & occupiedBlackBitboard & ~Bitboards::RANK_8_MASK;
     extract_capture_moves<NORTH_EAST, NO_SPECIAL>(pos, northEastCaptures, moveList);
-    Bitboard northWestMoves = (pos.get_pieceTypes_bitboard(WHITE, PAWN) << NORTH_WEST) & ~Bitboards::FILE_H_MASK;
-    Bitboard northWestCaptures = northWestMoves & pos.get_occupied_bitboard(BLACK) & ~Bitboards::RANK_8_MASK;
+    Bitboard northWestMoves = Bitboards::make_direction<NORTH_WEST>(pos.get_pieceTypes_bitboard(WHITE, PAWN));
+    Bitboard northWestCaptures = northWestMoves & occupiedBlackBitboard & ~Bitboards::RANK_8_MASK;
     extract_capture_moves<NORTH_WEST, NO_SPECIAL>(pos, northWestCaptures, moveList);
-    Bitboard northEastCapturesPromotions = northEastMoves & pos.get_occupied_bitboard(BLACK) & Bitboards::RANK_8_MASK;
+    Bitboard northEastCapturesPromotions = northEastMoves & occupiedBlackBitboard & Bitboards::RANK_8_MASK;
     extract_capture_moves<NORTH_EAST, PROMOTION_BISHOP>(pos, northEastCapturesPromotions, moveList);
     extract_capture_moves<NORTH_EAST, PROMOTION_KNIGHT>(pos, northEastCapturesPromotions, moveList);
     extract_capture_moves<NORTH_EAST, PROMOTION_QUEEN> (pos, northEastCapturesPromotions, moveList);
     extract_capture_moves<NORTH_EAST, PROMOTION_ROOK>  (pos, northEastCapturesPromotions, moveList);
-    Bitboard northWestCapturesPromotions = northWestMoves & pos.get_occupied_bitboard(BLACK) & Bitboards::RANK_8_MASK;
+    Bitboard northWestCapturesPromotions = northWestMoves & occupiedBlackBitboard & Bitboards::RANK_8_MASK;
     extract_capture_moves<NORTH_WEST, PROMOTION_BISHOP>(pos, northWestCapturesPromotions, moveList);
     extract_capture_moves<NORTH_WEST, PROMOTION_KNIGHT>(pos, northWestCapturesPromotions, moveList);
     extract_capture_moves<NORTH_WEST, PROMOTION_QUEEN> (pos, northWestCapturesPromotions, moveList);
@@ -143,10 +144,10 @@ void white_pawn_capture_moves(const Position &pos, MoveList &moveList){
 
 void white_pawn_quiet_moves(const Position &pos, MoveList &moveList){
 
-    Bitboard quietSimpleMoves = (pos.get_pieceTypes_bitboard(WHITE, PAWN) << NORTH) & ~pos.get_occupied_bitboard(COLOR_NC);
+    Bitboard quietSimpleMoves = Bitboards::make_direction<NORTH>(pos.get_pieceTypes_bitboard(WHITE, PAWN)) & ~pos.get_occupied_bitboard(COLOR_NC);
     Bitboard notPromotionQuietMoves = quietSimpleMoves & ~Bitboards::RANK_8_MASK;
     extract_quiet_moves<NORTH, SpecialMove::NO_SPECIAL>(notPromotionQuietMoves, moveList);
-    Bitboard startMoves = ((quietSimpleMoves & Bitboards::RANK_3_MASK) << NORTH) & ~pos.get_occupied_bitboard(COLOR_NC);
+    Bitboard startMoves = Bitboards::make_direction<NORTH>(quietSimpleMoves & Bitboards::RANK_3_MASK) & ~pos.get_occupied_bitboard(COLOR_NC);
     extract_quiet_moves<NORTH_NORTH, SpecialMove::PAWN_START>(startMoves, moveList);
 
     Bitboard promotionQuietMoves = quietSimpleMoves & Bitboards::RANK_8_MASK;
@@ -160,18 +161,19 @@ void white_pawn_quiet_moves(const Position &pos, MoveList &moveList){
 
 void black_pawn_capture_moves(const Position &pos, MoveList &moveList){
 
-    Bitboard southEastMoves = (pos.get_pieceTypes_bitboard(BLACK, PAWN) >> NORTH_WEST) & ~Bitboards::FILE_A_MASK;
-    Bitboard southEastCaptures = southEastMoves & pos.get_occupied_bitboard(WHITE) & ~Bitboards::RANK_1_MASK;
+    Bitboard southEastMoves = Bitboards::make_direction<SOUTH_EAST>(pos.get_pieceTypes_bitboard(BLACK, PAWN));
+    Bitboard occupiedWhiteBitboard = pos.get_occupied_bitboard(WHITE);
+    Bitboard southEastCaptures = southEastMoves & occupiedWhiteBitboard & ~Bitboards::RANK_1_MASK;
     extract_capture_moves<SOUTH_EAST, NO_SPECIAL>(pos, southEastCaptures, moveList);
-    Bitboard southWestMoves = (pos.get_pieceTypes_bitboard(BLACK, PAWN) >> NORTH_EAST) & ~Bitboards::FILE_H_MASK;
-    Bitboard southWestCaptures = southWestMoves & pos.get_occupied_bitboard(WHITE) & ~Bitboards::RANK_1_MASK;
+    Bitboard southWestMoves = Bitboards::make_direction<SOUTH_WEST>(pos.get_pieceTypes_bitboard(BLACK, PAWN));
+    Bitboard southWestCaptures = southWestMoves & occupiedWhiteBitboard & ~Bitboards::RANK_1_MASK;
     extract_capture_moves<SOUTH_WEST, NO_SPECIAL>(pos, southWestCaptures, moveList);
-    Bitboard southEastCapturesPromotions = southEastMoves & pos.get_occupied_bitboard(WHITE) & Bitboards::RANK_1_MASK;
+    Bitboard southEastCapturesPromotions = southEastMoves & occupiedWhiteBitboard & Bitboards::RANK_1_MASK;
     extract_capture_moves<SOUTH_EAST, PROMOTION_BISHOP>(pos, southEastCapturesPromotions, moveList);
     extract_capture_moves<SOUTH_EAST, PROMOTION_KNIGHT>(pos, southEastCapturesPromotions, moveList);
     extract_capture_moves<SOUTH_EAST, PROMOTION_QUEEN> (pos, southEastCapturesPromotions, moveList);
     extract_capture_moves<SOUTH_EAST, PROMOTION_ROOK>  (pos, southEastCapturesPromotions, moveList);
-    Bitboard southWestCapturesPromotions = southWestMoves & pos.get_occupied_bitboard(WHITE) & Bitboards::RANK_1_MASK;
+    Bitboard southWestCapturesPromotions = southWestMoves & occupiedWhiteBitboard & Bitboards::RANK_1_MASK;
     extract_capture_moves<SOUTH_WEST, PROMOTION_BISHOP>(pos, southWestCapturesPromotions, moveList);
     extract_capture_moves<SOUTH_WEST, PROMOTION_KNIGHT>(pos, southWestCapturesPromotions, moveList);
     extract_capture_moves<SOUTH_WEST, PROMOTION_QUEEN> (pos, southWestCapturesPromotions, moveList);
@@ -192,10 +194,10 @@ void black_pawn_capture_moves(const Position &pos, MoveList &moveList){
 
 void black_pawn_quiet_moves(const Position &pos, MoveList &moveList){
 
-    Bitboard quietSimpleMoves = (pos.get_pieceTypes_bitboard(BLACK, PAWN) >> NORTH) & ~pos.get_occupied_bitboard(COLOR_NC);
+    Bitboard quietSimpleMoves = Bitboards::make_direction<SOUTH>(pos.get_pieceTypes_bitboard(BLACK, PAWN)) & ~pos.get_occupied_bitboard(COLOR_NC);
     Bitboard notPromotionQuietMoves = quietSimpleMoves & ~Bitboards::RANK_1_MASK;
     extract_quiet_moves<SOUTH, SpecialMove::NO_SPECIAL>(notPromotionQuietMoves, moveList);
-    Bitboard startMoves = ((quietSimpleMoves & Bitboards::RANK_6_MASK) >> NORTH) & ~pos.get_occupied_bitboard(COLOR_NC);
+    Bitboard startMoves = Bitboards::make_direction<SOUTH>(quietSimpleMoves & Bitboards::RANK_6_MASK) & ~pos.get_occupied_bitboard(COLOR_NC);
     extract_quiet_moves<SOUTH_SOUTH, SpecialMove::PAWN_START>(startMoves, moveList);
 
     Bitboard promotionQuietMoves = quietSimpleMoves & Bitboards::RANK_1_MASK;

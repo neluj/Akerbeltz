@@ -13,16 +13,16 @@ constexpr Bitboard ZERO = 0;
 
 namespace Bitboards {
 
-    const Bitboard FILE_A_MASK = 0x0101010101010101ULL;
-    const Bitboard FILE_B_MASK = 0x0202020202020202ULL;
-    const Bitboard FILE_G_MASK = 0x4040404040404040ULL;
-    const Bitboard FILE_H_MASK = 0x8080808080808080ULL;
-    const Bitboard RANK_1_MASK = 0x00000000000000FFULL;
-    const Bitboard RANK_2_MASK = 0x000000000000FF00ULL;
-    const Bitboard RANK_3_MASK = 0x0000000000FF0000ULL;
-    const Bitboard RANK_6_MASK = 0x0000FF0000000000ULL;
-    const Bitboard RANK_7_MASK = 0x00FF000000000000ULL;
-    const Bitboard RANK_8_MASK = 0xFF00000000000000ULL;
+    constexpr Bitboard FILE_A_MASK = 0x0101010101010101ULL;
+    constexpr Bitboard FILE_B_MASK = 0x0202020202020202ULL;
+    constexpr Bitboard FILE_G_MASK = 0x4040404040404040ULL;
+    constexpr Bitboard FILE_H_MASK = 0x8080808080808080ULL;
+    constexpr Bitboard RANK_1_MASK = 0x00000000000000FFULL;
+    constexpr Bitboard RANK_2_MASK = 0x000000000000FF00ULL;
+    constexpr Bitboard RANK_3_MASK = 0x0000000000FF0000ULL;
+    constexpr Bitboard RANK_6_MASK = 0x0000FF0000000000ULL;
+    constexpr Bitboard RANK_7_MASK = 0x00FF000000000000ULL;
+    constexpr Bitboard RANK_8_MASK = 0xFF00000000000000ULL;
 
 
     template<typename... Squares>
