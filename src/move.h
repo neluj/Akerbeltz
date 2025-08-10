@@ -36,7 +36,7 @@ enum SpecialMove: int{
 
 constexpr MoveScore MVVLVASCORE = 900;
 
-const MoveScore MVVLVAScores[PIECETYPE_SIZE][PIECETYPE_SIZE] = {
+constexpr MoveScore MVVLVAScores[PIECETYPE_SIZE][PIECETYPE_SIZE] = {
     {0,  0,  0,  0,  0,  0, 0},
     {0, 15, 25, 35, 45, 55, 0},
     {0, 14, 24, 34, 44, 54, 0},
@@ -51,7 +51,7 @@ inline Move make_quiet_move(Square64 from, Square64 to, SpecialMove SpecialMove)
 }
 
 inline Move make_capture_move(Square64 from, Square64 to, SpecialMove SpecialMove, Piece attackerPiece , Piece capturedPiece) {
-
+    
     PieceType attackerType = piece_type(attackerPiece);
     PieceType capturedType = piece_type(capturedPiece);
     //TODO group with other move ordering and remove attackerpiece from paramters if not necessary
@@ -61,7 +61,7 @@ inline Move make_capture_move(Square64 from, Square64 to, SpecialMove SpecialMov
 }
 
 inline Move make_enpassant_move(Square64 from, Square64 to) {
-    return Move((ENPASSANT << 12) | (to << 6) | from);
+    return Move(((MVVLVASCORE + MVVLVAScores[PAWN][PAWN]) << 21) | (ENPASSANT << 12) | (to << 6) | from);
 }
 
 inline Square64 move_from(Move move) {
