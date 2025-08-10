@@ -54,7 +54,6 @@ inline Move make_capture_move(Square64 from, Square64 to, SpecialMove SpecialMov
     
     PieceType attackerType = piece_type(attackerPiece);
     PieceType capturedType = piece_type(capturedPiece);
-    //TODO group with other move ordering and remove attackerpiece from paramters if not necessary
     MoveScore mScore = MVVLVASCORE + MVVLVAScores[attackerType][capturedType];
 
     return Move((mScore << 21) | (capturedPiece << 17) | (SpecialMove << 12) | (to << 6) | from);
@@ -106,6 +105,7 @@ inline std::string algebraic_move(Move move) {
         case BISHOP:    algebraic_move += 'b'; break;
         case ROOK:      algebraic_move += 'r'; break;
         case QUEEN:     algebraic_move += 'q'; break;
+        default:                               break;
     }
 
     return algebraic_move;

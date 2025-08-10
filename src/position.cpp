@@ -205,7 +205,6 @@ std::string Position::get_FEN() const{
         for (File file = FILE_A; file <= FILE_H; ++file)
         {
             Square64 square = make_square64(rank, file);
-            PieceType pieceType{NO_PIECE_TYPE};
             for(emptySquaresCounter = 0; mailbox[square] == NO_PIECE && file <= FILE_H; ++file){
                 ++emptySquaresCounter;
                 square = make_square64(rank, file + 1);                    
@@ -255,11 +254,12 @@ std::string Position::get_FEN() const{
 void Position::calc_material_score(){
 
     for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64){
-        if(mailbox[sq64] != NO_PIECE)
+        if(mailbox[sq64] != NO_PIECE){
             if( piece_color(mailbox[sq64]) ==  WHITE)
                 materialScore[WHITE] += Evaluate::calc_material_table(mailbox[sq64], sq64);
             else    
                 materialScore[BLACK] += Evaluate::calc_material_table(mailbox[sq64], sq64);
+        }
     }
 
 }
@@ -296,7 +296,6 @@ const Direction diagonals[DIRECTION_SIDES] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST
 
 bool Position::square_is_attacked(Square64 sq64) const{
 
-    //Pawns
     return   (Attacks::pawnAttacks[sideToMove][sq64] & pieceTypesBitboards[~sideToMove][PAWN])
            | (Attacks::knightAttacks[sq64] & pieceTypesBitboards[~sideToMove][KNIGHT])
            | (Attacks::kingAttacks[sq64] &  pieceTypesBitboards[~sideToMove][KING])

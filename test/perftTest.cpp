@@ -76,8 +76,8 @@ void loadPerftSampleLine(std::vector<PerftSample>& samples){
 
 }
 
-TEST(PerftTest, DISABLED_FileTest) {
-//TEST(PerftTest, FileTest) {
+//TEST(PerftTest, DISABLED_FileTest) {
+TEST(PerftTest, FileTest) {
 
   std::vector<PerftSample> samples;
 
@@ -97,7 +97,7 @@ TEST(PerftTest, DISABLED_FileTest) {
     std::cout << "Test for line: " << lineNumber << ": " << sample.fen_notation << "\n";
     Search::SearchInfo searchInfo;
 
-    for(NodesSize ind = 0; ind < sample.depthNodes.size(); ++ind){
+    for(size_t ind = 0; ind < sample.depthNodes.size(); ++ind){
 
       std::cout << "Depth " << ind+1 << " :" << "\n";
       searchInfo.depth = ind+1;
