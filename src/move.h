@@ -14,8 +14,10 @@ namespace Xake{
 1111 1111 1111 1110 0000 0000 0000 0000 0000 -> Score
 */
 
-using Move = unsigned long int;
-using MoveScore = unsigned short int;
+using Move = uint64_t;
+using MoveScore = uint32_t;
+constexpr Move NOMOVE = 0;
+
 
 enum MoveType{
     QUIET,

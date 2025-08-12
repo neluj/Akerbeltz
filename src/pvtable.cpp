@@ -1,50 +1,51 @@
 #include "pvtable.h"
-
 #include "position.h"
 
-namespace Xake{
+namespace Xake {
 
-namespace PVTable{
+namespace PVTable {
 
-    std::unordered_map<Key, Move> pventries;
+    Entry table[PVTableEntries];
 
-    constexpr std::size_t PVTableSize = 0x100000 * 128;
-	constexpr std::size_t PVTableEntries = PVTableSize / sizeof(pventries);
-}
-
-void PVTable::init(){
-
-    pventries.reserve(PVTableEntries);
-}
-
-void PVTable::insert_entry(const Position &position, Move move){
-
-    pventries[position.get_key()] = move;
-}
-
-Move PVTable::prove_move(const Position &position){
-
-    return pventries[position.get_key()];
-
-}
-
-void PVTable::load_pv_line(PVLine &pvLine, DepthSize depth, Position &position){
-
-    Move move = prove_move(position);
-    pvLine.depth = 0;
-
-    while(pvLine.depth<depth && move != 0){
-        position.do_move(move);
-        pvLine.moves[pvLine.depth++] = move;
-        move = prove_move(position);
+    void init() {
+        for (std::size_t i = 0; i < PVTableEntries; ++i) {
+            table[i].key  = 0;
+            table[i].move = NOMOVE;
+        }
     }
 
-    DepthSize counter = pvLine.depth;
-    while(counter>0){
-        position.undo_move();
-        --counter;
+    void insert_entry(const Position& position, Move move) {
+        std::size_t index = position.get_key() % PVTableEntries;
+        table[index].key  = position.get_key();
+        table[index].move = move;
     }
 
+    Move probe_move(const Position& position) {
+        std::size_t index = position.get_key() % PVTableEntries;
+        if (table[index].key == position.get_key())
+            return table[index].move;
+        return NOMOVE; 
+    }
+
+    void load_pv_line(PVLine& pvLine, DepthSize depth, Position& position) {
+        pvLine.depth = 0;
+        Move move = probe_move(position);
+
+        while (pvLine.depth < depth && move != NOMOVE) {
+            
+            position.do_move(move);
+            pvLine.moves[pvLine.depth++] = move;
+            move = probe_move(position);
+
+        }
+
+        DepthSize counter = pvLine.depth;
+
+        while (counter > 0) {
+            position.undo_move();
+            --counter;
+        }
+    }
 }
 
 }

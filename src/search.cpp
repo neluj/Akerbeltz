@@ -111,7 +111,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     MoveGen::MoveList moveList;
     MoveGen::generate_all_moves(position, moveList);
 
-    Move pvMove = PVTable::prove_move(position);
+    Move pvMove = PVTable::probe_move(position);
 
     //Set move scores
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
