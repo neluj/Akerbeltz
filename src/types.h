@@ -11,10 +11,10 @@
 namespace Xake{
 
 using DepthSize = int;
-using NodesSize = int;
+using NodesSize = uint64_t;
 using MovesSize = int;
 using Key = uint64_t;
-using Time = long long;
+using Time = int64_t;
 
 constexpr int MAX_POSITION_MOVES_SIZE = 255;
 constexpr int MAX_GAME_MOVES = 2048;

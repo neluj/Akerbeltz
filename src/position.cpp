@@ -8,6 +8,8 @@ namespace Xake
 
 namespace Zobrist{
 
+    constexpr uint64_t ZOBRIST_SEED = 0x9E3779B97F4A7C15ULL;
+
     Key pieceSquare[PIECE_SIZE][SQUARE_SIZE_64];
     Key enpassantSquare[FILE_SIZE];
     Key castlingRight[CASTLING_POSIBILITIES];
@@ -106,23 +108,28 @@ void Position::clear_mailbox(){
 }
 
 void Position::zobris_prng(){
-    std::random_device rd;
 
-    std::mt19937_64 e2(rd());
+   	std::mt19937_64 e2(Zobrist::ZOBRIST_SEED);
+    std::uniform_int_distribution<Key> dist(
+    		std::llround(std::pow(2,61)),
+    		std::llround(std::pow(2,62)));
 
-    std::uniform_int_distribution<Key> dist;
+    // Initializes a random key for each piece on each square
+	for (int piece_type = 0; piece_type < PIECE_SIZE; piece_type++) {
+		for (int square = 0; square < SQUARE_SIZE_64; square++)
+			Zobrist::pieceSquare[piece_type][square] = dist(e2);
+	}
 
-    for(int p = 0; p < PIECE_SIZE; ++p)
-        for(int s = 0; s < SQUARE_SIZE_64; ++s)
-            Zobrist::pieceSquare[p][s] = dist(e2);
+    // Initializes a random key for an enpassant square on each file
+	for (int file = FILE_A; file <= FILE_H; file++) {
+		Zobrist::enpassantSquare[file] = dist(e2);
+	}
 
-    for(int f = 0; f < FILE_SIZE; ++f)
-        Zobrist::enpassantSquare[f] = dist(e2);
+	for (int i = 0; i < 16; i++) {
+		Zobrist::castlingRight[i] = dist(e2);
+	}
 
-    for(int c = 0; c < CASTLING_POSIBILITIES; ++c)
-        Zobrist::castlingRight[c] = dist(e2);
-        
-    Zobrist::blackMoves = dist(e2);
+	Zobrist::blackMoves = dist(e2);
 }
 
 void Position::set_FEN(std::string fenNotation){
