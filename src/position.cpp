@@ -206,24 +206,26 @@ std::string Position::get_FEN() const{
 
     std::ostringstream oss;
     
-    for (Rank rank = RANK_8; rank >= RANK_1; --rank)
-    {
-        int emptySquaresCounter;
-        for (File file = FILE_A; file <= FILE_H; ++file)
-        {
+    for (Rank rank = RANK_8; rank >= RANK_1; --rank) {
+        int emptySquaresCounter = 0;
+        for (File file = FILE_A; file <= FILE_H; ++file) {
             Square64 square = make_square64(rank, file);
-            for(emptySquaresCounter = 0; mailbox[square] == NO_PIECE && file <= FILE_H; ++file){
+            if (mailbox[square] == NO_PIECE) {
                 ++emptySquaresCounter;
-                square = make_square64(rank, file + 1);                    
+            } else {
+                if (emptySquaresCounter) {
+                    oss << emptySquaresCounter;
+                    emptySquaresCounter = 0;
+                }
+                auto pn = PIECE_NAMES[mailbox[square]];
+                if (pn != ' ')
+                    oss << pn;
             }
-
-            if(emptySquaresCounter)
-                oss << emptySquaresCounter;
-            
-            oss << PIECE_NAMES[mailbox[square]];
         }
-
-        if(rank > RANK_1)
+        if (emptySquaresCounter) {
+            oss << emptySquaresCounter;
+        }
+        if (rank > RANK_1)
             oss << "/";
     }
 
@@ -247,7 +249,7 @@ std::string Position::get_FEN() const{
         oss << '-';
 
     if(get_enpassant_square() == SQ64_NO_SQUARE)
-        oss << " - ";
+        oss << " -";
     else
          oss << " " << SQUARE_NAMES[get_enpassant_square()];
 
