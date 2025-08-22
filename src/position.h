@@ -35,7 +35,7 @@ public:
     Bitboard get_pieceTypes_bitboard(Color color, PieceType pieceType) const;
     Bitboard get_occupied_bitboard(Color color) const;
     Key get_key() const;
-    bool square_is_attacked(Square64 square) const; 
+    bool square_is_attacked_bySide(Square64 square, Color side) const; 
     Evaluate::Score get_material_score(Color color) const;
     bool is_repetition() const;
 

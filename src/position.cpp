@@ -303,13 +303,14 @@ const Direction sizes[DIRECTION_SIDES] = {EAST, WEST, NORTH, SOUTH};
 const Direction diagonals[DIRECTION_SIDES] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
 
 
-bool Position::square_is_attacked(Square64 sq64) const{
+/*returns true if the side is attacking the square*/
+bool Position::square_is_attacked_bySide(Square64 sq64, Color side) const{
 
-    return   (Attacks::pawnAttacks[sideToMove][sq64] & pieceTypesBitboards[~sideToMove][PAWN])
-           | (Attacks::knightAttacks[sq64] & pieceTypesBitboards[~sideToMove][KNIGHT])
-           | (Attacks::kingAttacks[sq64] &  pieceTypesBitboards[~sideToMove][KING])
-           | (Attacks::sliding_diagonal_attacks(occupiedBitboards[COLOR_NC], sq64) & (pieceTypesBitboards[~sideToMove][BISHOP] | pieceTypesBitboards[~sideToMove][QUEEN]))
-           | (Attacks::sliding_side_attacks(occupiedBitboards[COLOR_NC], sq64) & (pieceTypesBitboards[~sideToMove][ROOK] | pieceTypesBitboards[~sideToMove][QUEEN]));
+    return   (Attacks::pawnAttacks[~side][sq64] & pieceTypesBitboards[side][PAWN])
+           | (Attacks::knightAttacks[sq64] & pieceTypesBitboards[side][KNIGHT])
+           | (Attacks::kingAttacks[sq64] &  pieceTypesBitboards[side][KING])
+           | (Attacks::sliding_diagonal_attacks(occupiedBitboards[COLOR_NC], sq64) & (pieceTypesBitboards[side][BISHOP] | pieceTypesBitboards[side][QUEEN]))
+           | (Attacks::sliding_side_attacks(occupiedBitboards[COLOR_NC], sq64) & (pieceTypesBitboards[side][ROOK] | pieceTypesBitboards[side][QUEEN]));
 }
 
 
@@ -408,7 +409,7 @@ bool Position::do_move(Move move){
     Bitboard kingBitboard = pieceTypesBitboards[sideToMove][KING];
     Square64 kingsq64{__builtin_ctzll(kingBitboard)};
 
-    if(square_is_attacked(kingsq64)){
+    if(square_is_attacked_bySide(kingsq64, ~sideToMove)){
         //VIDEO
         sideToMove =~ sideToMove;
         historyPly[ply-1].positionKey ^= Zobrist::blackMoves;

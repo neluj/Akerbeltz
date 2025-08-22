@@ -149,31 +149,31 @@ TEST_F(PositionTest, SquareAttacked){
 
     position.set_FEN(ATTACK_PAWN_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_D4), true);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_D4, BLACK), true);
 
     const std::string ATTACK_ROOK_POSITION = "8/8/8/8/5r2/8/8/2R2P2 w - - 0 1";
 
     position.set_FEN(ATTACK_ROOK_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), true);
 
     const std::string ATTACK_BISHOP_POSITION = "8/8/8/8/8/3B3b/8/5P2 w - - 0 1";
 
     position.set_FEN(ATTACK_BISHOP_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), true);
 
     const std::string ATTACK_QUEEN_POSITION = "8/8/8/8/5q2/8/8/2R2P2 w - - 0 1";
 
     position.set_FEN(ATTACK_QUEEN_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), true);
 
     const std::string ATTACK_KNIGHT_POSITION = "8/8/8/8/8/3B4/7n/5P2 w - - 0 1";
 
     position.set_FEN(ATTACK_KNIGHT_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), true);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), true);
 
     //No attacks
 
@@ -181,43 +181,43 @@ TEST_F(PositionTest, SquareAttacked){
 
     position.set_FEN(NON_ATTACK_PAWN_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_D4), false);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_D4, BLACK), false);
 
     const std::string NON_ATTACK_ROOK_POSITION = "8/8/8/8/5R2/8/8/2R2P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_ROOK_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), false);
 
     const std::string NON_ATTACK_BISHOP_POSITION = "8/8/8/8/8/3B3B/8/5P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_BISHOP_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), false);
 
     const std::string NON_ATTACK_QUEEN_POSITION = "8/8/8/8/5Q2/8/8/2R2P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_QUEEN_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), false);
 
     const std::string NON_ATTACK_KNIGHT_POSITION = "8/8/8/8/8/3B4/7N/5P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_KNIGHT_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), false);
 
     const std::string NON_ATTACK_NEIGHBORING_POSITION = "8/8/8/8/8/8/4BBB1/4BPB1 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_NEIGHBORING_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), false);
 
     const std::string NON_ATTACK_OBSTRUCTION_POSITION = "8/8/8/8/2b5/3B4/8/5P2 w - - 0 1";
 
     position.set_FEN(NON_ATTACK_OBSTRUCTION_POSITION);
 
-    EXPECT_EQ(position.square_is_attacked(Square64::SQ64_F1), false);
+    EXPECT_EQ(position.square_is_attacked_bySide(Square64::SQ64_F1, BLACK), false);
 
     //TODO meter ataques con piezas en medio, peones, y piezas sin movimiento
 }
