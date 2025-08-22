@@ -119,15 +119,15 @@ void white_pawn_capture_moves(const Position &pos, MoveList &moveList){
     Bitboard northWestCaptures = northWestMoves & occupiedBlackBitboard & ~Bitboards::RANK_8_MASK;
     extract_capture_moves<NORTH_WEST, NO_SPECIAL>(pos, northWestCaptures, moveList);
     Bitboard northEastCapturesPromotions = northEastMoves & occupiedBlackBitboard & Bitboards::RANK_8_MASK;
-    extract_capture_moves<NORTH_EAST, PROMOTION_BISHOP>(pos, northEastCapturesPromotions, moveList);
+    extract_capture_moves<NORTH_EAST, PROMOTION_QUEEN>(pos, northEastCapturesPromotions, moveList);
     extract_capture_moves<NORTH_EAST, PROMOTION_KNIGHT>(pos, northEastCapturesPromotions, moveList);
-    extract_capture_moves<NORTH_EAST, PROMOTION_QUEEN> (pos, northEastCapturesPromotions, moveList);
-    extract_capture_moves<NORTH_EAST, PROMOTION_ROOK>  (pos, northEastCapturesPromotions, moveList);
+    extract_capture_moves<NORTH_EAST, PROMOTION_ROOK> (pos, northEastCapturesPromotions, moveList);
+    extract_capture_moves<NORTH_EAST, PROMOTION_BISHOP>  (pos, northEastCapturesPromotions, moveList);
     Bitboard northWestCapturesPromotions = northWestMoves & occupiedBlackBitboard & Bitboards::RANK_8_MASK;
-    extract_capture_moves<NORTH_WEST, PROMOTION_BISHOP>(pos, northWestCapturesPromotions, moveList);
+    extract_capture_moves<NORTH_WEST, PROMOTION_QUEEN>(pos, northWestCapturesPromotions, moveList);
     extract_capture_moves<NORTH_WEST, PROMOTION_KNIGHT>(pos, northWestCapturesPromotions, moveList);
-    extract_capture_moves<NORTH_WEST, PROMOTION_QUEEN> (pos, northWestCapturesPromotions, moveList);
-    extract_capture_moves<NORTH_WEST, PROMOTION_ROOK>  (pos, northWestCapturesPromotions, moveList);
+    extract_capture_moves<NORTH_WEST, PROMOTION_ROOK> (pos, northWestCapturesPromotions, moveList);
+    extract_capture_moves<NORTH_WEST, PROMOTION_BISHOP>  (pos, northWestCapturesPromotions, moveList);
 
     //Enpassant
     if(pos.get_enpassant_square() != SQ64_NO_SQUARE){
@@ -151,10 +151,10 @@ void white_pawn_quiet_moves(const Position &pos, MoveList &moveList){
     extract_quiet_moves<NORTH_NORTH, SpecialMove::PAWN_START>(startMoves, moveList);
 
     Bitboard promotionQuietMoves = quietSimpleMoves & Bitboards::RANK_8_MASK;
-    extract_quiet_moves<NORTH, PROMOTION_BISHOP>(promotionQuietMoves, moveList);
+    extract_quiet_moves<NORTH, PROMOTION_QUEEN>(promotionQuietMoves, moveList);
     extract_quiet_moves<NORTH, PROMOTION_KNIGHT>(promotionQuietMoves, moveList);
-    extract_quiet_moves<NORTH, PROMOTION_QUEEN> (promotionQuietMoves, moveList);
-    extract_quiet_moves<NORTH, PROMOTION_ROOK>  (promotionQuietMoves, moveList);
+    extract_quiet_moves<NORTH, PROMOTION_ROOK> (promotionQuietMoves, moveList);
+    extract_quiet_moves<NORTH, PROMOTION_BISHOP>  (promotionQuietMoves, moveList);
 
 }
 
@@ -169,15 +169,15 @@ void black_pawn_capture_moves(const Position &pos, MoveList &moveList){
     Bitboard southWestCaptures = southWestMoves & occupiedWhiteBitboard & ~Bitboards::RANK_1_MASK;
     extract_capture_moves<SOUTH_WEST, NO_SPECIAL>(pos, southWestCaptures, moveList);
     Bitboard southEastCapturesPromotions = southEastMoves & occupiedWhiteBitboard & Bitboards::RANK_1_MASK;
-    extract_capture_moves<SOUTH_EAST, PROMOTION_BISHOP>(pos, southEastCapturesPromotions, moveList);
+    extract_capture_moves<SOUTH_EAST, PROMOTION_QUEEN>(pos, southEastCapturesPromotions, moveList);
     extract_capture_moves<SOUTH_EAST, PROMOTION_KNIGHT>(pos, southEastCapturesPromotions, moveList);
-    extract_capture_moves<SOUTH_EAST, PROMOTION_QUEEN> (pos, southEastCapturesPromotions, moveList);
-    extract_capture_moves<SOUTH_EAST, PROMOTION_ROOK>  (pos, southEastCapturesPromotions, moveList);
+    extract_capture_moves<SOUTH_EAST, PROMOTION_ROOK> (pos, southEastCapturesPromotions, moveList);
+    extract_capture_moves<SOUTH_EAST, PROMOTION_BISHOP>  (pos, southEastCapturesPromotions, moveList);
     Bitboard southWestCapturesPromotions = southWestMoves & occupiedWhiteBitboard & Bitboards::RANK_1_MASK;
-    extract_capture_moves<SOUTH_WEST, PROMOTION_BISHOP>(pos, southWestCapturesPromotions, moveList);
+    extract_capture_moves<SOUTH_WEST, PROMOTION_QUEEN>(pos, southWestCapturesPromotions, moveList);
     extract_capture_moves<SOUTH_WEST, PROMOTION_KNIGHT>(pos, southWestCapturesPromotions, moveList);
-    extract_capture_moves<SOUTH_WEST, PROMOTION_QUEEN> (pos, southWestCapturesPromotions, moveList);
-    extract_capture_moves<SOUTH_WEST, PROMOTION_ROOK>  (pos, southWestCapturesPromotions, moveList);
+    extract_capture_moves<SOUTH_WEST, PROMOTION_ROOK> (pos, southWestCapturesPromotions, moveList);
+    extract_capture_moves<SOUTH_WEST, PROMOTION_BISHOP>  (pos, southWestCapturesPromotions, moveList);
 
     //Enpassant
     if(pos.get_enpassant_square() != SQ64_NO_SQUARE){
@@ -201,10 +201,10 @@ void black_pawn_quiet_moves(const Position &pos, MoveList &moveList){
     extract_quiet_moves<SOUTH_SOUTH, SpecialMove::PAWN_START>(startMoves, moveList);
 
     Bitboard promotionQuietMoves = quietSimpleMoves & Bitboards::RANK_1_MASK;
-    extract_quiet_moves<SOUTH, PROMOTION_BISHOP>(promotionQuietMoves, moveList);
+    extract_quiet_moves<SOUTH, PROMOTION_QUEEN>(promotionQuietMoves, moveList);
     extract_quiet_moves<SOUTH, PROMOTION_KNIGHT>(promotionQuietMoves, moveList);
-    extract_quiet_moves<SOUTH, PROMOTION_QUEEN> (promotionQuietMoves, moveList);
-    extract_quiet_moves<SOUTH, PROMOTION_ROOK>  (promotionQuietMoves, moveList);
+    extract_quiet_moves<SOUTH, PROMOTION_ROOK> (promotionQuietMoves, moveList);
+    extract_quiet_moves<SOUTH, PROMOTION_BISHOP>  (promotionQuietMoves, moveList);
 
 }
 
