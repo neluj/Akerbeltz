@@ -21,7 +21,7 @@ TEST(MoveTest, PromotionMove){
     Piece capturedPiece = Piece::B_BISHOP; 
 
     Move moveQueenPromotion = make_capture_move(from, to, specialMove, attackerPiece, capturedPiece);
-    Move expected = 0b1110100111101110100110000101000;
+    Move expected = 0b100100000000000000000000000000000000000000101110100110000101000;
 
     EXPECT_EQ(moveQueenPromotion, expected);
 
@@ -36,7 +36,7 @@ TEST(MoveTest, CastlingMove){
     Piece capturedPiece = Piece::B_BISHOP;
     
     Move moveCasling = make_capture_move(from, to, specialMove, attackerPiece, capturedPiece);
-    Move expected = 0b1110100111101100011110000101000;
+    Move expected = 0b100100000000000000000000000000000000000000101100011110000101000;
 
     EXPECT_EQ(moveCasling, expected);
 
@@ -51,3 +51,24 @@ TEST(MoveTest, MoveScoreFunction){
     EXPECT_EQ(score, expectedScore);
 
 }
+
+
+TEST(MoveTest, CapturedPieceFunction){
+
+    Square64 from = Square64::SQ64_A6;                           
+    Square64 to = Square64::SQ64_A7;                             
+    SpecialMove specialMove = SpecialMove::CASTLE;  
+    Piece attackerPiece = Piece::W_PAWN;                 
+    Piece capturedPiece = Piece::B_BISHOP;
+    
+    Move capturedMove= make_capture_move(from, to, specialMove, attackerPiece, capturedPiece);
+
+    EXPECT_EQ(B_BISHOP, captured_piece(capturedMove));
+
+    Move quietPiece = make_quiet_move(from, to, specialMove);
+
+    EXPECT_EQ(NO_PIECE, captured_piece(quietPiece));
+
+
+}
+

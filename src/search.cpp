@@ -16,16 +16,10 @@ static NodesSize leafCounter;
 PVTable::PVLine pvLine;
 
 //Killer heuristic
-constexpr int MAX_KILLERMOVES = 2;
-constexpr MoveScore KILLERMOVE_SOCORE_0 = 850;
-constexpr MoveScore KILLERMOVE_SOCORE_1 = 800;
 Move killerMoves[MAX_KILLERMOVES][MAX_DEPTH];
 
 //History Heuristic
-MoveScore searchHistory[SQUARE_SIZE_64][SQUARE_SIZE_64];
-
-//PV Move Ordering
-constexpr MoveScore PV_SCORE = 1000;
+MoveScore searchHistory[PIECE_SIZE][SQUARE_SIZE_64];
 
 void perft(Position &position, DepthSize depth);
 
@@ -34,8 +28,6 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 void clean_search_info(SearchInfo &searchInfo);
 void check_time(SearchInfo &searchInfo);
 void pick_move(int moveIndx, MoveGen::MoveList &moveList);
-
-//TODO isrepetition
 
 void search(Position &position, SearchInfo &searchInfo){
 
@@ -87,6 +79,7 @@ void search(Position &position, SearchInfo &searchInfo){
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth){
 
+
     if(depth==0){
         ++searchInfo.nodes;
         return quiescence_search(position, searchInfo, alpha, beta);
@@ -115,14 +108,14 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     //Set move scores
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
-        if(moveList.moves[mIndx] == pvMove){
-            moveList.moves[mIndx] = set_score(moveList.moves[mIndx], PV_SCORE);
-        }else if(moveList.moves[mIndx] == killerMoves[0][position.get_ply()]){
-            moveList.moves[mIndx] = set_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
-        }else if(moveList.moves[mIndx] == killerMoves[1][position.get_ply()]){
-            moveList.moves[mIndx] = set_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
-        }else{
-            moveList.moves[mIndx] = set_score(moveList.moves[mIndx], searchHistory[move_from(moveList.moves[mIndx])][move_to(moveList.moves[mIndx])]);
+        if(raw_move(moveList.moves[mIndx]) == pvMove){
+            moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], PV_SCORE);
+        }else if(raw_move(moveList.moves[mIndx]) == raw_move(killerMoves[0][position.get_ply()])){
+            moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
+        }else if(raw_move(moveList.moves[mIndx]) == raw_move(killerMoves[1][position.get_ply()])){
+            moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
+        }else{ 
+            moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], searchHistory[position.get_mailbox_piece(move_from(moveList.moves[mIndx]))][move_to(moveList.moves[mIndx])]);
         }
     }
 
@@ -157,9 +150,9 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
                 searchInfo.FirstHit++;
                 int ply = position.get_ply();
-                if(captured_piece(move) == NO_PIECE && move != killerMoves[0][ply]){
-                    killerMoves[1][ply] = killerMoves [0][ply];
-                    killerMoves[0][ply] = move;
+                if(!is_capture(move) && raw_move(move) != raw_move(killerMoves[0][ply])){
+                    killerMoves[1][ply] = killerMoves[0][ply];
+                    killerMoves[0][ply] = raw_move(move);
                 }
 
                 return beta;
@@ -167,8 +160,8 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
             alpha = score;
             bestMove = move;
 
-            if(captured_piece(bestMove) == NO_PIECE){
-                searchHistory[move_from(bestMove)][move_to(bestMove)] += depth;
+            if(!is_capture(bestMove)){
+                searchHistory[position.get_mailbox_piece(move_from(bestMove))][move_to(bestMove)] += depth;
             }
         }
     }
@@ -181,7 +174,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     }
 
     if(alpha != oldAlpha){
-        PVTable::insert_entry(position, bestMove);
+        PVTable::insert_entry(position, raw_move(bestMove));
     }
 
     return alpha;
@@ -216,7 +209,6 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     score = -CHECKMATE_SCORE;
     Score oldAlpha = alpha;
     Move bestMove = 0;
-    int legalMoves = 0;
 
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
 
@@ -225,8 +217,6 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         if(!position.do_move(move)){
             continue;
         }
-
-        ++legalMoves;
 
         score = -quiescence_search(position, searchInfo, -beta, -alpha);
         position.undo_move();
@@ -238,9 +228,6 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         if(score>alpha){
             if(score>=beta){
 
-                if(legalMoves == 1){
-                    searchInfo.FirstHitFirst++;
-                }
                 searchInfo.FirstHit++;
 
                 return beta;
@@ -251,7 +238,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     }
 
     if(alpha != oldAlpha){
-        PVTable::insert_entry(position, bestMove);
+        PVTable::insert_entry(position, raw_move(bestMove));
     }
 
     return alpha;
@@ -268,7 +255,7 @@ void clean_search_info(SearchInfo &searchInfo){
             killerMoves[i][x] = 0;
         }
     }
-    for(int i = 0; i < SQUARE_SIZE_64; ++i){
+    for(int i = 0; i < PIECE_SIZE; ++i){
         for(int x = 0; x < SQUARE_SIZE_64; ++x){
             searchHistory[i][x] = 0;
         }
