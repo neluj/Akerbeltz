@@ -108,7 +108,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     //Set move scores
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
-        if(raw_move(moveList.moves[mIndx]) == pvMove){
+        if(equal_move(moveList.moves[mIndx], pvMove)){
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], PV_SCORE);
         }else if(is_capture(moveList.moves[mIndx])){
             if(move_special(moveList.moves[mIndx]) == ENPASSANT){
@@ -118,9 +118,9 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
                 moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], MVVLVAScores[piece_type(attacker_piece(moveList.moves[mIndx]))][piece_type(captured_piece(moveList.moves[mIndx]))]);
             }
         }
-        else if(raw_move(moveList.moves[mIndx]) == raw_move(killerMoves[0][position.get_ply()])){
+        else if(equal_move(moveList.moves[mIndx], killerMoves[0][position.get_ply()])){
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
-        }else if(raw_move(moveList.moves[mIndx]) == raw_move(killerMoves[1][position.get_ply()])){
+        }else if(equal_move(moveList.moves[mIndx], killerMoves[1][position.get_ply()])){
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
         }else{ 
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], searchHistory[position.get_mailbox_piece(move_from(moveList.moves[mIndx]))][move_to(moveList.moves[mIndx])]);
@@ -158,7 +158,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
                 searchInfo.FirstHit++;
                 int ply = position.get_ply();
-                if(!is_capture(move) && raw_move(move) != raw_move(killerMoves[0][ply])){
+                if(!is_capture(move) && !equal_move(move, killerMoves[0][ply])){
                     killerMoves[1][ply] = killerMoves[0][ply];
                     killerMoves[0][ply] = raw_move(move);
                 }
