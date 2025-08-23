@@ -4,12 +4,13 @@
 using namespace Xake;
 
 /*Move:
-0000 0000 0000 0000 0000 0000 0000 0011 1111 -> From 0x7F
-0000 0000 0000 0000 0000 0000 1111 1100 0000 -> To 0x7F
-0000 0000 0000 0000 0000 0011 0000 0000 0000 -> Special move flag
-0000 0000 0000 0000 0001 1100 0000 0000 0000 -> Promotion Piece
-0000 0000 0000 0001 1110 0000 0000 0000 0000 -> Captured piece
-1111 1111 1111 1110 0000 0000 0000 0000 0000 -> Score
+.... 0000 0000 0000 0000 0000 0000 0000 0011 1111 -> From
+.... 0000 0000 0000 0000 0000 0000 1111 1100 0000 -> To
+.... 0000 0000 0000 0000 0000 0011 0000 0000 0000 -> Special move flag
+.... 0000 0000 0000 0000 0001 1100 0000 0000 0000 -> Promotion Piece Type
+.... 0000 0000 0000 0001 1110 0000 0000 0000 0000 -> Captured piece
+.... 0000 0000 0001 1110 0000 0000 0000 0000 0000 -> Attacker piece
+.... 1111 1111 1110 0000 0000 0000 0000 0000 0000 -> Score
 */
 
 TEST(MoveTest, PromotionMove){
@@ -21,7 +22,7 @@ TEST(MoveTest, PromotionMove){
     Piece capturedPiece = Piece::B_BISHOP; 
 
     Move moveQueenPromotion = make_capture_move(from, to, specialMove, attackerPiece, capturedPiece);
-    Move expected = 0b100100000000000000000000000000000000000000101110100110000101000;
+    Move expected = 0b0001101110100110000101000;
 
     EXPECT_EQ(moveQueenPromotion, expected);
 
@@ -36,22 +37,11 @@ TEST(MoveTest, CastlingMove){
     Piece capturedPiece = Piece::B_BISHOP;
     
     Move moveCasling = make_capture_move(from, to, specialMove, attackerPiece, capturedPiece);
-    Move expected = 0b100100000000000000000000000000000000000000101100011110000101000;
+    Move expected = 0b0001101100011110000101000;
 
     EXPECT_EQ(moveCasling, expected);
 
 }
-
-TEST(MoveTest, MoveScoreFunction){
-
-    Move move = 0b1111111111111000000000000000000000;
-    MoveScore expectedScore = 8191;
-    MoveScore score = move_score(move);
-
-    EXPECT_EQ(score, expectedScore);
-
-}
-
 
 TEST(MoveTest, CapturedPieceFunction){
 

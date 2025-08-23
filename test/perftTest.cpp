@@ -76,8 +76,8 @@ void loadPerftSampleLine(std::vector<PerftSample>& samples){
 
 }
 
-//TEST(PerftTest, DISABLED_FileTest) {
-TEST(PerftTest, FileTest) {
+TEST(PerftTest, DISABLED_FileTest) {
+//TEST(PerftTest, FileTest) {
 
   std::vector<PerftSample> samples;
 

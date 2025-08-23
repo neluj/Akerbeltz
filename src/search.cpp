@@ -110,7 +110,15 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
         if(raw_move(moveList.moves[mIndx]) == pvMove){
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], PV_SCORE);
-        }else if(raw_move(moveList.moves[mIndx]) == raw_move(killerMoves[0][position.get_ply()])){
+        }else if(is_capture(moveList.moves[mIndx])){
+            if(move_special(moveList.moves[mIndx]) == ENPASSANT){
+                moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], MVVLVAScores[PAWN][PAWN]);
+            }
+            else{
+                moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], MVVLVAScores[piece_type(attacker_piece(moveList.moves[mIndx]))][piece_type(captured_piece(moveList.moves[mIndx]))]);
+            }
+        }
+        else if(raw_move(moveList.moves[mIndx]) == raw_move(killerMoves[0][position.get_ply()])){
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
         }else if(raw_move(moveList.moves[mIndx]) == raw_move(killerMoves[1][position.get_ply()])){
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
