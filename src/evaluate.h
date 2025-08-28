@@ -12,6 +12,8 @@ class Position;
 namespace Evaluate{
 
     using Score = int;
+    constexpr Score CHECKMATE_SCORE = 30000;
+    constexpr Score DRAW_SOCORE = 0;
 
     void init();
     

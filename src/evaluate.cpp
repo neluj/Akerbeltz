@@ -5,9 +5,21 @@ namespace Xake{
 
 namespace Evaluate {
 
+//Function Declarations
+void init_isolated_masks();
+void init_passed_masks();
+Score eval_pawn_structure(const Position& pos);
 int flip(int sq);
 
+
+//Material Scores
 Score material_evaluation_array[] = {0,82,337,365,477, 1025,20000};
+
+//Pawn Structures
+constexpr Score ISOLATED_PAWN_PENALTY = 15;
+constexpr Score PASSED_PAWN_BONUS_BY_RANK[8] = {
+    0, 10, 20, 35, 60, 90, 140, 0
+};
 
 
 /*
@@ -20,7 +32,6 @@ Score material_evaluation_array[] = {0,82,337,365,477, 1025,20000};
  A7 B7 C7 D7 E7 F7 G7 H7
  A8 B8 C8 D8 E8 F8 G8 H8
 */
-
 
 int nopiece_table[SQUARE_SIZE_64] = {
     0,  0,  0,  0,  0,  0,  0,  0,
@@ -112,17 +123,8 @@ int* piecesTypes_tables[PIECETYPE_SIZE] = {
 
 Score material_table[PIECE_SIZE][SQUARE_SIZE_64];
 
-Score calc_material_table(Piece piece, Square64 square){
-    return material_table[piece][square];
-}
-
-Score calc_score(const Position &position){
-
-    Score score = position.get_material_score(WHITE) - position.get_material_score(BLACK);
-    return score * (~position.get_side_to_move() - position.get_side_to_move());
-
-}
-
+Bitboard isolated_masks[SQUARE_SIZE_64];
+Bitboard passed_masks[COLOR_SIZE][SQUARE_SIZE_64];
 
 void init(){
 
@@ -142,6 +144,87 @@ void init(){
         }
     }
 
+    init_isolated_masks();
+    init_passed_masks();
+
+}
+
+void init_isolated_masks() {
+    for (Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64) {
+        File file = square_file(sq64);
+
+        Bitboard mask = ZERO;
+        if (file > 0) mask |= Bitboards::FILE_A_MASK << (file - 1); 
+        if (file < 7) mask |= Bitboards::FILE_A_MASK << (file + 1); 
+
+        isolated_masks[sq64] = mask;
+    }
+}
+
+void init_passed_masks(){
+    for (Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64) {
+        File file = square_file(sq64); 
+        Rank rank = square_rank(sq64);
+
+        Bitboard files =
+            Bitboards::FILE_A_MASK << file |
+            (file > 0 ? Bitboards::FILE_A_MASK << (file - 1) : ZERO) |
+            (file < 7 ? Bitboards::FILE_A_MASK << (file + 1) : ZERO);
+
+        Bitboard white_forward = (rank < 7) ? (~ZERO << ((rank + 1) * 8)) : ZERO;
+        Bitboard black_forward = (ONE << (rank * 8)) - ONE;
+
+        passed_masks[WHITE][sq64] = files & white_forward;
+        passed_masks[BLACK][sq64] = files & black_forward;
+    }
+}
+
+Score calc_score(const Position &position){
+
+    Score score = position.get_material_score(WHITE) - position.get_material_score(BLACK);
+    score += eval_pawn_structure(position);
+    return score * (~position.get_side_to_move() - position.get_side_to_move());
+
+}
+
+Score calc_material_table(Piece piece, Square64 square){
+    return material_table[piece][square];
+}
+
+Score eval_pawn_structure(const Position& pos) {
+    
+    Score score = 0;
+
+    const Bitboard wPawns = pos.get_pieceTypes_bitboard(WHITE, PAWN);
+    const Bitboard bPawns = pos.get_pieceTypes_bitboard(BLACK, PAWN);
+
+    Bitboard itWPawns = wPawns;
+    
+    while (itWPawns) {
+        Square64 sq64{__builtin_ctzll(itWPawns)}; 
+        if ((isolated_masks[sq64] & wPawns) == ZERO)
+            score -= ISOLATED_PAWN_PENALTY;
+        if ((passed_masks[WHITE][sq64] & bPawns) == ZERO) {
+            Rank rank = square_rank(sq64);                 
+            score += PASSED_PAWN_BONUS_BY_RANK[rank];
+        }
+        itWPawns &= itWPawns - 1;
+    }
+
+    Bitboard itBPawns = bPawns;
+    
+    while (itBPawns) {
+        Square64 sq64{__builtin_ctzll(itBPawns)}; 
+        if ((isolated_masks[sq64] & bPawns) == ZERO)
+            score += ISOLATED_PAWN_PENALTY;  
+        if ((passed_masks[BLACK][sq64] & wPawns) == ZERO) {
+            Rank rank = square_rank(sq64);                 
+            score -= PASSED_PAWN_BONUS_BY_RANK[7 - rank];   
+        } 
+        itBPawns &= itBPawns - 1;
+    }
+
+    return score;
 }
 
 int flip(int sq){

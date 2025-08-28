@@ -23,9 +23,6 @@ constexpr int MAX_DEPTH = 64;
 
 constexpr int CASTLING_POSIBILITIES = 4 * 4;
 
-constexpr int CHECKMATE_SCORE = 30000;
-constexpr int DRAW_SOCORE = 0;
-
 constexpr Xake::Time NO_TIME = -1;
 
 enum PieceType{
