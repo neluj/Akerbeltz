@@ -9,6 +9,7 @@ namespace Evaluate {
 void init_isolated_masks();
 void init_passed_masks();
 Score eval_pawn_structure(const Position& pos);
+Score eval_open_files(const Position& pos);
 int flip(int sq);
 
 
@@ -21,6 +22,11 @@ constexpr Score PASSED_PAWN_BONUS_BY_RANK[8] = {
     0, 10, 20, 35, 60, 90, 140, 0
 };
 
+//Open File
+constexpr Score ROOK_OPEN_FILE_BONUS      = 32; 
+constexpr Score ROOK_SEMIOPEN_FILE_BONUS  = 18; 
+constexpr Score QUEEN_OPEN_FILE_BONUS     = 14; 
+constexpr Score QUEEN_SEMIOPEN_FILE_BONUS = 7;  
 
 /*
  A1 B1 C1 D1 E1 F1 G1 H1
@@ -183,6 +189,7 @@ Score calc_score(const Position &position){
 
     Score score = position.get_material_score(WHITE) - position.get_material_score(BLACK);
     score += eval_pawn_structure(position);
+    score += eval_open_files(position);
     return score * (~position.get_side_to_move() - position.get_side_to_move());
 
 }
@@ -201,27 +208,104 @@ Score eval_pawn_structure(const Position& pos) {
     Bitboard itWPawns = wPawns;
     
     while (itWPawns) {
-        Square64 sq64{__builtin_ctzll(itWPawns)}; 
+        Square64 sq64{__builtin_ctzll(itWPawns)};
+        itWPawns &= itWPawns - 1;
+        
         if ((isolated_masks[sq64] & wPawns) == ZERO)
             score -= ISOLATED_PAWN_PENALTY;
         if ((passed_masks[WHITE][sq64] & bPawns) == ZERO) {
             Rank rank = square_rank(sq64);                 
             score += PASSED_PAWN_BONUS_BY_RANK[rank];
         }
-        itWPawns &= itWPawns - 1;
     }
 
     Bitboard itBPawns = bPawns;
     
     while (itBPawns) {
         Square64 sq64{__builtin_ctzll(itBPawns)}; 
+        itBPawns &= itBPawns - 1;
+
         if ((isolated_masks[sq64] & bPawns) == ZERO)
             score += ISOLATED_PAWN_PENALTY;  
         if ((passed_masks[BLACK][sq64] & wPawns) == ZERO) {
             Rank rank = square_rank(sq64);                 
             score -= PASSED_PAWN_BONUS_BY_RANK[7 - rank];   
         } 
-        itBPawns &= itBPawns - 1;
+    }
+
+    return score;
+}
+
+Score eval_open_files(const Position& pos) {
+
+    Score score = 0;
+
+    const Bitboard wPawns = pos.get_pieceTypes_bitboard(WHITE, PAWN);
+    const Bitboard bPawns = pos.get_pieceTypes_bitboard(BLACK, PAWN);
+    const Bitboard allPawns = (wPawns | bPawns);
+
+    //White rooks
+    Bitboard rooks = pos.get_pieceTypes_bitboard(WHITE, ROOK);
+    while (rooks){
+        Square64 sq64 = Square64(__builtin_ctzll(rooks));
+        rooks &= rooks - 1;
+
+        const File file = square_file(sq64);
+        const Bitboard mask = Bitboards::FILE_A_MASK << file;
+
+        const Bitboard ownInFile = (wPawns & mask);
+        if (ownInFile == ZERO){
+            const Bitboard occInFile = (allPawns & mask);
+            score += (occInFile == ZERO ? ROOK_OPEN_FILE_BONUS : ROOK_SEMIOPEN_FILE_BONUS);
+        }
+    }
+
+    //Black rooks
+    rooks = pos.get_pieceTypes_bitboard(BLACK, ROOK);
+    while (rooks){
+        Square64 sq64 = Square64(__builtin_ctzll(rooks));
+        rooks &= rooks - 1;
+
+        const File file = square_file(sq64);
+        const Bitboard mask = Bitboards::FILE_A_MASK << file;
+
+        const Bitboard ownInFile = (bPawns & mask);
+        if (ownInFile == ZERO){
+            const Bitboard occInFile = (allPawns & mask);
+            score -= (occInFile == ZERO ? ROOK_OPEN_FILE_BONUS : ROOK_SEMIOPEN_FILE_BONUS);
+        }
+    }
+
+    //White queens
+    Bitboard queens = pos.get_pieceTypes_bitboard(WHITE, QUEEN);
+    while (queens){
+        Square64 sq64 = Square64(__builtin_ctzll(queens));
+        queens &= queens - 1;
+
+        const File file = square_file(sq64);
+        const Bitboard mask = Bitboards::FILE_A_MASK << file;
+
+        const Bitboard ownInFile = (wPawns & mask);
+        if (ownInFile == ZERO){
+            const Bitboard occInFile = (allPawns & mask);
+            score += (occInFile == ZERO ? QUEEN_OPEN_FILE_BONUS : QUEEN_SEMIOPEN_FILE_BONUS);
+        }
+    }
+
+    //Black queens
+    queens = pos.get_pieceTypes_bitboard(BLACK, QUEEN);
+    while (queens){
+        Square64 sq64 = Square64(__builtin_ctzll(queens));
+        queens &= queens - 1;
+
+        const File file = square_file(sq64);
+        const Bitboard mask = Bitboards::FILE_A_MASK << file;
+
+        const Bitboard ownInFile = (bPawns & mask);
+        if (ownInFile == ZERO){
+            const Bitboard occInFile = (allPawns & mask);
+            score -= (occInFile == ZERO ? QUEEN_OPEN_FILE_BONUS : QUEEN_SEMIOPEN_FILE_BONUS);
+        }
     }
 
     return score;

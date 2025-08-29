@@ -60,11 +60,9 @@ TEST_F(EvaluateTest, Score){
 
 TEST_F(EvaluateTest, PassedPawnDeltaExact) {
 
-    const std::string FEN_PASSED =
-        "4k3/8/8/8/3P4/2p5/8/4K3 w - - 0 1";
+    const std::string FEN_PASSED =     "4k3/8/8/8/3P4/2p5/8/4K3 w - - 0 1";
 
-    const std::string FEN_NOT_PASSED =
-        "4k3/8/8/2p5/3P4/8/8/4K3 w - - 0 1";
+    const std::string FEN_NOT_PASSED = "4k3/8/8/2p5/3P4/8/8/4K3 w - - 0 1";
 
     Position p_passed, p_not;
     p_passed.set_FEN(FEN_PASSED);
@@ -86,11 +84,9 @@ TEST_F(EvaluateTest, PassedPawnDeltaExact) {
 
 TEST_F(EvaluateTest, IsolatedPawnDeltaExact) {
 
-    const std::string FEN_ISOLATED =
-        "4k3/8/8/8/2P5/8/8/P3K3 w - - 0 1";
+    const std::string FEN_ISOLATED =     "4k3/8/8/8/2P5/8/8/P3K3 w - - 0 1";
 
-    const std::string FEN_NOT_ISOLATED =
-        "4k3/8/8/8/2P5/8/8/1P2K3 w - - 0 1";
+    const std::string FEN_NOT_ISOLATED = "4k3/8/8/8/2P5/8/8/1P2K3 w - - 0 1";
 
     Position p_iso, p_not;
     p_iso.set_FEN(FEN_ISOLATED);
@@ -110,3 +106,48 @@ TEST_F(EvaluateTest, IsolatedPawnDeltaExact) {
 
     EXPECT_EQ(s_not - s_iso, 2 * ISOLATED_PAWN_PENALTY + delta_w_pawn);
 }
+
+TEST_F(EvaluateTest, OpenVsSemiOpen_RookBlack_DeltaExact) {
+
+    const std::string FEN_SEMIOPEN = "4k3/8/8/8/3r4/3P4/8/3K4 b - - 0 1";
+    const std::string FEN_OPEN =     "4k3/8/8/8/3r4/4P3/8/3K4 b - - 0 1";
+
+    Position p_open, p_semi;
+    p_open.set_FEN(FEN_OPEN);
+    p_semi.set_FEN(FEN_SEMIOPEN);
+
+    const Score s_open = Evaluate::calc_score(p_open);
+    const Score s_semi = Evaluate::calc_score(p_semi);
+
+    const Score delta_w_pawn =
+        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_E3) -
+        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_D3);
+
+    constexpr Score ROOK_OPEN_FILE_BONUS     = 20;
+    constexpr Score ROOK_SEMIOPEN_FILE_BONUS = 12;
+
+    EXPECT_EQ(s_open - s_semi, (ROOK_OPEN_FILE_BONUS - ROOK_SEMIOPEN_FILE_BONUS) - delta_w_pawn);
+}
+
+TEST_F(EvaluateTest, OpenVsSemiOpen_QueenBlack_DeltaExact) {
+
+    const std::string FEN_SEMIOPEN = "4k3/8/8/8/3q4/3P4/8/3K4 b - - 0 1";
+    const std::string FEN_OPEN =     "4k3/8/8/8/3q4/4P3/8/3K4 b - - 0 1";
+
+    Position p_open, p_semi;
+    p_open.set_FEN(FEN_OPEN);
+    p_semi.set_FEN(FEN_SEMIOPEN);
+
+    const Score s_open = Evaluate::calc_score(p_open);
+    const Score s_semi = Evaluate::calc_score(p_semi);
+
+    const Score delta_w_pawn =
+        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_E3) -
+        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_D3);
+
+    constexpr Score QUEEN_OPEN_FILE_BONUS     = 6;
+    constexpr Score QUEEN_SEMIOPEN_FILE_BONUS = 3;
+
+    EXPECT_EQ(s_open - s_semi, (QUEEN_OPEN_FILE_BONUS - QUEEN_SEMIOPEN_FILE_BONUS) - delta_w_pawn);
+}
+

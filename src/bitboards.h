@@ -8,8 +8,8 @@ namespace Xake{
 
 using Bitboard = uint64_t;
 
-constexpr Bitboard ONE = 1;
-constexpr Bitboard ZERO = 0;
+inline constexpr Bitboard ZERO = Bitboard{0};
+inline constexpr Bitboard ONE  = Bitboard{1};
 
 namespace Bitboards {
 
