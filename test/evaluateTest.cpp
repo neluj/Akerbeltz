@@ -151,3 +151,36 @@ TEST_F(EvaluateTest, OpenVsSemiOpen_QueenBlack_DeltaExact) {
     EXPECT_EQ(s_open - s_semi, (QUEEN_OPEN_FILE_BONUS - QUEEN_SEMIOPEN_FILE_BONUS) - delta_w_pawn);
 }
 
+TEST_F(EvaluateTest, MaterialDraws){
+
+    const std::string FEN_KK   = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
+    const std::string FEN_KBK  = "4k3/8/8/8/8/8/8/3BK3 w - - 0 1";
+    const std::string FEN_KNK  = "4k3/8/8/8/8/8/8/3NK3 w - - 0 1";
+    const std::string FEN_KNNK = "4k3/8/8/8/8/8/8/2NNK3 w - - 0 1";
+    const std::string FEN_KBKB = "4kb2/8/8/8/8/8/8/2B1K3 w - - 0 1";
+    const std::string FEN_KBNK = "4k3/8/8/8/8/8/8/2B1K1N1 w - - 0 1";
+    const std::string FEN_KRK  = "4k3/8/8/8/8/8/8/3RK3 w - - 0 1";
+
+    Position position;
+
+    position.set_FEN(FEN_KK);
+    EXPECT_TRUE(Evaluate::material_draw(position));
+
+    position.set_FEN(FEN_KBK);
+    EXPECT_TRUE(Evaluate::material_draw(position));
+
+    position.set_FEN(FEN_KNK);
+    EXPECT_TRUE(Evaluate::material_draw(position));
+
+    position.set_FEN(FEN_KNNK);
+    EXPECT_TRUE(Evaluate::material_draw(position));
+
+    position.set_FEN(FEN_KBKB);
+    EXPECT_TRUE(Evaluate::material_draw(position));
+
+    position.set_FEN(FEN_KBNK);
+    EXPECT_FALSE(Evaluate::material_draw(position));
+
+    position.set_FEN(FEN_KRK);
+    EXPECT_FALSE(Evaluate::material_draw(position));
+}

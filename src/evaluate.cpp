@@ -28,6 +28,11 @@ constexpr Score ROOK_SEMIOPEN_FILE_BONUS  = 18;
 constexpr Score QUEEN_OPEN_FILE_BONUS     = 14; 
 constexpr Score QUEEN_SEMIOPEN_FILE_BONUS = 7;  
 
+
+/*
+Based on PeSTOs evaluation function
+https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
+*/
 /*
  A1 B1 C1 D1 E1 F1 G1 H1
  A2 B2 C2 D2 E2 F2 G2 H2
@@ -309,6 +314,62 @@ Score eval_open_files(const Position& pos) {
     }
 
     return score;
+}
+
+bool material_draw(const Position& pos){
+
+    const Bitboard wP = pos.get_pieceTypes_bitboard(WHITE, PAWN);
+    const Bitboard bP = pos.get_pieceTypes_bitboard(BLACK, PAWN);
+    if (wP || bP)
+        return false;
+
+    const Bitboard wQ = pos.get_pieceTypes_bitboard(WHITE, QUEEN);
+    const Bitboard bQ = pos.get_pieceTypes_bitboard(BLACK, QUEEN);
+    const Bitboard wR = pos.get_pieceTypes_bitboard(WHITE, ROOK);
+    const Bitboard bR = pos.get_pieceTypes_bitboard(BLACK, ROOK);
+
+    if (!wR && !bR && !wQ && !bQ){
+
+        const Bitboard wB = pos.get_pieceTypes_bitboard(WHITE, BISHOP);
+        const Bitboard bB = pos.get_pieceTypes_bitboard(BLACK, BISHOP);
+        const Bitboard wN = pos.get_pieceTypes_bitboard(WHITE, KNIGHT);
+        const Bitboard bN = pos.get_pieceTypes_bitboard(BLACK, KNIGHT);
+
+        if (!wB && !bB){
+            const int wn = __builtin_popcountll(wN);
+            const int bn = __builtin_popcountll(bN);
+            return (wn < 3 && bn == 0) || (bn < 3 && wn == 0);
+        } else if (!wN && !bN){
+            Bitboard bishops = wB | bB;
+            const int totalB = __builtin_popcountll(bishops);
+            if (totalB == 1)
+                return true;
+            if (totalB == 2){
+                constexpr Bitboard DARK_SQUARES = 0xAA55AA55AA55AA55ULL;
+                return ((bishops & DARK_SQUARES) == bishops) ||
+                       ((bishops & ~DARK_SQUARES) == bishops);
+            }
+        }
+
+    } else if (!wQ && !bQ){
+
+        const Bitboard wB = pos.get_pieceTypes_bitboard(WHITE, BISHOP);
+        const Bitboard bB = pos.get_pieceTypes_bitboard(BLACK, BISHOP);
+        const Bitboard wN = pos.get_pieceTypes_bitboard(WHITE, KNIGHT);
+        const Bitboard bN = pos.get_pieceTypes_bitboard(BLACK, KNIGHT);
+
+        if (!wR && !wB && !wN){
+            const int bn = __builtin_popcountll(bN);
+            const int bb = __builtin_popcountll(bB);
+            return !bR && (bn + bb) < 2;
+        } else if (!bR && !bB && !bN){
+            const int wn = __builtin_popcountll(wN);
+            const int wb = __builtin_popcountll(wB);
+            return !wR && (wn + wb) < 2;
+        }
+    }
+
+    return false;
 }
 
 int flip(int sq){

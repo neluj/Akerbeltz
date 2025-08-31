@@ -20,6 +20,8 @@ namespace Evaluate{
     Score calc_material_table(Piece piece, Square64 square);
 
     Score calc_score(const Position &position);
+
+    bool material_draw(const Position& pos);
 }
 }
 
