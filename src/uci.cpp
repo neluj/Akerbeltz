@@ -180,6 +180,8 @@ void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo, 
     else{
         is.seekg(isParamPos);
         go_info(pos, is, searchInfo);
+        if (searchThread.joinable())
+            searchThread.join();
         searchThread = std::thread(Search::search, std::ref(pos), std::ref(searchInfo));
     }
 
