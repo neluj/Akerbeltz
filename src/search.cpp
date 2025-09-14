@@ -67,13 +67,13 @@ void search(Position &position, SearchInfo &searchInfo){
             std::cout << " " << algebraic_move(pvLine.moves[pvLineDepth]);
         }
 
-        std::cout << "\n";
+        std::cout << std::endl;
         //std::cout << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
         //std::cout << "move:" << algebraic_move(veryBestMove) << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
         
     }
 
-    std::cout << "bestmove " << algebraic_move(bestMove) << "\n\n"; 
+    std::cout << "bestmove " << algebraic_move(bestMove) << std::endl; 
 
 }
 
