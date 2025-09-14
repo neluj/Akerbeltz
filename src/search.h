@@ -4,6 +4,8 @@
 #include "types.h"
 #include "move.h"
 
+#include <atomic>
+
 namespace Xake{
 
 class Position;
@@ -19,6 +21,7 @@ namespace Search{
         Xake::Time moveTime;
         Xake::Time realTime;
         bool timeOver;
+        std::atomic_bool stop;
     };
 
     NodesSize perftTest(Position &position, SearchInfo &searchInfo);

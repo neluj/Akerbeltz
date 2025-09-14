@@ -1,10 +1,11 @@
 #include "uci.h"
+#include "position.h"
+#include "search.h"
 
 #include <iostream>
 #include <sstream>
-
-#include "position.h"
-#include "search.h"
+#include <thread>
+#include <functional>
 
 namespace Xake{
 
@@ -14,7 +15,7 @@ const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk
 
 void position(Position & pos, std::istringstream &is);
 Move make_move(const Position &pos, std::string algebraic_move);
-void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo);
+void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo, std::thread &searchThread);
 void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo);
 void uci_info();
 
@@ -24,6 +25,7 @@ void run(){
     pos.set_FEN(START_FEN);
 
     Search::SearchInfo searchInfo;
+    std::thread searchThread;
 
     std::string inputStr, token;
 
@@ -39,7 +41,7 @@ void run(){
         is >> token;
 
         if (token == "go")
-            go(pos, is, searchInfo);
+            go(pos, is, searchInfo, searchThread);
 
         else if (token == "position")
             position(pos, is);
@@ -58,8 +60,16 @@ void run(){
         else if (token == "uci")
             uci_info();
         
-        // TODO searchInfo.stop = true
+        else if (token == "stop"){
+            searchInfo.stop = true;
+            if(searchThread.joinable())
+                searchThread.join();
+        }
+        
         else if(token == "quit"){
+            searchInfo.stop = true;
+            if(searchThread.joinable())
+                searchThread.join();
             break;
         }
     
@@ -156,21 +166,21 @@ Move make_move(const Position &pos, std::string algebraic_move){
     return make_capture_move(from, to, specialMove, piece, capturedPiece);
 }
 
-void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo){
+void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo, std::thread &searchThread){
 
     std::string arg;
-    std::streampos isParamPos = is.tellg(); 
+    std::streampos isParamPos = is.tellg();
 
     is >> arg;
 
     if(arg == "perft"){
         go_info(pos, is, searchInfo);
-        Search::perftTest(pos, searchInfo); 
+        Search::perftTest(pos, searchInfo);
     }
     else{
         is.seekg(isParamPos);
         go_info(pos, is, searchInfo);
-        Search::search(pos, searchInfo);
+        searchThread = std::thread(Search::search, std::ref(pos), std::ref(searchInfo));
     }
 
 }
@@ -184,6 +194,7 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
     searchInfo.moveTime = Xake::NO_TIME;
     searchInfo.realTime = Xake::NO_TIME;
     searchInfo.timeOver = false;
+    searchInfo.stop = false;
     Xake::Time colorTime = Xake::NO_TIME;    
     Xake::Time moveTime = Xake::NO_TIME; 
     Xake::Time colorInc = 0;   

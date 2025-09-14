@@ -1,10 +1,10 @@
 #include "search.h"
 
-#include <iostream>
-
 #include "movegen.h"
 #include "position.h"
 #include "pvtable.h"
+
+#include <iostream>
 
 namespace Xake{
 
@@ -40,7 +40,7 @@ void search(Position &position, SearchInfo &searchInfo){
         
         bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
         
-        if(searchInfo.timeOver){
+        if(searchInfo.timeOver || searchInfo.stop){
             break;
         }
         
@@ -145,7 +145,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         score = -alpha_beta(position, searchInfo, -beta, -alpha, depth - 1);
         position.undo_move();
 
-        if(searchInfo.timeOver){
+        if(searchInfo.timeOver || searchInfo.stop){
             return DRAW_SOCORE;
         }
         
@@ -229,7 +229,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         score = -quiescence_search(position, searchInfo, -beta, -alpha);
         position.undo_move();
 
-        if(searchInfo.timeOver){
+        if(searchInfo.timeOver || searchInfo.stop){
             return 0;
         }
         
