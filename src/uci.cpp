@@ -103,7 +103,7 @@ void position(Position & pos, std::istringstream &is){
     while(is >> arg)
         pos.do_move(make_move(pos, arg));
 
-    std::cout << pos;
+    //std::cout << pos;
     
 }
 
