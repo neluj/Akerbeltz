@@ -58,8 +58,7 @@ void search(Position &position, SearchInfo &searchInfo){
         " score cp " << bestMoveScore << 
         " move " << algebraic_move(bestMove) <<
         " nodes " << searchInfo.nodes <<
-        " time " << searchInfo.realTime <<
-        " ordering " << searchInfo.FirstHitFirst/searchInfo.FirstHit;
+        " time " << searchInfo.realTime;
 
         std::cout << " pv";
 
@@ -152,11 +151,6 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         if(score>alpha){
             if(score>=beta){
 
-                if(legalMoves == 1){
-                    searchInfo.FirstHitFirst++;
-                }
-
-                searchInfo.FirstHit++;
                 int ply = position.get_ply();
                 if(!is_capture(move) && !equal_move(move, killerMoves[0][ply])){
                     killerMoves[1][ply] = killerMoves[0][ply];
@@ -235,9 +229,6 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         
         if(score>alpha){
             if(score>=beta){
-
-                searchInfo.FirstHit++;
-
                 return beta;
             }
             alpha = score;
@@ -255,8 +246,6 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 
 void clean_search_info(SearchInfo &searchInfo){
     searchInfo.nodes = 0;
-    searchInfo.FirstHit = 0;
-    searchInfo.FirstHitFirst = 0;
     
     for(int i = 0; i < MAX_KILLERMOVES; ++i){
         for(int x = 0; x < MAX_DEPTH; ++x){
