@@ -328,8 +328,7 @@ bool Position::do_move(Move move){
     historyPly[ply-1].positionKey ^= Zobrist::castlingRight[historyPly[ply-2].castlingRight];
 
     if(specialMove != SpecialMove::NO_SPECIAL){
-        if(specialMove == SpecialMove::ENPASSANT){
-            historyPly[ply-1].positionKey ^= Zobrist::enpassantSquare[square_file(historyPly[ply-2].enpassantSquare)];
+        if(specialMove == SpecialMove::ENPASSANT ){
             if(sideToMove==Color::WHITE){
                 remove_piece(Square64(to+Direction::SOUTH));
             }else{
@@ -382,6 +381,9 @@ bool Position::do_move(Move move){
         historyPly[ply-1].movesCounter = historyPly[ply-2].movesCounter+1;
 
     //Set enpassant square
+    if(historyPly[ply-2].enpassantSquare != Square64::SQ64_NO_SQUARE){
+        historyPly[ply-1].positionKey ^= Zobrist::enpassantSquare[square_file(historyPly[ply-2].enpassantSquare)];
+    }
     historyPly[ply-1].enpassantSquare = Square64::SQ64_NO_SQUARE;
     if(piece_type(mailbox[from]) == PieceType::PAWN){
         historyPly[ply-1].fiftyMovesCounter = 0;

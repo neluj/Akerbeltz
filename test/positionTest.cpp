@@ -740,6 +740,46 @@ TEST_F(PositionTest, CalcKeyBasicPromotion){
 
 }
 
+TEST_F(PositionTest, ZobristKeyClearsStaleEnpassantOnQuietMove){
+
+    const std::string FEN_WITH_EP = "4k3/8/8/8/1pP5/8/8/4K3 b - c3 0 1";
+    const std::string FEN_WITHOUT_EP = "4k3/8/8/8/1pP5/8/8/4K3 b - - 0 1";
+
+    position.set_FEN(FEN_WITH_EP);
+    Position referencePosition;
+    referencePosition.set_FEN(FEN_WITHOUT_EP);
+
+    Move blackKingMove = make_quiet_move(SQ64_E8, SQ64_D8, SpecialMove::NO_SPECIAL);
+
+    ASSERT_TRUE(position.do_move(blackKingMove));
+    ASSERT_TRUE(referencePosition.do_move(blackKingMove));
+
+    EXPECT_EQ(position.get_enpassant_square(), SQ64_NO_SQUARE);
+    EXPECT_EQ(referencePosition.get_enpassant_square(), SQ64_NO_SQUARE);
+
+    EXPECT_EQ(position.get_key(), referencePosition.get_key());
+}
+
+TEST_F(PositionTest, ZobristKeyMatchesAfterEnpassantCapture){
+
+    const std::string FEN_WITH_EP = "4k3/8/8/8/1pP5/8/8/4K3 b - c3 0 1";
+    const std::string FEN_AFTER_EP_CAPTURE = "4k3/8/8/8/8/2p5/8/4K3 w - - 0 1";
+
+    position.set_FEN(FEN_WITH_EP);
+
+    Move enpassantCapture = make_enpassant_move(SQ64_B4, SQ64_C3);
+
+    ASSERT_TRUE(position.do_move(enpassantCapture));
+
+    Position referencePosition;
+    referencePosition.set_FEN(FEN_AFTER_EP_CAPTURE);
+
+    EXPECT_EQ(position.get_enpassant_square(), SQ64_NO_SQUARE);
+    EXPECT_EQ(referencePosition.get_enpassant_square(), SQ64_NO_SQUARE);
+
+    EXPECT_EQ(position.get_key(), referencePosition.get_key());
+}
+
 TEST_F(PositionTest, IsRepetition){
 
     position.set_FEN(FEN_INIT_POSITION);
