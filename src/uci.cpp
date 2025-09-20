@@ -197,6 +197,7 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
     searchInfo.realTime = Xake::NO_TIME;
     searchInfo.timeOver = false;
     searchInfo.stop = false;
+    searchInfo.searchPly = 0;
     Xake::Time colorTime = Xake::NO_TIME;    
     Xake::Time moveTime = Xake::NO_TIME; 
     Xake::Time colorInc = 0;   

@@ -63,9 +63,8 @@ private:
     Bitboard occupiedBitboards[COLOR_SIZE];
     Piece mailbox[SQUARE_SIZE_64];
     Color sideToMove{COLOR_NC};
-    //TODO esto meterlo en HistoryInfo?
     int ply;
-    HistoryInfo historyPly[MAX_GAME_MOVES];
+    HistoryInfo moveHistory[MAX_GAME_MOVES];
     Evaluate::Score materialScore[COLOR_SIZE];
 
 };
@@ -79,16 +78,16 @@ inline int Position::get_ply() const{
     return ply;
 }
 inline CastlingRight Position::get_castling_right() const{
-    return historyPly[ply-1].castlingRight;
+    return moveHistory[ply-1].castlingRight;
 }
 inline Square64 Position::get_enpassant_square() const{
-    return historyPly[ply-1].enpassantSquare;
+    return moveHistory[ply-1].enpassantSquare;
 }
 inline unsigned short Position::get_fifty_moves_counter() const{
-    return historyPly[ply-1].fiftyMovesCounter;
+    return moveHistory[ply-1].fiftyMovesCounter;
 }
 inline unsigned short Position::get_moves_counter() const{
-    return historyPly[ply-1].movesCounter;
+    return moveHistory[ply-1].movesCounter;
 }
 inline Piece Position::get_mailbox_piece(Square64 square) const{
     return mailbox[square];
@@ -103,7 +102,7 @@ inline Evaluate::Score Position::get_material_score(Color color) const{
     return materialScore[color];
 }
 inline Key Position::get_key() const{
-    return historyPly[ply-1].positionKey;
+    return moveHistory[ply-1].positionKey;
 }
 
 

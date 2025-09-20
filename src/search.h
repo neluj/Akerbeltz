@@ -14,6 +14,7 @@ namespace Search{
     struct SearchInfo{
         DepthSize depth;
         NodesSize nodes;
+        DepthSize searchPly;
         Xake::Time startTime;
         Xake::Time stopTime;
         Xake::Time moveTime;

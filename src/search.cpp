@@ -90,7 +90,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     ++searchInfo.nodes;
 
-    if(((position.is_repetition() || position.get_fifty_moves_counter() >= 100) && position.get_ply())){
+    if(((position.is_repetition() || position.get_fifty_moves_counter() >= 100) && searchInfo.searchPly)){
         return DRAW_SOCORE;
     }
 
@@ -117,9 +117,9 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
                 moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], MVVLVAScores[piece_type(attacker_piece(moveList.moves[mIndx]))][piece_type(captured_piece(moveList.moves[mIndx]))]);
             }
         }
-        else if(equal_move(moveList.moves[mIndx], killerMoves[0][position.get_ply()])){
+        else if(equal_move(moveList.moves[mIndx], killerMoves[0][searchInfo.searchPly])){
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
-        }else if(equal_move(moveList.moves[mIndx], killerMoves[1][position.get_ply()])){
+        }else if(equal_move(moveList.moves[mIndx], killerMoves[1][searchInfo.searchPly])){
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
         }else{ 
             moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], searchHistory[position.get_mailbox_piece(move_from(moveList.moves[mIndx]))][move_to(moveList.moves[mIndx])]);
@@ -138,11 +138,12 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         if(!position.do_move(move)){
             continue;
         }
-
+        ++searchInfo.searchPly;
         ++legalMoves;
         
         score = -alpha_beta(position, searchInfo, -beta, -alpha, depth - 1);
         position.undo_move();
+        --searchInfo.searchPly;
 
         if(searchInfo.timeOver || searchInfo.stop){
             return DRAW_SOCORE;
@@ -151,10 +152,9 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         if(score>alpha){
             if(score>=beta){
 
-                int ply = position.get_ply();
-                if(!is_capture(move) && !equal_move(move, killerMoves[0][ply])){
-                    killerMoves[1][ply] = killerMoves[0][ply];
-                    killerMoves[0][ply] = raw_move(move);
+                if(!is_capture(move) && !equal_move(move, killerMoves[0][searchInfo.searchPly])){
+                    killerMoves[1][searchInfo.searchPly] = killerMoves[0][searchInfo.searchPly];
+                    killerMoves[0][searchInfo.searchPly] = raw_move(move);
                 }
 
                 return beta;
@@ -170,7 +170,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     if(legalMoves == 0){
         if(isCheck)
-            return -CHECKMATE_SCORE + position.get_ply();
+            return -CHECKMATE_SCORE + searchInfo.searchPly;
         else
             return DRAW_SOCORE;
     }
@@ -219,9 +219,11 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         if(!position.do_move(move)){
             continue;
         }
+        ++searchInfo.searchPly;
 
         score = -quiescence_search(position, searchInfo, -beta, -alpha);
         position.undo_move();
+        --searchInfo.searchPly;
 
         if(searchInfo.timeOver || searchInfo.stop){
             return 0;
