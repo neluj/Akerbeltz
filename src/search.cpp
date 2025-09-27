@@ -28,6 +28,8 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 void clean_search_info(SearchInfo &searchInfo);
 void check_time(SearchInfo &searchInfo);
 void pick_move(int moveIndx, MoveGen::MoveList &moveList);
+bool is_draw(const Position &position, const SearchInfo &searchInfo);
+
 
 void search(Position &position, SearchInfo &searchInfo){
 
@@ -90,7 +92,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     ++searchInfo.nodes;
 
-    if(((position.is_repetition() || position.get_fifty_moves_counter() >= 100) && searchInfo.searchPly)){
+    if (is_draw(position, searchInfo)){
         return DRAW_SOCORE;
     }
 
@@ -191,6 +193,10 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 
     ++searchInfo.nodes;
 
+    if (is_draw(position, searchInfo)){
+        return DRAW_SOCORE;
+    }
+
     if(searchInfo.depth > MAX_DEPTH - 1){
         return Evaluate::calc_score(position);
     }
@@ -259,6 +265,14 @@ void clean_search_info(SearchInfo &searchInfo){
             searchHistory[i][x] = 0;
         }
     }
+}
+
+bool is_draw(const Position &position, const SearchInfo &searchInfo) {
+    if ((position.is_repetition() || position.get_fifty_moves_counter() >= 100) && searchInfo.searchPly) {
+        return true;
+    }
+
+    return Evaluate::material_draw(position);
 }
 
 void check_time(SearchInfo &searchInfo){

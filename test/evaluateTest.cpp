@@ -123,8 +123,8 @@ TEST_F(EvaluateTest, OpenVsSemiOpen_RookBlack_DeltaExact) {
         Evaluate::calc_material_table(Piece::W_PAWN, SQ64_E3) -
         Evaluate::calc_material_table(Piece::W_PAWN, SQ64_D3);
 
-    constexpr Score ROOK_OPEN_FILE_BONUS     = 20;
-    constexpr Score ROOK_SEMIOPEN_FILE_BONUS = 12;
+    constexpr Score ROOK_OPEN_FILE_BONUS     = 32;
+    constexpr Score ROOK_SEMIOPEN_FILE_BONUS = 18;
 
     EXPECT_EQ(s_open - s_semi, (ROOK_OPEN_FILE_BONUS - ROOK_SEMIOPEN_FILE_BONUS) - delta_w_pawn);
 }
@@ -145,8 +145,8 @@ TEST_F(EvaluateTest, OpenVsSemiOpen_QueenBlack_DeltaExact) {
         Evaluate::calc_material_table(Piece::W_PAWN, SQ64_E3) -
         Evaluate::calc_material_table(Piece::W_PAWN, SQ64_D3);
 
-    constexpr Score QUEEN_OPEN_FILE_BONUS     = 6;
-    constexpr Score QUEEN_SEMIOPEN_FILE_BONUS = 3;
+    constexpr Score QUEEN_OPEN_FILE_BONUS     = 14;
+    constexpr Score QUEEN_SEMIOPEN_FILE_BONUS = 7;
 
     EXPECT_EQ(s_open - s_semi, (QUEEN_OPEN_FILE_BONUS - QUEEN_SEMIOPEN_FILE_BONUS) - delta_w_pawn);
 }

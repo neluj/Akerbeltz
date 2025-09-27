@@ -18,6 +18,7 @@ evaluateTest.cpp
 pvtableTest.cpp
 bitboardsTest.cpp
 attacksTest.cpp
+searchTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}-test  gtest_main src)
