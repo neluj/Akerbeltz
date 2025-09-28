@@ -4,11 +4,11 @@ namespace Xake{
 
 namespace Attacks {
 
-Bitboard pawnAttacks[COLOR_SIZE][SQUARE_SIZE_64];
-Bitboard knightAttacks[SQUARE_SIZE_64];
-Bitboard kingAttacks[SQUARE_SIZE_64];
-Bitboard slidingSideRays[SIDE_ATTACK_DIR_SIZE][SQUARE_SIZE_64];
-Bitboard slidingDiagonalRays[DIAGONAL_ATTACK_DIR_SIZE][SQUARE_SIZE_64];
+Bitboard pawnAttacks[COLOR_SIZE][SQ64_SIZE];
+Bitboard knightAttacks[SQ64_SIZE];
+Bitboard kingAttacks[SQ64_SIZE];
+Bitboard slidingSideRays[SIDE_ATTACK_DIR_SIZE][SQ64_SIZE];
+Bitboard slidingDiagonalRays[DIAGONAL_ATTACK_DIR_SIZE][SQ64_SIZE];
 
 void init_pawn_attacks();
 void init_knight_attacks();
@@ -28,7 +28,7 @@ void init(){
 //TODO unify as non sliding attacks
 void init_pawn_attacks(){
 
-    for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64)
+    for(Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64)
     {
 
         pawnAttacks[WHITE][sq64] = Bitboards::make_direction<NORTH_WEST>(Bitboards::set_pieces(sq64)) 
@@ -42,7 +42,7 @@ void init_pawn_attacks(){
 
 void init_knight_attacks(){
 
-    for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64)
+    for(Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64)
     {
 
         knightAttacks[sq64] = Bitboards::make_direction<NORTH_NORTH_WEST>(Bitboards::set_pieces(sq64))
@@ -60,7 +60,7 @@ void init_knight_attacks(){
 
 void init_king_attacks(){
 
-    for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64)
+    for(Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64)
     {
 
         kingAttacks[sq64] = Bitboards::make_direction<NORTH>      (Bitboards::set_pieces(sq64))
@@ -78,7 +78,7 @@ void init_king_attacks(){
 
 void init_sliding_side_attacks(){
 
-    for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64)
+    for(Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64)
     {
         slidingSideRays[NORTH_ATTACK][sq64] = 0x0101010101010100ULL << sq64;          
         slidingSideRays[SOUTH_ATTACK][sq64] = 0x0080808080808080ULL >> (63 - sq64);

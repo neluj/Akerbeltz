@@ -56,12 +56,12 @@ private:
     void clear_occupied_bitboards();
     void clear_mailbox();
 
-    void calc_material_score();
+    //void calc_material_score();
     void calc_key();
     
     Bitboard pieceTypesBitboards[COLOR_SIZE][PIECETYPE_SIZE];
     Bitboard occupiedBitboards[COLOR_SIZE];
-    Piece mailbox[SQUARE_SIZE_64];
+    Piece mailbox[SQ64_SIZE];
     Color sideToMove{COLOR_NC};
     int ply;
     HistoryInfo moveHistory[MAX_GAME_MOVES];

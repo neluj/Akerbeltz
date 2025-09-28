@@ -10,14 +10,14 @@ namespace Zobrist{
 
     constexpr uint64_t ZOBRIST_SEED = 0x9E3779B97F4A7C15ULL;
 
-    Key pieceSquare[PIECE_SIZE][SQUARE_SIZE_64];
+    Key pieceSquare[PIECE_SIZE][SQ64_SIZE];
     Key enpassantSquare[FILE_SIZE];
     Key castlingRight[CASTLING_POSIBILITIES];
     Key blackMoves;
 
 }
 
-const int CASTLE_PERSMISION_UPDATES[SQUARE_SIZE_64] = {
+const int CASTLE_PERSMISION_UPDATES[SQ64_SIZE] = {
     13, 15, 15, 15, 12, 15, 15, 14, 
     15, 15, 15, 15, 15, 15, 15, 15, 
     15, 15, 15, 15, 15, 15, 15, 15, 
@@ -102,7 +102,7 @@ void Position::clear_occupied_bitboards(){
 
 void Position::clear_mailbox(){
     //clear mailbox
-    for(int i = 0; i < SQUARE_SIZE_64; ++i){
+    for(int i = 0; i < SQ64_SIZE; ++i){
         mailbox[i] = NO_PIECE;
     }
 }
@@ -116,7 +116,7 @@ void Position::zobris_prng(){
 
     // Initializes a random key for each piece on each square
 	for (int piece_type = 0; piece_type < PIECE_SIZE; piece_type++) {
-		for (int square = 0; square < SQUARE_SIZE_64; square++)
+		for (int square = 0; square < SQ64_SIZE; square++)
 			Zobrist::pieceSquare[piece_type][square] = dist(e2);
 	}
 
@@ -260,18 +260,18 @@ std::string Position::get_FEN() const{
     return oss.str();
 }
 
-void Position::calc_material_score(){
-
-    for(Square64 sq64 = SQ64_A1; sq64 < SQUARE_SIZE_64; ++sq64){
-        if(mailbox[sq64] != NO_PIECE){
-            if( piece_color(mailbox[sq64]) ==  WHITE)
-                materialScore[WHITE] += Evaluate::calc_material_table(mailbox[sq64], sq64);
-            else    
-                materialScore[BLACK] += Evaluate::calc_material_table(mailbox[sq64], sq64);
-        }
-    }
-
-}
+//void Position::calc_material_score(){
+//
+//    for(Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64){
+//        if(mailbox[sq64] != NO_PIECE){
+//            if( piece_color(mailbox[sq64]) ==  WHITE)
+//                materialScore[WHITE] += Evaluate::calc_material_table(mailbox[sq64], sq64);
+//            else    
+//                materialScore[BLACK] += Evaluate::calc_material_table(mailbox[sq64], sq64);
+//        }
+//    }
+//
+//}
 
 void Position::calc_key(){
     
@@ -295,13 +295,6 @@ bool Position::is_repetition() const {
     }
     return false;
 }
-
-
-
-const int DIRECTION_SIDES = 4;
-const Direction sizes[DIRECTION_SIDES] = {EAST, WEST, NORTH, SOUTH};
-const Direction diagonals[DIRECTION_SIDES] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
-
 
 /*returns true if the side is attacking the square*/
 bool Position::square_is_attacked_bySide(Square64 sq64, Color side) const{
@@ -506,8 +499,8 @@ void Position::move_piece(Square64 from, Square64 to){
     occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC],to);
 
     //Update piece value from material
-    materialScore[pieceColor] -= Evaluate::calc_material_table(piece, from);
-    materialScore[pieceColor] += Evaluate::calc_material_table(piece, to);
+    //materialScore[pieceColor] -= Evaluate::calc_material_table(piece, from);
+    //materialScore[pieceColor] += Evaluate::calc_material_table(piece, to);
 
     //Update key
     moveHistory[ply-1].positionKey ^= Zobrist::pieceSquare[piece][from];
@@ -527,7 +520,7 @@ void Position::remove_piece(Square64 square){
     occupiedBitboards[Color::COLOR_NC] = Bitboards::clear_pieces(occupiedBitboards[Color::COLOR_NC], square);
 
     //Remove piece value from material 
-    materialScore[pieceColor] -= Evaluate::calc_material_table(piece, square);
+    //materialScore[pieceColor] -= Evaluate::calc_material_table(piece, square);
 
     //Update key
     moveHistory[ply-1].positionKey ^= Zobrist::pieceSquare[piece][square];
@@ -544,7 +537,7 @@ void Position::add_piece(Square64 square, Piece piece){
     occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC], square);
 
     //Add piece value from material 
-    materialScore[pieceColor] += Evaluate::calc_material_table(piece, square);
+    //materialScore[pieceColor] += Evaluate::calc_material_table(piece, square);
     
     //Update key
     moveHistory[ply-1].positionKey ^= Zobrist::pieceSquare[piece][square];

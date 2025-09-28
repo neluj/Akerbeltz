@@ -12,12 +12,14 @@ class Position;
 namespace Evaluate{
 
     using Score = int;
+    using GamePhaseWeight = int;
+
     constexpr Score CHECKMATE_SCORE = 30000;
     constexpr Score DRAW_SOCORE = 0;
 
     void init();
     
-    Score calc_material_table(Piece piece, Square64 square);
+    //Score calc_material_table(Piece piece, Square64 square);
 
     Score calc_score(const Position &position);
 

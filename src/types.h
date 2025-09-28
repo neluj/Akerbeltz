@@ -92,10 +92,10 @@ enum Square64 : int{
 	SQ64_A6, SQ64_B6, SQ64_C6, SQ64_D6, SQ64_E6, SQ64_F6, SQ64_G6, SQ64_H6,
 	SQ64_A7, SQ64_B7, SQ64_C7, SQ64_D7, SQ64_E7, SQ64_F7, SQ64_G7, SQ64_H7,
 	SQ64_A8, SQ64_B8, SQ64_C8, SQ64_D8, SQ64_E8, SQ64_F8, SQ64_G8, SQ64_H8,
-  SQUARE_SIZE_64, SQ64_NO_SQUARE, SQ64_OFFBOARD
+  SQ64_SIZE, SQ64_NO_SQUARE, SQ64_OFFBOARD
 };
 
-const std::string SQUARE_NAMES[SQUARE_SIZE_64] = {
+const std::string SQUARE_NAMES[SQ64_SIZE] = {
    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", 
    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", 
    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3", 

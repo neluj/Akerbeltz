@@ -19,7 +19,7 @@ PVTable::PVLine pvLine;
 Move killerMoves[MAX_KILLERMOVES][MAX_DEPTH];
 
 //History Heuristic
-MoveScore searchHistory[PIECE_SIZE][SQUARE_SIZE_64];
+MoveScore searchHistory[PIECE_SIZE][SQ64_SIZE];
 
 void perft(Position &position, DepthSize depth);
 
@@ -261,7 +261,7 @@ void clean_search_info(SearchInfo &searchInfo){
         }
     }
     for(int i = 0; i < PIECE_SIZE; ++i){
-        for(int x = 0; x < SQUARE_SIZE_64; ++x){
+        for(int x = 0; x < SQ64_SIZE; ++x){
             searchHistory[i][x] = 0;
         }
     }

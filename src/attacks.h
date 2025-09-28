@@ -24,9 +24,9 @@ namespace Attacks {
         DIAGONAL_ATTACK_DIR_SIZE
     };
 
-    extern Bitboard pawnAttacks[COLOR_SIZE][SQUARE_SIZE_64];
-    extern Bitboard knightAttacks[SQUARE_SIZE_64];
-    extern Bitboard kingAttacks[SQUARE_SIZE_64];
+    extern Bitboard pawnAttacks[COLOR_SIZE][SQ64_SIZE];
+    extern Bitboard knightAttacks[SQ64_SIZE];
+    extern Bitboard kingAttacks[SQ64_SIZE];
     
     void init();
     Bitboard sliding_side_attacks(Bitboard occupied,Square64 sq64);
