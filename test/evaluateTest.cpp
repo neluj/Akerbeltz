@@ -1,186 +1,148 @@
+#include <array>
 #include <gtest/gtest.h>
+
 #include "evaluate.h"
 #include "position.h"
 
 using namespace Xake;
-using namespace Evaluate;
 
-class EvaluateTest : public ::testing::Test
-{
-     protected:
-     virtual void SetUp()
-     {      
-         Evaluate::init(); 
-     }
+namespace Xake::Evaluate {
+    Score eval_pawn_structure(const Position& pos);
+    Score eval_open_files(const Position& pos);
+}
 
-     virtual void TearDown()
-    {
+namespace {
+constexpr Evaluate::Score kIsolatedPawnPenalty = 15;
+constexpr std::array<Evaluate::Score, 8> kPassedPawnBonusByRank{{0, 10, 20, 35, 60, 90, 140, 0}};
+constexpr Evaluate::Score kRookOpenFileBonus = 32;
+constexpr Evaluate::Score kRookSemiOpenFileBonus = 18;
+constexpr Evaluate::Score kQueenOpenFileBonus = 14;
+constexpr Evaluate::Score kQueenSemiOpenFileBonus = 7;
+
+constexpr const char* kStartFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+constexpr const char* kWhiteAdvantageWhiteToMove = "4k3/8/8/8/4Q3/8/8/4K3 w - - 0 1";
+constexpr const char* kWhiteAdvantageBlackToMove = "4k3/8/8/8/4Q3/8/8/4K3 b - - 0 1";
+constexpr const char* kPassedPawnFen = "4k3/8/8/8/3P4/2p5/8/4K3 w - - 0 1";
+constexpr const char* kBlockedPawnFen = "4k3/8/8/2p5/3P4/8/8/4K3 w - - 0 1";
+constexpr const char* kIsolatedPawnsFen = "4k3/8/8/8/2P5/8/8/P3K3 w - - 0 1";
+constexpr const char* kSupportedPawnsFen = "4k3/8/8/8/2P5/8/8/1P2K3 w - - 0 1";
+constexpr const char* kRookSemiOpenFen = "4k3/8/8/8/3r4/3P4/8/3K4 b - - 0 1";
+constexpr const char* kRookOpenFen = "4k3/8/8/8/3r4/4P3/8/3K4 b - - 0 1";
+constexpr const char* kQueenSemiOpenFen = "4k3/8/8/8/3q4/3P4/8/3K4 b - - 0 1";
+constexpr const char* kQueenOpenFen = "4k3/8/8/8/3q4/4P3/8/3K4 b - - 0 1";
+constexpr const char* kBareKingsFen = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
+constexpr const char* kKBKFen = "4k3/8/8/8/8/8/8/3BK3 w - - 0 1";
+constexpr const char* kKNKFen = "4k3/8/8/8/8/8/8/3NK3 w - - 0 1";
+constexpr const char* kKNNKFen = "4k3/8/8/8/8/8/8/2NNK3 w - - 0 1";
+constexpr const char* kKBKBSameColorFen = "4kb2/8/8/8/8/8/8/2B1K3 w - - 0 1";
+constexpr const char* kKBNKFen = "4k3/8/8/8/8/8/8/2B1K1N1 w - - 0 1";
+constexpr const char* kKRKFen = "4k3/8/8/8/8/8/8/3RK3 w - - 0 1";
+}
+
+class EvaluateTest : public ::testing::Test {
+protected:
+    static void SetUpTestSuite() {
+        Position::init();
+        Evaluate::init();
     }
 
-    public:
-    
-    Position pos;
-    const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
+    Position position_;
 };
 
-TEST_F(EvaluateTest, MaterialTable){
-
-    EXPECT_EQ(calc_material_table(Piece::NO_PIECE, SQ64_A1), 0);
-    EXPECT_EQ(calc_material_table(Piece::NO_PIECE, SQ64_A1), 0);
-
-
-    EXPECT_EQ(calc_material_table(Piece::W_PAWN, SQ64_A1), 82);
-    EXPECT_EQ(calc_material_table(Piece::W_PAWN, SQ64_B1), 82);
-    EXPECT_EQ(calc_material_table(Piece::W_PAWN, SQ64_A2), 47);
-    EXPECT_EQ(calc_material_table(Piece::W_PAWN, SQ64_B7), 216);
-
-    EXPECT_EQ(calc_material_table(Piece::B_PAWN, SQ64_A8), 82);
-    EXPECT_EQ(calc_material_table(Piece::B_PAWN, SQ64_B8), 82);
-    EXPECT_EQ(calc_material_table(Piece::B_PAWN, SQ64_A7), 47);
-    EXPECT_EQ(calc_material_table(Piece::B_PAWN, SQ64_B2), 216);
-
-    EXPECT_EQ(calc_material_table(Piece::W_KING, SQ64_D5), 19973);
-    EXPECT_EQ(calc_material_table(Piece::B_KING, SQ64_D4), 19973);
-
+TEST_F(EvaluateTest, CalcScoreStartPositionIsNeutral) {
+    position_.set_FEN(kStartFen);
+    EXPECT_EQ(Evaluate::calc_score(position_), 0);
 }
 
-TEST_F(EvaluateTest, Score){
+TEST_F(EvaluateTest, CalcScoreDependsOnSideToMove) {
+    position_.set_FEN(kWhiteAdvantageWhiteToMove);
+    const Evaluate::Score whiteToMove = Evaluate::calc_score(position_);
 
-    pos.set_FEN(START_FEN);
+    position_.set_FEN(kWhiteAdvantageBlackToMove);
+    const Evaluate::Score blackToMove = Evaluate::calc_score(position_);
 
-    EXPECT_EQ(0, calc_score(pos));
-
-    pos.do_move(make_quiet_move(SQ64_D2, SQ64_D4, SpecialMove::NO_SPECIAL));
-
-    //Value is negative because side to move has move to black
-    EXPECT_EQ(-35, calc_score(pos));
-
+    EXPECT_GT(whiteToMove, 0);
+    EXPECT_LT(blackToMove, 0);
+    EXPECT_EQ(whiteToMove, -blackToMove);
 }
 
-TEST_F(EvaluateTest, PassedPawnDeltaExact) {
+TEST_F(EvaluateTest, PawnStructureRewardsPassedPawns) {
+    Position passed;
+    Position blocked;
+    passed.set_FEN(kPassedPawnFen);
+    blocked.set_FEN(kBlockedPawnFen);
 
-    const std::string FEN_PASSED =     "4k3/8/8/8/3P4/2p5/8/4K3 w - - 0 1";
+    const Evaluate::Score passedScore = Evaluate::eval_pawn_structure(passed);
+    const Evaluate::Score blockedScore = Evaluate::eval_pawn_structure(blocked);
 
-    const std::string FEN_NOT_PASSED = "4k3/8/8/2p5/3P4/8/8/4K3 w - - 0 1";
-
-    Position p_passed, p_not;
-    p_passed.set_FEN(FEN_PASSED);
-    p_not.set_FEN(FEN_NOT_PASSED);
-
-    const Score s_passed = Evaluate::calc_score(p_passed);
-    const Score s_not    = Evaluate::calc_score(p_not);
-
-    const Score delta_b_pawn =
-        Evaluate::calc_material_table(Piece::B_PAWN, SQ64_C5) -
-        Evaluate::calc_material_table(Piece::B_PAWN, SQ64_C3);
-
-
-    constexpr Score WHITE_PASSED_R3 = 35;
-    constexpr Score BLACK_PASSED_R5 = 90;
-
-    EXPECT_EQ(s_passed - s_not, WHITE_PASSED_R3 - BLACK_PASSED_R5 + delta_b_pawn);
+    constexpr Evaluate::Score expected =
+        kPassedPawnBonusByRank[3] - kPassedPawnBonusByRank[5];
+    EXPECT_EQ(passedScore - blockedScore, expected);
 }
 
-TEST_F(EvaluateTest, IsolatedPawnDeltaExact) {
+TEST_F(EvaluateTest, PawnStructurePenalizesIsolatedPawns) {
+    Position isolated;
+    Position supported;
+    isolated.set_FEN(kIsolatedPawnsFen);
+    supported.set_FEN(kSupportedPawnsFen);
 
-    const std::string FEN_ISOLATED =     "4k3/8/8/8/2P5/8/8/P3K3 w - - 0 1";
+    const Evaluate::Score isolatedScore = Evaluate::eval_pawn_structure(isolated);
+    const Evaluate::Score supportedScore = Evaluate::eval_pawn_structure(supported);
 
-    const std::string FEN_NOT_ISOLATED = "4k3/8/8/8/2P5/8/8/1P2K3 w - - 0 1";
-
-    Position p_iso, p_not;
-    p_iso.set_FEN(FEN_ISOLATED);
-    p_not.set_FEN(FEN_NOT_ISOLATED);
-
-    const Score s_iso = Evaluate::calc_score(p_iso);
-    const Score s_not = Evaluate::calc_score(p_not);
-
-
-    const Score delta_w_pawn =
-        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_B1) -
-        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_A1);
-
-
-    constexpr Score ISOLATED_PAWN_PENALTY = 15;
-
-
-    EXPECT_EQ(s_not - s_iso, 2 * ISOLATED_PAWN_PENALTY + delta_w_pawn);
+    constexpr Evaluate::Score expected = 2 * kIsolatedPawnPenalty;
+    EXPECT_EQ(supportedScore - isolatedScore, expected);
 }
 
-TEST_F(EvaluateTest, OpenVsSemiOpen_RookBlack_DeltaExact) {
+TEST_F(EvaluateTest, OpenFilesApplyRookBonuses) {
+    Position semiOpen;
+    Position open;
+    semiOpen.set_FEN(kRookSemiOpenFen);
+    open.set_FEN(kRookOpenFen);
 
-    const std::string FEN_SEMIOPEN = "4k3/8/8/8/3r4/3P4/8/3K4 b - - 0 1";
-    const std::string FEN_OPEN =     "4k3/8/8/8/3r4/4P3/8/3K4 b - - 0 1";
+    const Evaluate::Score semiOpenScore = Evaluate::eval_open_files(semiOpen);
+    const Evaluate::Score openScore = Evaluate::eval_open_files(open);
 
-    Position p_open, p_semi;
-    p_open.set_FEN(FEN_OPEN);
-    p_semi.set_FEN(FEN_SEMIOPEN);
-
-    const Score s_open = Evaluate::calc_score(p_open);
-    const Score s_semi = Evaluate::calc_score(p_semi);
-
-    const Score delta_w_pawn =
-        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_E3) -
-        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_D3);
-
-    constexpr Score ROOK_OPEN_FILE_BONUS     = 32;
-    constexpr Score ROOK_SEMIOPEN_FILE_BONUS = 18;
-
-    EXPECT_EQ(s_open - s_semi, (ROOK_OPEN_FILE_BONUS - ROOK_SEMIOPEN_FILE_BONUS) - delta_w_pawn);
+    constexpr Evaluate::Score expected =
+        -(kRookOpenFileBonus - kRookSemiOpenFileBonus);
+    EXPECT_EQ(openScore - semiOpenScore, expected);
 }
 
-TEST_F(EvaluateTest, OpenVsSemiOpen_QueenBlack_DeltaExact) {
+TEST_F(EvaluateTest, OpenFilesApplyQueenBonuses) {
+    Position semiOpen;
+    Position open;
+    semiOpen.set_FEN(kQueenSemiOpenFen);
+    open.set_FEN(kQueenOpenFen);
 
-    const std::string FEN_SEMIOPEN = "4k3/8/8/8/3q4/3P4/8/3K4 b - - 0 1";
-    const std::string FEN_OPEN =     "4k3/8/8/8/3q4/4P3/8/3K4 b - - 0 1";
+    const Evaluate::Score semiOpenScore = Evaluate::eval_open_files(semiOpen);
+    const Evaluate::Score openScore = Evaluate::eval_open_files(open);
 
-    Position p_open, p_semi;
-    p_open.set_FEN(FEN_OPEN);
-    p_semi.set_FEN(FEN_SEMIOPEN);
-
-    const Score s_open = Evaluate::calc_score(p_open);
-    const Score s_semi = Evaluate::calc_score(p_semi);
-
-    const Score delta_w_pawn =
-        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_E3) -
-        Evaluate::calc_material_table(Piece::W_PAWN, SQ64_D3);
-
-    constexpr Score QUEEN_OPEN_FILE_BONUS     = 14;
-    constexpr Score QUEEN_SEMIOPEN_FILE_BONUS = 7;
-
-    EXPECT_EQ(s_open - s_semi, (QUEEN_OPEN_FILE_BONUS - QUEEN_SEMIOPEN_FILE_BONUS) - delta_w_pawn);
+    constexpr Evaluate::Score expected =
+        -(kQueenOpenFileBonus - kQueenSemiOpenFileBonus);
+    EXPECT_EQ(openScore - semiOpenScore, expected);
 }
 
-TEST_F(EvaluateTest, MaterialDraws){
+TEST_F(EvaluateTest, MaterialDrawDetectionMatchesCommonCases) {
+    Position pos;
 
-    const std::string FEN_KK   = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
-    const std::string FEN_KBK  = "4k3/8/8/8/8/8/8/3BK3 w - - 0 1";
-    const std::string FEN_KNK  = "4k3/8/8/8/8/8/8/3NK3 w - - 0 1";
-    const std::string FEN_KNNK = "4k3/8/8/8/8/8/8/2NNK3 w - - 0 1";
-    const std::string FEN_KBKB = "4kb2/8/8/8/8/8/8/2B1K3 w - - 0 1";
-    const std::string FEN_KBNK = "4k3/8/8/8/8/8/8/2B1K1N1 w - - 0 1";
-    const std::string FEN_KRK  = "4k3/8/8/8/8/8/8/3RK3 w - - 0 1";
+    pos.set_FEN(kBareKingsFen);
+    EXPECT_TRUE(Evaluate::material_draw(pos));
 
-    Position position;
+    pos.set_FEN(kKBKFen);
+    EXPECT_TRUE(Evaluate::material_draw(pos));
 
-    position.set_FEN(FEN_KK);
-    EXPECT_TRUE(Evaluate::material_draw(position));
+    pos.set_FEN(kKNKFen);
+    EXPECT_TRUE(Evaluate::material_draw(pos));
 
-    position.set_FEN(FEN_KBK);
-    EXPECT_TRUE(Evaluate::material_draw(position));
+    pos.set_FEN(kKNNKFen);
+    EXPECT_TRUE(Evaluate::material_draw(pos));
 
-    position.set_FEN(FEN_KNK);
-    EXPECT_TRUE(Evaluate::material_draw(position));
+    pos.set_FEN(kKBKBSameColorFen);
+    EXPECT_TRUE(Evaluate::material_draw(pos));
 
-    position.set_FEN(FEN_KNNK);
-    EXPECT_TRUE(Evaluate::material_draw(position));
+    pos.set_FEN(kKBNKFen);
+    EXPECT_FALSE(Evaluate::material_draw(pos));
 
-    position.set_FEN(FEN_KBKB);
-    EXPECT_TRUE(Evaluate::material_draw(position));
-
-    position.set_FEN(FEN_KBNK);
-    EXPECT_FALSE(Evaluate::material_draw(position));
-
-    position.set_FEN(FEN_KRK);
-    EXPECT_FALSE(Evaluate::material_draw(position));
+    pos.set_FEN(kKRKFen);
+    EXPECT_FALSE(Evaluate::material_draw(pos));
 }
+

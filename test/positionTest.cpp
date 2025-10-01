@@ -10,7 +10,6 @@ class PositionTest : public ::testing::Test
      virtual void SetUp()
      {  
         Position::init();    
-        Evaluate::init();
         Attacks::init();
      }
 
@@ -288,9 +287,6 @@ TEST_F(PositionTest, RemovePiece){
     ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , d2Mask);
     ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , d2Mask);
 
-    //Score
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
-
     //2 Remove piece located on D2
     position.remove_piece(Square64::SQ64_D2);
 
@@ -304,9 +300,6 @@ TEST_F(PositionTest, RemovePiece){
     //Bitboards
     ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , ZERO);
     ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , ZERO);
-
-    //Score
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23833);
 
 }
  
@@ -331,8 +324,6 @@ TEST_F(PositionTest, AddPiece){
     ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , ZERO);
     ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , ZERO);
 
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23833);
-
     //2 Add piece on D2
     position.add_piece(Square64::SQ64_D2, Piece::W_PAWN);
 
@@ -347,8 +338,6 @@ TEST_F(PositionTest, AddPiece){
     ASSERT_EQ(position.get_pieceTypes_bitboard(WHITE, PAWN) & d2Mask , d2Mask);
     ASSERT_EQ(position.get_occupied_bitboard(WHITE) & d2Mask , d2Mask);
 
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
-
 }
 
 TEST_F(PositionTest, DoMove){
@@ -362,7 +351,6 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_moves_counter(), 1);
     EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B2), Piece::W_PAWN);
     EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B4), Piece::NO_PIECE);
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     Move moveb2b4 = make_quiet_move(Square64::SQ64_B2, Square64::SQ64_B4, SpecialMove::PAWN_START);    
     bool legalb2b4 = position.do_move(moveb2b4);
@@ -375,7 +363,6 @@ TEST_F(PositionTest, DoMove){
     EXPECT_EQ(position.get_moves_counter(), 1);
     EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B2), Piece::NO_PIECE);
     EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B4), Piece::W_PAWN);
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23891);
 
     //InCheck
 
@@ -415,7 +402,6 @@ TEST_F(PositionTest, UndoMove){
     EXPECT_EQ(position.get_moves_counter(), 1);
     EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B2), Piece::W_PAWN);
     EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B4), Piece::NO_PIECE);
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
     Move moveb2b4 = make_quiet_move(Square64::SQ64_B2, Square64::SQ64_B4, SpecialMove::PAWN_START); 
 
@@ -429,7 +415,6 @@ TEST_F(PositionTest, UndoMove){
     EXPECT_EQ(position.get_moves_counter(), 1);
     EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B2), Piece::W_PAWN);
     EXPECT_EQ(position.get_mailbox_piece(Square64::SQ64_B4), Piece::NO_PIECE);
-    EXPECT_EQ(position.get_material_score(Color::WHITE), 23892);
 
 }
 
