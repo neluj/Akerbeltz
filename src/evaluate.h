@@ -18,8 +18,6 @@ namespace Evaluate{
     constexpr Score DRAW_SOCORE = 0;
 
     void init();
-    
-    //Score calc_material_table(Piece piece, Square64 square);
 
     Score calc_score(const Position &position);
 

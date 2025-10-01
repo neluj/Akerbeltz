@@ -77,10 +77,6 @@ void Position::clear_position_info(){
     moveHistory[ply-1].enpassantSquare = SQ64_NO_SQUARE;
     moveHistory[ply-1].positionKey = 0;
 
-    materialScore[WHITE] = 0;
-    materialScore[BLACK] = 0;
-    materialScore[COLOR_NC] = 0;
-
 }
 
 void Position::clear_pieceTypes_bitboards(){
@@ -259,19 +255,6 @@ std::string Position::get_FEN() const{
 
     return oss.str();
 }
-
-//void Position::calc_material_score(){
-//
-//    for(Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64){
-//        if(mailbox[sq64] != NO_PIECE){
-//            if( piece_color(mailbox[sq64]) ==  WHITE)
-//                materialScore[WHITE] += Evaluate::calc_material_table(mailbox[sq64], sq64);
-//            else    
-//                materialScore[BLACK] += Evaluate::calc_material_table(mailbox[sq64], sq64);
-//        }
-//    }
-//
-//}
 
 void Position::calc_key(){
     
@@ -498,10 +481,6 @@ void Position::move_piece(Square64 from, Square64 to){
     occupiedBitboards[pieceColor] = Bitboards::set_pieces(occupiedBitboards[pieceColor], to);
     occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC],to);
 
-    //Update piece value from material
-    //materialScore[pieceColor] -= Evaluate::calc_material_table(piece, from);
-    //materialScore[pieceColor] += Evaluate::calc_material_table(piece, to);
-
     //Update key
     moveHistory[ply-1].positionKey ^= Zobrist::pieceSquare[piece][from];
     moveHistory[ply-1].positionKey ^= Zobrist::pieceSquare[piece][to];
@@ -519,9 +498,6 @@ void Position::remove_piece(Square64 square){
     occupiedBitboards[pieceColor] = Bitboards::clear_pieces(occupiedBitboards[pieceColor], square);
     occupiedBitboards[Color::COLOR_NC] = Bitboards::clear_pieces(occupiedBitboards[Color::COLOR_NC], square);
 
-    //Remove piece value from material 
-    //materialScore[pieceColor] -= Evaluate::calc_material_table(piece, square);
-
     //Update key
     moveHistory[ply-1].positionKey ^= Zobrist::pieceSquare[piece][square];
 }
@@ -536,9 +512,6 @@ void Position::add_piece(Square64 square, Piece piece){
     occupiedBitboards[pieceColor] = Bitboards::set_pieces(occupiedBitboards[pieceColor], square);
     occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC], square);
 
-    //Add piece value from material 
-    //materialScore[pieceColor] += Evaluate::calc_material_table(piece, square);
-    
     //Update key
     moveHistory[ply-1].positionKey ^= Zobrist::pieceSquare[piece][square];
 

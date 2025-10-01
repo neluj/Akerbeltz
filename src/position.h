@@ -56,7 +56,6 @@ private:
     void clear_occupied_bitboards();
     void clear_mailbox();
 
-    //void calc_material_score();
     void calc_key();
     
     Bitboard pieceTypesBitboards[COLOR_SIZE][PIECETYPE_SIZE];
@@ -65,8 +64,6 @@ private:
     Color sideToMove{COLOR_NC};
     int ply;
     HistoryInfo moveHistory[MAX_GAME_MOVES];
-    Evaluate::Score materialScore[COLOR_SIZE];
-
 };
 
 std::ostream& operator<<(std::ostream& os, const Position& pos);
@@ -97,9 +94,6 @@ inline Bitboard Position::get_pieceTypes_bitboard(Color color, PieceType pieceTy
 }
 inline Bitboard Position::get_occupied_bitboard(Color color) const{
     return occupiedBitboards[color];
-}
-inline Evaluate::Score Position::get_material_score(Color color) const{
-    return materialScore[color];
 }
 inline Key Position::get_key() const{
     return moveHistory[ply-1].positionKey;

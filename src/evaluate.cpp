@@ -311,13 +311,112 @@ Score calc_score(const Position &position){
     eg_scores[WHITE] = 0;
     eg_scores[BLACK] = 0;
 
-    for(Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64){
-        Piece piece = position.get_mailbox_piece(sq64);
-        if(piece != NO_PIECE){
-            mg_scores[piece_color(piece)] += mg_pesto_score[piece][sq64];
-            eg_scores[piece_color(piece)] += eg_pesto_score[piece][sq64];
-            game_phase += PHASE_PIECE_WEIGHT[piece];
-        }
+    Bitboard wpBitboard= position.get_pieceTypes_bitboard(WHITE, PAWN);
+    while (wpBitboard) {
+        Square64 sq64{__builtin_ctzll(wpBitboard)};
+        mg_scores[WHITE] += mg_pesto_score[W_PAWN][sq64];
+        eg_scores[WHITE] += eg_pesto_score[W_PAWN][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[W_PAWN];
+        wpBitboard &= wpBitboard - 1;
+    }
+
+    Bitboard bpBitboard= position.get_pieceTypes_bitboard(BLACK, PAWN);
+    while (bpBitboard) {
+        Square64 sq64{__builtin_ctzll(bpBitboard)};
+        mg_scores[BLACK] += mg_pesto_score[B_PAWN][sq64];
+        eg_scores[BLACK] += eg_pesto_score[B_PAWN][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[B_PAWN];
+        bpBitboard &= bpBitboard - 1;
+    }
+
+    Bitboard wNBitboard= position.get_pieceTypes_bitboard(WHITE, KNIGHT);
+    while (wNBitboard) {
+        Square64 sq64{__builtin_ctzll(wNBitboard)};
+        mg_scores[WHITE] += mg_pesto_score[W_KNIGHT][sq64];
+        eg_scores[WHITE] += eg_pesto_score[W_KNIGHT][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[W_KNIGHT];
+        wNBitboard &= wNBitboard - 1;
+    }
+
+    Bitboard bNBitboard= position.get_pieceTypes_bitboard(BLACK, KNIGHT);
+    while (bNBitboard) {
+        Square64 sq64{__builtin_ctzll(bNBitboard)};
+        mg_scores[BLACK] += mg_pesto_score[B_KNIGHT][sq64];
+        eg_scores[BLACK] += eg_pesto_score[B_KNIGHT][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[B_KNIGHT];
+        bNBitboard &= bNBitboard - 1;
+    }
+
+    Bitboard wBBitboard= position.get_pieceTypes_bitboard(WHITE, BISHOP);
+    while (wBBitboard) {
+        Square64 sq64{__builtin_ctzll(wBBitboard)};
+        mg_scores[WHITE] += mg_pesto_score[W_BISHOP][sq64];
+        eg_scores[WHITE] += eg_pesto_score[W_BISHOP][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[W_BISHOP];
+        wBBitboard &= wBBitboard - 1;
+    }
+
+    Bitboard bBBitboard= position.get_pieceTypes_bitboard(BLACK, BISHOP);
+    while (bBBitboard) {
+        Square64 sq64{__builtin_ctzll(bBBitboard)};
+        mg_scores[BLACK] += mg_pesto_score[B_BISHOP][sq64];
+        eg_scores[BLACK] += eg_pesto_score[B_BISHOP][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[B_BISHOP];
+        bBBitboard &= bBBitboard - 1;
+    }
+
+    Bitboard wRBitboard= position.get_pieceTypes_bitboard(WHITE, ROOK);
+    while (wRBitboard) {
+        Square64 sq64{__builtin_ctzll(wRBitboard)};
+        mg_scores[WHITE] += mg_pesto_score[W_ROOK][sq64];
+        eg_scores[WHITE] += eg_pesto_score[W_ROOK][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[W_ROOK];
+        wRBitboard &= wRBitboard - 1;
+    }
+
+    Bitboard bRBitboard= position.get_pieceTypes_bitboard(BLACK, ROOK);
+    while (bRBitboard) {
+        Square64 sq64{__builtin_ctzll(bRBitboard)};
+        mg_scores[BLACK] += mg_pesto_score[B_ROOK][sq64];
+        eg_scores[BLACK] += eg_pesto_score[B_ROOK][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[B_ROOK];
+        bRBitboard &= bRBitboard - 1;
+    }
+
+    Bitboard wQBitboard= position.get_pieceTypes_bitboard(WHITE, QUEEN);
+    while (wQBitboard) {
+        Square64 sq64{__builtin_ctzll(wQBitboard)};
+        mg_scores[WHITE] += mg_pesto_score[W_QUEEN][sq64];
+        eg_scores[WHITE] += eg_pesto_score[W_QUEEN][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[W_QUEEN];
+        wQBitboard &= wQBitboard - 1;
+    }
+
+    Bitboard bQBitboard= position.get_pieceTypes_bitboard(BLACK, QUEEN);
+    while (bQBitboard) {
+        Square64 sq64{__builtin_ctzll(bQBitboard)};
+        mg_scores[BLACK] += mg_pesto_score[B_QUEEN][sq64];
+        eg_scores[BLACK] += eg_pesto_score[B_QUEEN][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[B_QUEEN];
+        bQBitboard &= bQBitboard - 1;
+    }
+
+    Bitboard wKBitboard= position.get_pieceTypes_bitboard(WHITE, KING);
+    while (wKBitboard) {
+        Square64 sq64{__builtin_ctzll(wKBitboard)};
+        mg_scores[WHITE] += mg_pesto_score[W_KING][sq64];
+        eg_scores[WHITE] += eg_pesto_score[W_KING][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[W_KING];
+        wKBitboard &= wKBitboard - 1;
+    }
+
+    Bitboard bKBitboard= position.get_pieceTypes_bitboard(BLACK, KING);
+    while (bKBitboard) {
+        Square64 sq64{__builtin_ctzll(bKBitboard)};
+        mg_scores[BLACK] += mg_pesto_score[B_KING][sq64];
+        eg_scores[BLACK] += eg_pesto_score[B_KING][sq64];
+        game_phase += PHASE_PIECE_WEIGHT[B_KING];
+        bKBitboard &= bKBitboard - 1;
     }
 
     Color site_to_move = position.get_side_to_move();
@@ -332,18 +431,8 @@ Score calc_score(const Position &position){
     eg_game_phase_weight = MAX_PHASE_PIECE_WEIGHT - mg_game_phase_weight;
 
     return ((mg_score * mg_game_phase_weight) + (eg_score * eg_game_phase_weight)) / 24;
-    //score += eval_pawn_structure(position);
-    //score += eval_open_files(position);
-
-
-
-    //return score * (~position.get_side_to_move() - position.get_side_to_move());
 
 }
-
-//Score calc_material_table(Piece piece, Square64 square){
-//    return mg_pesto_score[piece][square];
-//}
 
 Score eval_pawn_structure(const Position& pos) {
     
