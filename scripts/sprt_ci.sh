@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+# SPRT CI test with cutechess-cli.
+# - Two engines (first two in TSV by default, or --a/--b).
+# - Openings: EPD or PGN; both colors per opening (-repeat + -games 2).
+# - Default SPRT: elo0=0 elo1=5 alpha=0.05 beta=0.05 (stop on decision).
+# - Default TC: 10+0.1.
+# - Writes logs/pgn with timestamped names. Prints decision and games played.
+
+set -euo pipefail
+
+# --- Defaults ---
+TC_DEFAULT="10+0.1"
+HASH_DEFAULT=256
+THREADS_DEFAULT=1
+BOOK_PLIES_DEFAULT=8
+ADJ_RESIGN_SCORE=700
+ADJ_RESIGN_MOVES=8
+ADJ_DRAW_MOVENUM=60
+ADJ_DRAW_MOVES=10
+ADJ_DRAW_SCORE=10
+
+ELO0=0
+ELO1=5
+ALPHA=0.05
+BETA=0.05
+
+CONCURRENCY_OVERRIDE=""
+A_NAME_OVERRIDE=""
+B_NAME_OVERRIDE=""
+#SEED=""
+ENGINES_TSV=""
+OPENINGS_FILE=""
+#GLOBAL_THREADS=""
+#GLOBAL_HASH=""
+TC="$TC_DEFAULT"
+ROUNDS=""   # not set by default; SPRT decides
+GAMES=""    # optional override
+
+die(){ echo "ERROR: $*" >&2; exit 1; }
+need(){ command -v "$1" >/dev/null 2>&1 || die "'$1' not found in PATH."; }
+timestamp(){ date +"%Y%m%d_%H%M%S"; }
+
+usage(){
+  cat <<EOF
+Usage: $0 --engines engines.tsv --openings file.(epd|pgn) [options]
+Required:
+  --engines <path.tsv>
+  --openings <path.epd|pgn>
+Optional:
+  --a <name>  --b <name>      Pick engines by TSV 'name'
+  --tc <tc>                   Default: ${TC_DEFAULT}
+  --threads <N>               Global default if TSV empty (default ${THREADS_DEFAULT})
+  --hash <MB>                 Global default if TSV empty (default ${HASH_DEFAULT})
+  --book-depth <ply>          If EPD, default ${BOOK_PLIES_DEFAULT}
+  --concurrency <N>           Default: auto max(1,nproc-1)
+  --seed <int>                RNG seed for -srand
+  --adjudicate                Enable resign/draw (conservative defaults)
+  --sprt-elo0 <n>             H0 (default ${ELO0})
+  --sprt-elo1 <n>             H1 (default ${ELO1})
+  --sprt-alpha <p>            (default ${ALPHA})
+  --sprt-beta <p>             (default ${BETA})
+  --rounds <N>                Override (not typical for SPRT)
+  --games <N>                 Override games per round (default 2 with -repeat)
+EOF
+}
+
+# --- Parse CLI ---
+BOOK_PLIES="$BOOK_PLIES_DEFAULT"
+ADJUDICATE=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --engines) ENGINES_TSV="${2:-}"; shift 2;;
+    --openings) OPENINGS_FILE="${2:-}"; shift 2;;
+    --a) A_NAME_OVERRIDE="${2:-}"; shift 2;;
+    --b) B_NAME_OVERRIDE="${2:-}"; shift 2;;
+    --tc) TC="${2:-}"; shift 2;;
+    #--threads) GLOBAL_THREADS="${2:-}"; shift 2;;
+    #--hash) GLOBAL_HASH="${2:-}"; shift 2;;
+    --book-depth) BOOK_PLIES="${2:-}"; shift 2;;
+    --concurrency) CONCURRENCY_OVERRIDE="${2:-}"; shift 2;;
+    #--seed) SEED="${2:-}"; shift 2;;
+    --adjudicate) ADJUDICATE=true; shift;;
+    --sprt-elo0) ELO0="${2:-}"; shift 2;;
+    --sprt-elo1) ELO1="${2:-}"; shift 2;;
+    --sprt-alpha) ALPHA="${2:-}"; shift 2;;
+    --sprt-beta) BETA="${2:-}"; shift 2;;
+    --rounds) ROUNDS="${2:-}"; shift 2;;
+    --games) GAMES="${2:-}"; shift 2;;
+    -h|--help) usage; exit 0;;
+    *) die "Unknown option: $1";;
+  esac
+done
+
+need cutechess-cli; need awk; need nproc; need tee
+[[ -n "$ENGINES_TSV" && -f "$ENGINES_TSV" ]] || { usage; die "--engines required"; }
+[[ -n "$OPENINGS_FILE" && -f "$OPENINGS_FILE" ]] || { usage; die "--openings required"; }
+
+mkdir -p ./logs ./pgn
+
+# Concurrency
+if [[ -n "$CONCURRENCY_OVERRIDE" ]]; then
+  CONCURRENCY="$CONCURRENCY_OVERRIDE"
+else
+  CPU="$(nproc)"; CONCURRENCY=$(( CPU>1 ? CPU-1 : 1 ))
+fi
+
+# Seed
+#if [[ -z "$SEED" ]]; then SEED="$(( (RANDOM<<16) ^ RANDOM ))"; fi
+
+# TSV → lines
+mapfile -t LINES < <(awk -F'\t' 'NR==1{next} NF && $0!~/^[ \t]*#/{print}' "$ENGINES_TSV")
+[[ ${#LINES[@]} -ge 2 ]] || die "Need at least two engines in TSV."
+
+declare -A ENGINE_BY_NAME
+for ln in "${LINES[@]}"; do n="$(echo -e "$ln"|awk -F'\t' '{print $1}')"; ENGINE_BY_NAME["$n"]="$ln"; done
+
+resolve_line(){ local n="$1"; local l="${ENGINE_BY_NAME[$n]:-}"; [[ -n "$l" ]] || die "Engine '$n' not in TSV"; echo "$l"; }
+pick_two(){ echo -e "${LINES[0]}\n${LINES[1]}"; }
+
+if [[ -n "$A_NAME_OVERRIDE" && -n "$B_NAME_OVERRIDE" ]]; then
+  A_LINE="$(resolve_line "$A_NAME_OVERRIDE")"
+  B_LINE="$(resolve_line "$B_NAME_OVERRIDE")"
+else
+  mapfile -t PAIR < <(pick_two)
+  A_LINE="${PAIR[0]}"; B_LINE="${PAIR[1]}"
+  A_NAME_OVERRIDE="$(echo -e "$A_LINE"|awk -F'\t' '{print $1}')"
+  B_NAME_OVERRIDE="$(echo -e "$B_LINE"|awk -F'\t' '{print $1}')"
+fi
+
+# Build -engine (same logic as smoke)
+build_engine(){
+  local line="$1"
+  #local gthr="${GLOBAL_THREADS:-$THREADS_DEFAULT}"
+  #local ghash="${GLOBAL_HASH:-$HASH_DEFAULT}"
+  IFS=$'\t' read -r name cmd args thr hash uci <<<"$line"
+  [[ -x "$cmd" ]] || die "Engine binary not executable: $cmd"
+  #local threads="${thr:-$gthr}"; local hashmb="${hash:-$ghash}"
+  #local optstr=" option.Hash=${hashmb} option.Threads=${threads}"
+  local optstr=""   #Remove if some param is used
+  if [[ -n "${uci:-}" ]]; then
+    IFS=';' read -ra opts <<<"$uci"
+    for kv in "${opts[@]}"; do [[ -z "$kv" ]]&&continue; key="${kv%%=*}"; val="${kv#*=}"; optstr+=" option.${key}=${val}"; done
+  fi
+  local argstr=""; [[ -n "${args:-}" ]] && argstr=" args=${args}"
+  echo "-engine name=${name} cmd=${cmd}${argstr} proto=uci${optstr}"
+}
+
+ENG_A="$(build_engine "$A_LINE")"
+ENG_B="$(build_engine "$B_LINE")"
+
+# Optional safety: ensure we actually built both engines
+[[ -n "$ENG_A" && -n "$ENG_B" ]] || die "Empty engine clauses; check build_engine() / TSV input." #Remove if some param is used
+
+# Openings: detect format and set flags
+ext="${OPENINGS_FILE##*.}"; lower_ext="$(echo "$ext" | tr '[:upper:]' '[:lower:]')"
+OPEN_FLAGS=()
+case "$lower_ext" in
+  epd) OPEN_FLAGS=( -openings "file=${OPENINGS_FILE}" "format=epd" "order=random" "plies=${BOOK_PLIES}" );;
+  pgn) OPEN_FLAGS=( -openings "file=${OPENINGS_FILE}" "format=pgn" "policy=round" );;
+  *) die "Openings must be .epd or .pgn";;
+esac
+
+ADJ_FLAGS=()
+if $ADJUDICATE; then
+  ADJ_FLAGS+=( -resign "movecount=${ADJ_RESIGN_MOVES}" "score=${ADJ_RESIGN_SCORE}" )
+  ADJ_FLAGS+=( -draw "movenumber=${ADJ_DRAW_MOVENUM}" "movecount=${ADJ_DRAW_MOVES}" "score=${ADJ_DRAW_SCORE}" )
+fi
+
+ts="$(timestamp)"
+LOGFILE="./logs/sprt_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.log"
+PGNFILE="./pgn/sprt_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.pgn"
+
+echo "=== SPRT configuration ==="
+echo "Engines TSV:   $ENGINES_TSV"
+echo "A vs B:        $A_NAME_OVERRIDE vs $B_NAME_OVERRIDE"
+echo "Openings:      $OPENINGS_FILE (format: $lower_ext) with color-swap"
+echo "TC:            $TC"
+echo "SPRT:          elo0=${ELO0} elo1=${ELO1} alpha=${ALPHA} beta=${BETA}"
+[[ -n "$ROUNDS" ]] && echo "Rounds:        $ROUNDS"
+[[ -n "$GAMES"  ]] && echo "Games/round:   $GAMES"
+echo "Concurrency:   $CONCURRENCY"
+#echo "Seed:          $SEED"
+echo "Logs:          $LOGFILE"
+echo "PGN:           $PGNFILE"
+
+#trap "echo 'Aborting…'; kill 0 || true" INT TERM
+
+CMD=( cutechess-cli
+  $ENG_A
+  $ENG_B
+  -each proto=uci tc="$TC" timemargin=50 ponder=false
+  "${OPEN_FLAGS[@]}"
+  -repeat
+  -concurrency "$CONCURRENCY"
+  #-srand "$SEED"
+  -sprt "elo0=${ELO0}" "elo1=${ELO1}" "alpha=${ALPHA}" "beta=${BETA}"
+  "${ADJ_FLAGS[@]}"
+  -pgnout "$PGNFILE"
+)
+# optional rounds/games overrides
+[[ -n "$ROUNDS" ]] && CMD+=( -rounds "$ROUNDS" )
+if [[ -n "$GAMES" ]]; then CMD+=( -games "$GAMES" ); else CMD+=( -games 2 ); fi
+
+set -x
+"${CMD[@]}" 2>&1 | tee "$LOGFILE"
+set +x
+
+# Print quick summary: count games + grep for sprt decision
+if [[ -f "$PGNFILE" ]]; then
+  G=$(grep -c '^\[Result ' "$PGNFILE" || true)
+  echo "=== SPRT finished (or interrupted) ==="
+  echo "Games played: $G"
+fi
+if grep -qiE 'SPRT:.*(H1|H0).*accepted' "$LOGFILE"; then
+  grep -iE 'SPRT:.*accepted' "$LOGFILE" | tail -1
+else
+  echo "SPRT decision not found in log (may have been interrupted)."
+fi

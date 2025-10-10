@@ -1,0 +1,4 @@
+name	cmd	args	threads	hash	uci_options
+Engine1	path/to/Engine1
+Engine2	path/to/Engine2
+Engine3	path/to/Engine3

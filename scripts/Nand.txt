@@ -1,9 +1,0 @@
-First move list size: 27
-First moves not included in second: 
-
-
-
-
-Second move list size: 27
-Second moves not included in first: 
-
