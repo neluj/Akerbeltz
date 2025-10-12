@@ -49,7 +49,7 @@ template<PieceType PT>
 constexpr const Bitboard* non_sliding_attack_table();
 
 //DEFINITIONS
-void generate_all_moves(const Position &pos, MoveList &moveList){
+void generate_pseudo_moves(const Position &pos, MoveList &moveList){
     if(pos.get_side_to_move() == WHITE){
         white_pawn_moves(pos, moveList);
         no_special_moves<WHITE, KNIGHT, CAPTURE>(pos, moveList);
@@ -90,7 +90,7 @@ void black_pawn_moves(const Position &pos, MoveList &moveList){
     black_pawn_quiet_moves(pos, moveList);
 }
 
-void generate_capture_moves(Position &pos, MoveList &moveList){
+void generate_pseudo_captures(Position &pos, MoveList &moveList){
     if(pos.get_side_to_move() == WHITE){
         white_pawn_capture_moves(pos, moveList);
         no_special_moves<WHITE, KNIGHT, CAPTURE>(pos, moveList);

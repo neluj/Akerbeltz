@@ -21,8 +21,8 @@ struct MoveList{
 };
 
 
-void generate_all_moves(const Position &pos, MoveList &moveList);
-void generate_capture_moves(Position &pos, MoveList &moveList);
+void generate_pseudo_moves(const Position &pos, MoveList &moveList);
+void generate_pseudo_captures(Position &pos, MoveList &moveList);
 
 
 } // namespace Xake

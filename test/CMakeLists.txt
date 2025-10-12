@@ -12,7 +12,6 @@ positionTest.cpp
 moveTest.cpp
 movegenTest.cpp
 typesTest.cpp
-perftTest.cpp
 evaluateTest.cpp
 #uciTest.cpp
 pvtableTest.cpp

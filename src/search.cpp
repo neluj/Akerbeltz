@@ -103,7 +103,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
     }
 
     MoveGen::MoveList moveList;
-    MoveGen::generate_all_moves(position, moveList);
+    MoveGen::generate_pseudo_moves(position, moveList);
 
     Move pvMove = PVTable::probe_move(position);
 
@@ -212,7 +212,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     }
 
     MoveGen::MoveList moveList;
-    MoveGen::generate_capture_moves(position, moveList);
+    MoveGen::generate_pseudo_captures(position, moveList);
 
     score = -CHECKMATE_SCORE;
     Score oldAlpha = alpha;
@@ -314,7 +314,7 @@ void perft(Position &position, DepthSize depth){
     } 
 
     MoveGen::MoveList moveList;
-    MoveGen::generate_all_moves(position, moveList);
+    MoveGen::generate_pseudo_moves(position, moveList);
 
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
         
@@ -338,7 +338,7 @@ NodesSize perftTest(Position &position, SearchInfo &searchInfo){
     DepthSize actualDepth = searchInfo.depth-1;
 
     MoveGen::MoveList moveList;
-    MoveGen::generate_all_moves(position, moveList);
+    MoveGen::generate_pseudo_moves(position, moveList);
 
     std::cout << "\n";
     
