@@ -214,7 +214,7 @@ void no_special_moves(const Position &pos, MoveList &moveList){
     Bitboard pieceBitboards = pos.get_pieceTypes_bitboard(C, PT);
     Bitboard attackMoves{ZERO};
     while (pieceBitboards) {
-        Square64 fromSquare{__builtin_ctzll(pieceBitboards)}; 
+        Square64 fromSquare{Bitboards::ctz(pieceBitboards)}; 
 
         if constexpr(MT == QUIET){
             attackMoves = non_sliding_attack_table<PT>()[fromSquare] & ~pos.get_occupied_bitboard(COLOR_NC);
@@ -273,7 +273,7 @@ void bishop_moves(const Position &pos, MoveList &moveList){
 
     Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, BISHOP);
     while (fromBitboard) {
-        Square64 from{__builtin_ctzll(fromBitboard)};
+        Square64 from{Bitboards::ctz(fromBitboard)};
         Bitboard attacks = Attacks::sliding_diagonal_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
         Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
         
@@ -293,7 +293,7 @@ void rook_moves(const Position &pos, MoveList &moveList){
 
     Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, ROOK);
     while (fromBitboard) {
-        Square64 from{__builtin_ctzll(fromBitboard)};
+        Square64 from{Bitboards::ctz(fromBitboard)};
         Bitboard attacks = Attacks::sliding_side_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
         Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
         
@@ -313,7 +313,7 @@ void queen_moves(const Position &pos, MoveList &moveList){
 
     Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, QUEEN);
     while (fromBitboard) {
-        Square64 from{__builtin_ctzll(fromBitboard)};
+        Square64 from{Bitboards::ctz(fromBitboard)};
         Bitboard attacks =   Attacks::sliding_diagonal_attacks(pos.get_occupied_bitboard(COLOR_NC), from)
                            | Attacks::sliding_side_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
         Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
@@ -346,7 +346,7 @@ template<Direction D, SpecialMove SM>
 void extract_quiet_moves(Bitboard toBitboard, MoveList &moveList){
 
     while (toBitboard) {
-        Square64 to{__builtin_ctzll(toBitboard)};
+        Square64 to{Bitboards::ctz(toBitboard)};
         Square64 moveFrom{to - D};
         moveList.set_move(make_quiet_move(moveFrom, to, SM));
         toBitboard &= toBitboard - 1;
@@ -358,7 +358,7 @@ template<SpecialMove SM>
 void extract_quiet_moves(Square64 from, Bitboard toBitboard, MoveList &moveList){
 
     while (toBitboard) {
-        Square64 to{__builtin_ctzll(toBitboard)};
+        Square64 to{Bitboards::ctz(toBitboard)};
         moveList.set_move(make_quiet_move(from, to, SM));
         toBitboard &= toBitboard - 1;
     }
@@ -369,7 +369,7 @@ template<Direction D, SpecialMove SM>
 void extract_capture_moves(const Position &pos, Bitboard toBitboard, MoveList &moveList){
 
     while (toBitboard) {
-        Square64 to{__builtin_ctzll(toBitboard)};
+        Square64 to{Bitboards::ctz(toBitboard)};
         Square64 from{to - D};
         moveList.set_move(make_capture_move(from, to, SM, pos.get_mailbox_piece(from), pos.get_mailbox_piece(to)));
         toBitboard &= toBitboard - 1;
@@ -381,7 +381,7 @@ template<SpecialMove SM>
 void extract_capture_moves(const Position &pos, Square64 from, Bitboard toBitboard, MoveList &moveList){
 
     while (toBitboard) {
-        Square64 to{__builtin_ctzll(toBitboard)};
+        Square64 to{Bitboards::ctz(toBitboard)};
         moveList.set_move(make_capture_move(from, to, SM, pos.get_mailbox_piece(from), pos.get_mailbox_piece(to)));
         toBitboard &= toBitboard - 1;
     }

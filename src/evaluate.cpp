@@ -316,7 +316,7 @@ Score calc_score(const Position &position){
     Bitboard blackPawns = blackPawnIt;
 
     while (whitePawnIt) {
-        Square64 sq64{__builtin_ctzll(whitePawnIt)};
+        Square64 sq64{Bitboards::ctz(whitePawnIt)};
         mgScores[WHITE] += mgPestoScore[W_PAWN][sq64];
         egScores[WHITE] += egPestoScore[W_PAWN][sq64];
 
@@ -334,7 +334,7 @@ Score calc_score(const Position &position){
     }
 
     while (blackPawnIt) {
-        Square64 sq64{__builtin_ctzll(blackPawnIt)};
+        Square64 sq64{Bitboards::ctz(blackPawnIt)};
         mgScores[BLACK] += mgPestoScore[B_PAWN][sq64];
         egScores[BLACK] += egPestoScore[B_PAWN][sq64];
 
@@ -353,7 +353,7 @@ Score calc_score(const Position &position){
 
     Bitboard whiteKnightIt = position.get_pieceTypes_bitboard(WHITE, KNIGHT);
     while (whiteKnightIt) {
-        Square64 sq64{__builtin_ctzll(whiteKnightIt)};
+        Square64 sq64{Bitboards::ctz(whiteKnightIt)};
         mgScores[WHITE] += mgPestoScore[W_KNIGHT][sq64];
         egScores[WHITE] += egPestoScore[W_KNIGHT][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[W_KNIGHT];
@@ -362,7 +362,7 @@ Score calc_score(const Position &position){
 
     Bitboard blackKnightIt = position.get_pieceTypes_bitboard(BLACK, KNIGHT);
     while (blackKnightIt) {
-        Square64 sq64{__builtin_ctzll(blackKnightIt)};
+        Square64 sq64{Bitboards::ctz(blackKnightIt)};
         mgScores[BLACK] += mgPestoScore[B_KNIGHT][sq64];
         egScores[BLACK] += egPestoScore[B_KNIGHT][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[B_KNIGHT];
@@ -371,7 +371,7 @@ Score calc_score(const Position &position){
 
     Bitboard whiteBishopIt = position.get_pieceTypes_bitboard(WHITE, BISHOP);
     while (whiteBishopIt) {
-        Square64 sq64{__builtin_ctzll(whiteBishopIt)};
+        Square64 sq64{Bitboards::ctz(whiteBishopIt)};
         mgScores[WHITE] += mgPestoScore[W_BISHOP][sq64];
         egScores[WHITE] += egPestoScore[W_BISHOP][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[W_BISHOP];
@@ -380,7 +380,7 @@ Score calc_score(const Position &position){
 
     Bitboard blackBishopIt = position.get_pieceTypes_bitboard(BLACK, BISHOP);
     while (blackBishopIt) {
-        Square64 sq64{__builtin_ctzll(blackBishopIt)};
+        Square64 sq64{Bitboards::ctz(blackBishopIt)};
         mgScores[BLACK] += mgPestoScore[B_BISHOP][sq64];
         egScores[BLACK] += egPestoScore[B_BISHOP][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[B_BISHOP];
@@ -389,7 +389,7 @@ Score calc_score(const Position &position){
 
     Bitboard whiteRookIt = position.get_pieceTypes_bitboard(WHITE, ROOK);
     while (whiteRookIt) {
-        Square64 sq64{__builtin_ctzll(whiteRookIt)};
+        Square64 sq64{Bitboards::ctz(whiteRookIt)};
         mgScores[WHITE] += mgPestoScore[W_ROOK][sq64];
         egScores[WHITE] += egPestoScore[W_ROOK][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[W_ROOK];
@@ -398,7 +398,7 @@ Score calc_score(const Position &position){
 
     Bitboard blackRookIt = position.get_pieceTypes_bitboard(BLACK, ROOK);
     while (blackRookIt) {
-        Square64 sq64{__builtin_ctzll(blackRookIt)};
+        Square64 sq64{Bitboards::ctz(blackRookIt)};
         mgScores[BLACK] += mgPestoScore[B_ROOK][sq64];
         egScores[BLACK] += egPestoScore[B_ROOK][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[B_ROOK];
@@ -407,7 +407,7 @@ Score calc_score(const Position &position){
 
     Bitboard whiteQueenIt = position.get_pieceTypes_bitboard(WHITE, QUEEN);
     while (whiteQueenIt) {
-        Square64 sq64{__builtin_ctzll(whiteQueenIt)};
+        Square64 sq64{Bitboards::ctz(whiteQueenIt)};
         mgScores[WHITE] += mgPestoScore[W_QUEEN][sq64];
         egScores[WHITE] += egPestoScore[W_QUEEN][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[W_QUEEN];
@@ -416,7 +416,7 @@ Score calc_score(const Position &position){
 
     Bitboard blackQueenIt = position.get_pieceTypes_bitboard(BLACK, QUEEN);
     while (blackQueenIt) {
-        Square64 sq64{__builtin_ctzll(blackQueenIt)};
+        Square64 sq64{Bitboards::ctz(blackQueenIt)};
         mgScores[BLACK] += mgPestoScore[B_QUEEN][sq64];
         egScores[BLACK] += egPestoScore[B_QUEEN][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[B_QUEEN];
@@ -425,7 +425,7 @@ Score calc_score(const Position &position){
 
     Bitboard whiteKingIt = position.get_pieceTypes_bitboard(WHITE, KING);
     while (whiteKingIt) {
-        Square64 sq64{__builtin_ctzll(whiteKingIt)};
+        Square64 sq64{Bitboards::ctz(whiteKingIt)};
         mgScores[WHITE] += mgPestoScore[W_KING][sq64];
         egScores[WHITE] += egPestoScore[W_KING][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[W_KING];
@@ -434,7 +434,7 @@ Score calc_score(const Position &position){
 
     Bitboard blackKingIt = position.get_pieceTypes_bitboard(BLACK, KING);
     while (blackKingIt) {
-        Square64 sq64{__builtin_ctzll(blackKingIt)};
+        Square64 sq64{Bitboards::ctz(blackKingIt)};
         mgScores[BLACK] += mgPestoScore[B_KING][sq64];
         egScores[BLACK] += egPestoScore[B_KING][sq64];
         gamePhase += PHASE_PIECE_WEIGHT[B_KING];
@@ -476,16 +476,16 @@ bool material_draw(const Position& pos) {
 
         // Knights only (no bishops at all)
         if (!wB && !bB) {
-            const int wn = __builtin_popcountll(wN);
-            const int bn = __builtin_popcountll(bN);
+            const int wn = Bitboards::cpop(wN);
+            const int bn = Bitboards::cpop(bN);
             // K+N or K+NN vs K is a draw; K+NNN vs K can mate in theory (but is practically impossible),
             // so treat draws when the stronger side has < 3 knights and the weaker side has none.
             return (wn < 3 && bn == 0) || (bn < 3 && wn == 0);
         }
         // Bishops only (no knights at all)
         else if (!wN && !bN) {
-            const int wb = __builtin_popcountll(wB);
-            const int bb = __builtin_popcountll(bB);
+            const int wb = Bitboards::cpop(wB);
+            const int bb = Bitboards::cpop(bB);
             const int totalB = wb + bb;
 
             // KB vs K is a draw
@@ -515,14 +515,14 @@ bool material_draw(const Position& pos) {
 
         // White has no rook/bishop/knight: black's remaining force < 2 minor pieces → draw.
         if (!wR && !wB && !wN) {
-            const int bn = __builtin_popcountll(bN);
-            const int bb = __builtin_popcountll(bB);
+            const int bn = Bitboards::cpop(bN);
+            const int bb = Bitboards::cpop(bB);
             return !bR && (bn + bb) < 2;
         }
         // Black has no rook/bishop/knight: white's remaining force < 2 minor pieces → draw.
         else if (!bR && !bB && !bN) {
-            const int wn = __builtin_popcountll(wN);
-            const int wb = __builtin_popcountll(wB);
+            const int wn = Bitboards::cpop(wN);
+            const int wb = Bitboards::cpop(wB);
             return !wR && (wn + wb) < 2;
         }
     }

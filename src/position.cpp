@@ -385,7 +385,7 @@ bool Position::do_move(Move move){
     }
 
     Bitboard kingBitboard = pieceTypesBitboards[sideToMove][KING];
-    Square64 kingsq64{__builtin_ctzll(kingBitboard)};
+    Square64 kingsq64{Bitboards::ctz(kingBitboard)};
 
     if(square_is_attacked_bySide(kingsq64, ~sideToMove)){
         //VIDEO

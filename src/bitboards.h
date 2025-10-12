@@ -24,6 +24,22 @@ namespace Bitboards {
     constexpr Bitboard RANK_7_MASK = 0x00FF000000000000ULL;
     constexpr Bitboard RANK_8_MASK = 0xFF00000000000000ULL;
 
+    //GCC/Clang
+    #if defined(__clang__) || defined(__GNUC__)
+
+    inline int ctz (Bitboard bitboard){ return __builtin_ctzll(bitboard); }      
+    inline int clz (Bitboard bitboard){ return __builtin_clzll(bitboard); }      
+    inline int cpop(Bitboard bitboard){ return __builtin_popcountll(bitboard); }
+
+    //For other compilers, use C++ 20 std
+    #else
+
+    #include <bit>
+    inline int ctz (Bitboard bitboard){ return (int)std::countr_zero(bitboard); } 
+    inline int clz (Bitboard bitboard){ return (int)std::countl_zero(bitboard); }
+    inline int cpop(Bitboard bitboard){ return (int)std::popcount(bitboard); }
+
+    #endif
 
     template<typename... Squares>
     inline Bitboard set_pieces(Squares... squares) {

@@ -127,7 +127,7 @@ Bitboard sliding_side_attacks(Bitboard occupied, Square64 sq64){
     Bitboard bloquersN = occupied & slidingSideRays[NORTH_ATTACK][sq64];
     Bitboard nAttacks = slidingSideRays[NORTH_ATTACK][sq64];
     if(bloquersN != 0){
-        Square64 sq64BloquerN{__builtin_ctzll(bloquersN)};
+        Square64 sq64BloquerN{Bitboards::ctz(bloquersN)};
         nAttacks = slidingSideRays[NORTH_ATTACK][sq64] & ~slidingSideRays[NORTH_ATTACK][sq64BloquerN];
     }
 
@@ -136,7 +136,7 @@ Bitboard sliding_side_attacks(Bitboard occupied, Square64 sq64){
     Bitboard bloquersS = occupied & slidingSideRays[SOUTH_ATTACK][sq64];
     Bitboard sAttacks = slidingSideRays[SOUTH_ATTACK][sq64];
     if(bloquersS != 0){
-        Square64 sq64BloquerS{SQ64_H8 - __builtin_clzl(bloquersS)};
+        Square64 sq64BloquerS{SQ64_H8 - Bitboards::clz(bloquersS)};
         sAttacks = slidingSideRays[SOUTH_ATTACK][sq64] & ~slidingSideRays[SOUTH_ATTACK][sq64BloquerS];
     }
 
@@ -144,7 +144,7 @@ Bitboard sliding_side_attacks(Bitboard occupied, Square64 sq64){
     Bitboard bloquersE = occupied & slidingSideRays[EAST_ATTACK][sq64];
     Bitboard eAttacks = slidingSideRays[EAST_ATTACK][sq64];
     if(bloquersE != 0){
-        Square64 sq64BloquerE{__builtin_ctzll(bloquersE)};
+        Square64 sq64BloquerE{Bitboards::ctz(bloquersE)};
         eAttacks = slidingSideRays[EAST_ATTACK][sq64] & ~slidingSideRays[EAST_ATTACK][sq64BloquerE];
     }
 
@@ -153,7 +153,7 @@ Bitboard sliding_side_attacks(Bitboard occupied, Square64 sq64){
     Bitboard bloquersW = occupied & slidingSideRays[WEST_ATTACK][sq64];
     Bitboard wAttacks = slidingSideRays[WEST_ATTACK][sq64];
     if(bloquersW != 0){
-        Square64 sq64BloquerW{SQ64_H8 - __builtin_clzl(bloquersW)};
+        Square64 sq64BloquerW{SQ64_H8 - Bitboards::clz(bloquersW)};
         wAttacks = slidingSideRays[WEST_ATTACK][sq64] & ~slidingSideRays[WEST_ATTACK][sq64BloquerW];
     }
  
@@ -168,7 +168,7 @@ Bitboard sliding_diagonal_attacks(Bitboard occupied,Square64 sq64){
     Bitboard bloquersNE = occupied & slidingDiagonalRays[NORTH_EAST_ATTACK][sq64];
     Bitboard neAttacks = slidingDiagonalRays[NORTH_EAST_ATTACK][sq64];
     if(bloquersNE != 0){
-        Square64 sq64BloquerNE{__builtin_ctzll(bloquersNE)};
+        Square64 sq64BloquerNE{Bitboards::ctz(bloquersNE)};
         neAttacks = slidingDiagonalRays[NORTH_EAST_ATTACK][sq64] & ~slidingDiagonalRays[NORTH_EAST_ATTACK][sq64BloquerNE];
     }
 
@@ -176,7 +176,7 @@ Bitboard sliding_diagonal_attacks(Bitboard occupied,Square64 sq64){
     Bitboard bloquersSE = occupied & slidingDiagonalRays[SOUTH_EAST_ATTACK][sq64];
     Bitboard seAttacks = slidingDiagonalRays[SOUTH_EAST_ATTACK][sq64];
     if(bloquersSE != 0){
-        Square64 sq64BloquerSE{SQ64_H8 - __builtin_clzl(bloquersSE)};
+        Square64 sq64BloquerSE{SQ64_H8 - Bitboards::clz(bloquersSE)};
         seAttacks = slidingDiagonalRays[SOUTH_EAST_ATTACK][sq64] & ~slidingDiagonalRays[SOUTH_EAST_ATTACK][sq64BloquerSE];
     }
 
@@ -184,7 +184,7 @@ Bitboard sliding_diagonal_attacks(Bitboard occupied,Square64 sq64){
     Bitboard bloquersNW = occupied & slidingDiagonalRays[NORTH_WEST_ATTACK][sq64];
     Bitboard nwAttacks = slidingDiagonalRays[NORTH_WEST_ATTACK][sq64];
     if(bloquersNW != 0){
-        Square64 sq64BloquerNW{__builtin_ctzll(bloquersNW)};
+        Square64 sq64BloquerNW{Bitboards::ctz(bloquersNW)};
         nwAttacks = slidingDiagonalRays[NORTH_WEST_ATTACK][sq64] & ~slidingDiagonalRays[NORTH_WEST_ATTACK][sq64BloquerNW];
     }
 
@@ -192,7 +192,7 @@ Bitboard sliding_diagonal_attacks(Bitboard occupied,Square64 sq64){
     Bitboard bloquersSW = occupied & slidingDiagonalRays[SOUTH_WEST_ATTACK][sq64];
     Bitboard swAttacks = slidingDiagonalRays[SOUTH_WEST_ATTACK][sq64];
     if(bloquersSW != 0){
-        Square64 sq64BloquerSW{SQ64_H8 - __builtin_clzl(bloquersSW)};
+        Square64 sq64BloquerSW{SQ64_H8 - Bitboards::clz(bloquersSW)};
         swAttacks = slidingDiagonalRays[SOUTH_WEST_ATTACK][sq64] & ~slidingDiagonalRays[SOUTH_WEST_ATTACK][sq64BloquerSW];
     }
 

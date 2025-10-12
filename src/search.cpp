@@ -96,7 +96,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         return DRAW_SOCORE;
     }
 
-    bool isCheck = position.square_is_attacked_bySide( Square64(__builtin_ctzll(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING))), ~position.get_side_to_move());
+    bool isCheck = position.square_is_attacked_bySide( Square64(Bitboards::ctz(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING))), ~position.get_side_to_move());
 
     if(isCheck){
         depth++;

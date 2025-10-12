@@ -297,7 +297,7 @@ Evaluate::GamePhaseWeight manualGamePhase(const Position& pos) {
         for (int pt = PieceType::PAWN; pt <= PieceType::KING; ++pt) {
             const auto pieceType = static_cast<PieceType>(pt);
             const Bitboard bitboard = pos.get_pieceTypes_bitboard(color, pieceType);
-            const Evaluate::GamePhaseWeight count = static_cast<Evaluate::GamePhaseWeight>(__builtin_popcountll(bitboard));
+            const Evaluate::GamePhaseWeight count = static_cast<Evaluate::GamePhaseWeight>(Bitboards::cpop(bitboard));
             const Piece piece = make_piece(color, pieceType);
             accumulated += count * PHASE_PIECE_WEIGHT[piece];
         }
@@ -324,7 +324,7 @@ ManualScoreBreakdown manualScoreBreakdown(const Position& pos) {
     const auto accumulatePawns = [&](Color color, Bitboard pawns, Bitboard opponents) {
         Bitboard it = pawns;
         while (it) {
-            const Square64 square = Square64(__builtin_ctzll(it));
+            const Square64 square = Square64(Bitboards::ctz(it));
             const Piece piece = make_piece(color, PieceType::PAWN);
             mgTotals[color] += mgPieceValue(piece, square);
             egTotals[color] += egPieceValue(piece, square);
@@ -349,7 +349,7 @@ ManualScoreBreakdown manualScoreBreakdown(const Position& pos) {
     const auto accumulate = [&](Color color, PieceType pieceType) {
         Bitboard bitboard = pos.get_pieceTypes_bitboard(color, pieceType);
         while (bitboard) {
-            const Square64 square = Square64(__builtin_ctzll(bitboard));
+            const Square64 square = Square64(Bitboards::ctz(bitboard));
             const Piece piece = make_piece(color, pieceType);
             mgTotals[color] += mgPieceValue(piece, square);
             egTotals[color] += egPieceValue(piece, square);
@@ -399,7 +399,7 @@ Evaluate::Score accumulateMgBase(const Position& pos, Color color) {
         const auto pieceType = static_cast<PieceType>(pt);
         Bitboard bitboard = pos.get_pieceTypes_bitboard(color, pieceType);
         while (bitboard) {
-            const Square64 square = Square64(__builtin_ctzll(bitboard));
+            const Square64 square = Square64(Bitboards::ctz(bitboard));
             total += mgPieceValue(make_piece(color, pieceType), square);
             bitboard &= bitboard - 1;
         }
@@ -413,7 +413,7 @@ Evaluate::Score accumulateEgBase(const Position& pos, Color color) {
         const auto pieceType = static_cast<PieceType>(pt);
         Bitboard bitboard = pos.get_pieceTypes_bitboard(color, pieceType);
         while (bitboard) {
-            const Square64 square = Square64(__builtin_ctzll(bitboard));
+            const Square64 square = Square64(Bitboards::ctz(bitboard));
             total += egPieceValue(make_piece(color, pieceType), square);
             bitboard &= bitboard - 1;
         }
@@ -782,10 +782,10 @@ TEST_F(EvaluateTest, PST_Flip_BlackValueMatchesWhiteFlipped) {
     EXPECT_EQ(Evaluate::calc_score(whitePos), whiteBreakdown.blended);
     const Bitboard whiteKingBb =
         whitePos.get_pieceTypes_bitboard(Color::WHITE, PieceType::KING);
-    const Square64 whiteKingSq = Square64(__builtin_ctzll(whiteKingBb));
+    const Square64 whiteKingSq = Square64(Bitboards::ctz(whiteKingBb));
     const Bitboard whiteBishopBb =
         whitePos.get_pieceTypes_bitboard(Color::WHITE, PieceType::BISHOP);
-    const Square64 whiteBishopSq = Square64(__builtin_ctzll(whiteBishopBb));
+    const Square64 whiteBishopSq = Square64(Bitboards::ctz(whiteBishopBb));
 
     Position blackPos;
     const std::string blackFen = mirrorFen(BISHOP_CENTER_EG_FEN);
@@ -794,10 +794,10 @@ TEST_F(EvaluateTest, PST_Flip_BlackValueMatchesWhiteFlipped) {
     EXPECT_EQ(Evaluate::calc_score(blackPos), blackBreakdown.blended);
     const Bitboard blackKingBb =
         blackPos.get_pieceTypes_bitboard(Color::BLACK, PieceType::KING);
-    const Square64 blackKingSq = Square64(__builtin_ctzll(blackKingBb));
+    const Square64 blackKingSq = Square64(Bitboards::ctz(blackKingBb));
     const Bitboard blackBishopBb =
         blackPos.get_pieceTypes_bitboard(Color::BLACK, PieceType::BISHOP);
-    const Square64 blackBishopSq = Square64(__builtin_ctzll(blackBishopBb));
+    const Square64 blackBishopSq = Square64(Bitboards::ctz(blackBishopBb));
 
     const Evaluate::Score whiteBishopMg =
         whiteBreakdown.mgTotals[Color::WHITE] -
