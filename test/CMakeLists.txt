@@ -23,10 +23,6 @@ searchTest.cpp
 
 target_link_libraries(${PROJECT_NAME}-test  gtest_main src)
 
-file(COPY
-perftsuite.epd
-DESTINATION ${CMAKE_BINARY_DIR}/test)
-
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME}-test)
 
