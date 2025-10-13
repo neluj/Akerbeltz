@@ -1,459 +1,480 @@
 #include "evaluate.h"
 #include "position.h"
 
-namespace Xake{
-
+namespace Xake {
 namespace Evaluate {
 
-//Function Declarations
-void init_pesto_scores();
-void init_isolated_masks();
-void init_passed_masks();
-int flip(int sq);
+// ---------- Declaraciones ----------
+void init();
+static inline int flip(int sq) { return sq ^ 56; }
+static inline Score mg_eg_blend(Score mg, Score eg, int phase);
 
+static Bitboard ISOLATED_MASKS[SQ64_SIZE];
+static Bitboard PASSED_MASKS[COLOR_SIZE][SQ64_SIZE];
 
-//Material Scores
-constexpr Score MG_PIECE_SCORES[PIECETYPE_SIZE] = {0,82,337,365,477,1025,20000};
-constexpr Score EG_PIECE_SCORES[PIECETYPE_SIZE] = {0,94,281,297,512,936,20000};
+static Score MG_PST[PIECE_SIZE][SQ64_SIZE];
+static Score EG_PST[PIECE_SIZE][SQ64_SIZE];
 
-//Pawn Structures
-Bitboard isolatedPawnMasks[SQ64_SIZE];
-constexpr Score MG_ISOLATED_PAWN_PENALTY = -8;
-constexpr Score EG_ISOLATED_PAWN_PENALTY = -18;
-
-Bitboard passedMasks[COLOR_SIZE][SQ64_SIZE];
-constexpr Score MG_PASSED_PAWN_BONUS_BY_RANK[RANK_SIZE] = {
-    0, 0, 5, 12, 25, 45, 85, 0
+// Peso de fase por pieza (similar a V140)
+constexpr int PHASE_PIECE_WEIGHT[PIECE_SIZE] = {
+/*NO*/ 0,
+/*W_P*/ 0, /*W_N*/1, /*W_B*/1, /*W_R*/2, /*W_Q*/4, /*W_K*/0,
+/*gap*/ 0, 0,
+/*B_P*/ 0, /*B_N*/1, /*B_B*/1, /*B_R*/2, /*B_Q*/4, /*B_K*/0,
+/*gap*/ 0
 };
-constexpr Score EG_PASSED_PAWN_BONUS_BY_RANK[RANK_SIZE] = {
-    0, 0, 10, 25, 50, 90,150, 0
-};
-
-
-/*
-Based on PeSTOs evaluation function
-https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
-*/
-/*
- A1 B1 C1 D1 E1 F1 G1 H1
- A2 B2 C2 D2 E2 F2 G2 H2
- A3 B3 C3 D3 E3 F3 G3 H3
- A4 B4 C4 D4 E4 F4 G4 H4
- A5 B5 C5 D5 E5 F5 G5 H5
- A6 B6 C6 D6 E6 F6 G6 H6
- A7 B7 C7 D7 E7 F7 G7 H7
- A8 B8 C8 D8 E8 F8 G8 H8
-*/
-
-constexpr Score NO_PIECE_TABLE[SQ64_SIZE] = {
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,
-};
-
-constexpr Score MG_PAWN_TABLE[SQ64_SIZE] = {
-      0,   0,   0,   0,   0,   0,  0,   0,
-    -35,  -1, -20, -23, -15,  24, 38, -22,
-    -26,  -4,  -4, -10,   3,   3, 33, -12,
-    -27,  -2,  -5,  12,  17,   6, 10, -25,
-    -14,  13,   6,  21,  23,  12, 17, -23,
-     -6,   7,  26,  31,  65,  56, 25, -20,
-     98, 134,  61,  95,  68, 126, 34, -11,
-      0,   0,   0,   0,   0,   0,  0,   0,
-};
-
-constexpr Score EG_PAWN_TABLE[SQ64_SIZE] = {
-      0,   0,   0,   0,   0,   0,   0,   0,
-     13,   8,   8,  10,  13,   0,   2,  -7,
-      4,   7,  -6,   1,   0,  -5,  -1,  -8,
-     13,   9,  -3,  -7,  -7,  -8,   3,  -1,
-     32,  24,  13,   5,  -2,   4,  17,  17,
-     94, 100,  85,  67,  56,  53,  82,  84,
-    178, 173, 158, 134, 147, 132, 165, 187,
-      0,   0,   0,   0,   0,   0,   0,   0,
-};
-
-constexpr Score MG_KNIGHT_TABLE[SQ64_SIZE] = {
-    -105, -21, -58, -33, -17, -28, -19,  -23,
-     -29, -53, -12,  -3,  -1,  18, -14,  -19,
-     -23,  -9,  12,  10,  19,  17,  25,  -16,
-     -13,   4,  16,  13,  28,  19,  21,   -8,
-      -9,  17,  19,  53,  37,  69,  18,   22,
-     -47,  60,  37,  65,  84, 129,  73,   44,
-     -73, -41,  72,  36,  23,  62,   7,  -17,
-    -167, -89, -34, -49,  61, -97, -15, -107,
-};
-
-constexpr Score EG_KNIGHT_TABLE[SQ64_SIZE] = {
-    -29, -51, -23, -15, -22, -18, -50, -64,
-    -42, -20, -10,  -5,  -2, -20, -23, -44,
-    -23,  -3,  -1,  15,  10,  -3, -20, -22,
-    -18,  -6,  16,  25,  16,  17,   4, -18,
-    -17,   3,  22,  22,  22,  11,   8, -18,
-    -24, -20,  10,   9,  -1,  -9, -19, -41,
-    -25,  -8, -25,  -2,  -9, -25, -24, -52,
-    -58, -38, -13, -28, -31, -27, -63, -99,
-
-};
-
-constexpr Score MG_BISHOP_TABLE[SQ64_SIZE] = {
-    -33,  -3, -14, -21, -13, -12, -39, -21,
-      4,  15,  16,   0,   7,  21,  33,   1,
-      0,  15,  15,  15,  14,  27,  18,  10,
-     -6,  13,  13,  26,  34,  12,  10,   4,
-     -4,   5,  19,  50,  37,  37,   7,  -2,
-    -16,  37,  43,  40,  35,  50,  37,  -2,
-    -26,  16, -18, -13,  30,  59,  18, -47,
-    -29,   4, -82, -37, -25, -42,   7,  -8,
-};
-
-constexpr Score EG_BISHOP_TABLE[SQ64_SIZE] = {
-    -23,  -9, -23,  -5, -9, -16,  -5, -17,
-    -14, -18,  -7,  -1,  4,  -9, -15, -27,
-    -12,  -3,   8,  10, 13,   3,  -7, -15,
-     -6,   3,  13,  19,  7,  10,  -3,  -9,
-     -3,   9,  12,   9, 14,  10,   3,   2,
-      2,  -8,   0,  -1, -2,   6,   0,   4,
-     -8,  -4,   7, -12, -3, -13,  -4, -14,
-    -14, -21, -11,  -8, -7,  -9, -17, -24,
-};
-
-constexpr Score MG_ROOK_TABLE[SQ64_SIZE] = {
-    -19, -13,   1,  17, 16,  7, -37, -26,
-    -44, -16, -20,  -9, -1, 11,  -6, -71,
-    -45, -25, -16, -17,  3,  0,  -5, -33,
-    -36, -26, -12,  -1,  9, -7,   6, -23,
-    -24, -11,   7,  26, 24, 35,  -8, -20,
-     -5,  19,  26,  36, 17, 45,  61,  16,
-     27,  32,  58,  62, 80, 67,  26,  44,
-     32,  42,  32,  51, 63,  9,  31,  43,
-};
-
-constexpr Score EG_ROOK_TABLE[SQ64_SIZE] = {
-    -9,  2,  3, -1, -5, -13,   4, -20,
-    -6, -6,  0,  2, -9,  -9, -11,  -3,
-    -4,  0, -5, -1, -7, -12,  -8, -16,
-     3,  5,  8,  4, -5,  -6,  -8, -11,
-     4,  3, 13,  1,  2,   1,  -1,   2,
-     7,  7,  7,  5,  4,  -3,  -5,  -3,
-    11, 13, 13, 11, -3,   3,   8,   3,
-    13, 10, 18, 15, 12,  12,   8,   5,
-};
-
-constexpr Score MG_QUEEN_TABLE[SQ64_SIZE] = {
-     -1, -18,  -9,  10, -15, -25, -31, -50,
-    -35,  -8,  11,   2,   8,  15,  -3,   1,
-    -14,   2, -11,  -2,  -5,   2,  14,   5,
-     -9, -26,  -9, -10,  -2,  -4,   3,  -3,
-    -27, -27, -16, -16,  -1,  17,  -2,   1,
-    -13, -17,   7,   8,  29,  56,  47,  57,
-    -24, -39,  -5,   1, -16,  57,  28,  54,
-    -28,   0,  29,  12,  59,  44,  43,  45,
-};
-
-constexpr Score EG_QUEEN_TABLE[SQ64_SIZE] = {
-    -33, -28, -22, -43,  -5, -32, -20, -41,
-    -22, -23, -30, -16, -16, -23, -36, -32,
-    -16, -27,  15,   6,   9,  17,  10,   5,
-    -18,  28,  19,  47,  31,  34,  39,  23,
-      3,  22,  24,  45,  57,  40,  57,  36,
-    -20,   6,   9,  49,  47,  35,  19,   9,
-    -17,  20,  32,  41,  58,  25,  30,   0,
-     -9,  22,  22,  27,  27,  19,  10,  20,
-};
-
-constexpr Score MG_KING_TABLE[SQ64_SIZE] = {
-    -15,  36,  12, -54,   8, -28,  24,  14,
-      1,   7,  -8, -64, -43, -16,   9,   8,
-    -14, -14, -22, -46, -44, -30, -15, -27,
-    -49,  -1, -27, -39, -46, -44, -33, -51,
-    -17, -20, -12, -27, -30, -25, -14, -36,
-     -9,  24,   2, -16, -20,   6,  22, -22,
-     29,  -1, -20,  -7,  -8,  -4, -38, -29,
-    -65,  23,  16, -15, -56, -34,   2,  13,
-};
-
-constexpr Score EG_KING_TABLE[SQ64_SIZE] = {
-    -53, -34, -21, -11, -28, -14, -24, -43,
-    -27, -11,   4,  13,  14,   4,  -5, -17,
-    -19,  -3,  11,  21,  23,  16,   7,  -9,
-    -18,  -4,  21,  24,  27,  23,   9, -11,
-     -8,  22,  24,  27,  26,  33,  26,   3,
-     10,  17,  23,  15,  20,  45,  44,  13,
-    -12,  17,  14,  17,  17,  38,  23,  11,
-    -74, -35, -18, -18, -11,  15,   4, -17,
-};
-
-
-const Score* MG_PESTO_TABLES[PIECETYPE_SIZE] = {
-    NO_PIECE_TABLE,
-    MG_PAWN_TABLE,
-    MG_KNIGHT_TABLE,
-    MG_BISHOP_TABLE,
-    MG_ROOK_TABLE,
-    MG_QUEEN_TABLE,
-    MG_KING_TABLE
-};
-
-const Score* EG_PESTO_TABLES[PIECETYPE_SIZE] = {
-    NO_PIECE_TABLE,
-    EG_PAWN_TABLE,
-    EG_KNIGHT_TABLE,
-    EG_BISHOP_TABLE,
-    EG_ROOK_TABLE,
-    EG_QUEEN_TABLE,
-    EG_KING_TABLE
-};
-
-//TODO hacer mas compacto con &BLACK donde BLACK sea 1000
-constexpr GamePhaseWeight PHASE_PIECE_WEIGHT[PIECE_SIZE] = {
-  0, // NO_PIECE
-  0, // W_PAWN
-  1, // W_KNIGHT
-  1, // W_BISHOP
-  2, // W_ROOK
-  4, // W_QUEEN
-  0, // W_KING
-  0, 
-  0,
-  0, // B_PAWN
-  1, // B_KNIGHT
-  1, // B_BISHOP
-  2, // B_ROOK
-  4, // B_QUEEN
-  0, // B_KING
-  0  
-};
-
-//In case of early promotion, sum of every pieces will higher, and end game size will be negative.
 constexpr Score MAX_PHASE_PIECE_WEIGHT = 24;
 
-Score mgPestoScore[PIECE_SIZE][SQ64_SIZE];
-Score egPestoScore[PIECE_SIZE][SQ64_SIZE];
+// ---------- Material base MG/EG (escala compacta, segura) ----------
+constexpr Score MG_PIECE[PIECETYPE_SIZE] = { 0, 100, 325, 330, 500, 975, 0 };
+constexpr Score EG_PIECE[PIECETYPE_SIZE] = { 0, 100, 320, 330, 510, 975, 0 };
 
-void init(){
+// ---------- PSQT MG/EG (64 c/u, base sólida, “tuned-friendly”) ----------
+// Notación: tablas para BLANCAS. Para NEGRAS se hace flip(sq).
+// Peón
+static const Score MG_PAWN[64] = {
+   0,  0,  0,  0,  0,  0,  0,  0,
+ -10,  2, -6,-10, -8, 12, 16,-12,
+ -12, -4, -2, -4,  4,  6, 14, -8,
+ -10, -4,  0, 10, 12,  6,  8, -8,
+  -6,  8,  6, 12, 14,  8, 10, -8,
+  -2,  6, 16, 22, 32, 24, 12, -6,
+  10, 18, 10, 22, 16, 26,  8, -2,
+   0,  0,  0,  0,  0,  0,  0,  0,
+};
+static const Score EG_PAWN[64] = {
+   0,  0,  0,  0,  0,  0,  0,  0,
+   8,  6,  6,  8, 10,  2,  2, -4,
+   2,  6, -2,  2,  2, -2,  0, -6,
+  10,  8,  0, -2, -2, -2,  4,  0,
+  20, 16,  8,  4,  0,  6, 14, 14,
+  70, 78, 66, 54, 46, 46, 70, 72,
+ 150,145,130,115,125,115,140,155,
+   0,  0,  0,  0,  0,  0,  0,  0,
+};
 
-    init_pesto_scores();
-    init_isolated_masks();
-    init_passed_masks();
+// Caballo
+static const Score MG_KNIGHT[64] = {
+ -80,-30,-40,-30,-30,-40,-30,-80,
+ -30, -5, -5,  0,  0, -5, -5,-30,
+ -25,  0, 10, 12, 12, 10,  0,-20,
+ -20,  0, 12, 20, 20, 12,  0,-20,
+ -20,  0, 12, 20, 20, 12,  0,-20,
+ -25,  0, 10, 12, 12, 10,  0,-20,
+ -30, -5, -5,  0,  0, -5, -5,-30,
+ -80,-30,-40,-30,-30,-40,-30,-80,
+};
+static const Score EG_KNIGHT[64] = {
+ -60,-40,-35,-30,-30,-35,-40,-60,
+ -35,-25,-15, -8, -8,-15,-25,-35,
+ -30,-15,  0,  4,  4,  0,-15,-30,
+ -28,-10,  4, 10, 10,  4,-10,-28,
+ -28,-10,  4, 10, 10,  4,-10,-28,
+ -30,-15,  0,  4,  4,  0,-15,-30,
+ -35,-25,-15, -8, -8,-15,-25,-35,
+ -60,-40,-35,-30,-30,-35,-40,-60,
+};
 
+// Alfil
+static const Score MG_BISHOP[64] = {
+ -30,-10,-15,-12,-12,-15,-10,-30,
+  -8,  4,  4,  6,  6,  8,  4, -6,
+  -8,  6,  8, 10, 10, 12,  6, -4,
+  -6, 10, 10, 16, 18, 12, 10, -4,
+  -6,  8, 10, 18, 20, 14,  8, -6,
+ -10,  6, 10, 12, 12, 14,  6,-12,
+ -14, -8, -4, -2, -2, -4, -8,-14,
+ -22,-10,-12,-12,-12,-12,-10,-22,
+};
+static const Score EG_BISHOP[64] = {
+ -22,-12,-10, -8, -8,-10,-12,-22,
+ -10,  2,  4,  6,  6,  4,  2, -8,
+  -8,  4,  8, 10, 10,  8,  4, -6,
+  -6,  8, 10, 12, 12, 10,  8, -6,
+  -6,  8, 10, 12, 12, 10,  8, -6,
+  -8,  4,  8, 10, 10,  8,  4, -6,
+ -10,  2,  4,  6,  6,  4,  2, -8,
+ -22,-12,-10, -8, -8,-10,-12,-22,
+};
+
+// Torre
+static const Score MG_ROOK[64] = {
+ -10, -8, -6, -4, -4, -6, -8,-10,
+  -6, -2,  0,  2,  2,  0, -2, -6,
+  -6,  0,  2,  4,  4,  2,  0, -6,
+  -6,  0,  4,  6,  6,  4,  0, -6,
+  -6,  0,  4,  6,  6,  4,  0, -6,
+  -6,  0,  2,  4,  4,  2,  0, -6,
+  -6, -2,  0,  2,  2,  0, -2, -6,
+ -10, -8, -6, -4, -4, -6, -8,-10,
+};
+static const Score EG_ROOK[64] = {
+ -10, -8, -6, -4, -4, -6, -8,-10,
+  -6, -2,  0,  2,  2,  0, -2, -6,
+  -6,  0,  2,  4,  4,  2,  0, -6,
+  -6,  0,  4,  6,  6,  4,  0, -6,
+  -6,  0,  4,  6,  6,  4,  0, -6,
+  -6,  0,  2,  4,  4,  2,  0, -6,
+  -6, -2,  0,  2,  2,  0, -2, -6,
+ -10, -8, -6, -4, -4, -6, -8,-10,
+};
+
+// Dama (PST contenida; el valor viene del material)
+static const Score MG_QUEEN[64] = {
+ -12,-10, -8, -6, -6, -8,-10,-12,
+  -8, -6, -2,  0,  0, -2, -6, -8,
+  -8, -2,  2,  4,  4,  2, -2, -8,
+  -6,  0,  4,  8,  8,  4,  0, -6,
+  -6,  0,  4,  8,  8,  4,  0, -6,
+  -8, -2,  2,  4,  4,  2, -2, -8,
+  -8, -6, -2,  0,  0, -2, -6, -8,
+ -12,-10, -8, -6, -6, -8,-10,-12,
+};
+static const Score EG_QUEEN[64] = {
+ -12,-10, -8, -6, -6, -8,-10,-12,
+  -8, -6, -2,  0,  0, -2, -6, -8,
+  -8, -2,  2,  4,  4,  2, -2, -8,
+  -6,  0,  4,  8,  8,  4,  0, -6,
+  -6,  0,  4,  8,  8,  4,  0, -6,
+  -8, -2,  2,  4,  4,  2, -2, -8,
+  -8, -6, -2,  0,  0, -2, -6, -8,
+ -12,-10, -8, -6, -6, -8,-10,-12,
+};
+
+// Rey
+static const Score MG_KING[64] = {
+ -30,-40,-40,-50,-50,-40,-40,-30,
+ -30,-40,-45,-55,-55,-45,-40,-30,
+ -30,-38,-50,-60,-60,-50,-38,-30,
+ -25,-30,-40,-55,-55,-40,-30,-25,
+ -20,-20,-30,-40,-40,-30,-20,-20,
+ -10,-10,-20,-25,-25,-20,-10,-10,
+  10, 10,  0, -5, -5,  0, 10, 10,
+  30, 40, 30,  5,  0, 10, 40, 30,
+};
+static const Score EG_KING[64] = {
+ -40,-30,-20,-10,-10,-20,-30,-40,
+ -30,-10,  0, 10, 10,  0,-10,-30,
+ -20,  0, 15, 25, 25, 15,  0,-20,
+ -10, 10, 25, 35, 35, 25, 10,-10,
+ -10, 10, 25, 35, 35, 25, 10,-10,
+ -20,  0, 15, 25, 25, 15,  0,-20,
+ -30,-10,  0, 10, 10,  0,-10,-30,
+ -40,-30,-20,-10,-10,-20,-30,-40,
+};
+
+// ---------- Estructura de peones ----------
+// Penalización peón aislado (MG/EG) — moderada y segura en escala de 100
+constexpr Score ISOLATED_PAWN_PENALTY_MG = -10;
+constexpr Score ISOLATED_PAWN_PENALTY_EG = -18;
+
+// Bonus peón pasado por rango (1..7; 8=coronación)
+// MG: conservador; EG: más fuerte (principal fuerza aquí)
+static const Score PASSED_MG[8] = { 0, 0,  4, 10, 20, 36, 60, 0 };
+static const Score PASSED_EG[8] = { 0, 0,  8, 18, 34, 60,100, 0 };
+
+// Descuentos contextuales
+constexpr int PASSED_BLOCKED_NUM = 1;   // ×1/4 si bloqueado
+constexpr int PASSED_BLOCKED_DEN = 4;
+constexpr int PASSED_UNSAFE_NUM  = 1;   // ×1/2 si la casilla delante está controlada por el rival
+constexpr int PASSED_UNSAFE_DEN  = 2;
+
+// ---------- Helpers de máscaras ----------
+static inline Bitboard file_mask(int file) {
+    Bitboard m = 0ULL;
+    for (int r = 0; r < 8; ++r) m |= (1ULL << (r * 8 + file));
+    return m;
+}
+static inline Bitboard adjacent_files_mask(int file) {
+    Bitboard m = 0ULL;
+    if (file > 0) m |= file_mask(file - 1);
+    if (file < 7) m |= file_mask(file + 1);
+    return m;
 }
 
-void init_pesto_scores(){
+// ---------- INIT: PST + máscaras ----------
+void init() {
+    // Construye PST completas (material base + offsets PST), con flip para negras
+    // Orden de PieceType: {NO, P, N, B, R, Q, K}
+    // Orden de Piece: {NO, W_P..W_K, gaps, B_P..B_K, gaps}
 
-    for(int sq64 = 0; sq64 < SQ64_SIZE; ++sq64){
-        mgPestoScore[Piece::NO_PIECE][sq64] = MG_PIECE_SCORES[Piece::NO_PIECE] + MG_PESTO_TABLES[Piece::NO_PIECE][sq64];
-        egPestoScore[Piece::NO_PIECE][sq64] = EG_PIECE_SCORES[Piece::NO_PIECE] + EG_PESTO_TABLES[Piece::NO_PIECE][sq64];
+    // Primero, limpia
+    for (int p = 0; p < PIECE_SIZE; ++p)
+        for (int s = 0; s < SQ64_SIZE; ++s)
+            MG_PST[p][s] = EG_PST[p][s] = 0;
+
+    // Blancas
+    for (int s = 0; s < SQ64_SIZE; ++s) {
+        // NO_PIECE (0)
+        MG_PST[Piece::NO_PIECE][s] = 0;
+        EG_PST[Piece::NO_PIECE][s] = 0;
+    }
+    // W pieces
+    for (int s = 0; s < SQ64_SIZE; ++s) {
+        MG_PST[Piece::W_PAWN][s]   = MG_PIECE[PieceType::PAWN]   + MG_PAWN[s];
+        MG_PST[Piece::W_KNIGHT][s] = MG_PIECE[PieceType::KNIGHT] + MG_KNIGHT[s];
+        MG_PST[Piece::W_BISHOP][s] = MG_PIECE[PieceType::BISHOP] + MG_BISHOP[s];
+        MG_PST[Piece::W_ROOK][s]   = MG_PIECE[PieceType::ROOK]   + MG_ROOK[s];
+        MG_PST[Piece::W_QUEEN][s]  = MG_PIECE[PieceType::QUEEN]  + MG_QUEEN[s];
+        MG_PST[Piece::W_KING][s]   = MG_PIECE[PieceType::KING]   + MG_KING[s];
+
+        EG_PST[Piece::W_PAWN][s]   = EG_PIECE[PieceType::PAWN]   + EG_PAWN[s];
+        EG_PST[Piece::W_KNIGHT][s] = EG_PIECE[PieceType::KNIGHT] + EG_KNIGHT[s];
+        EG_PST[Piece::W_BISHOP][s] = EG_PIECE[PieceType::BISHOP] + EG_BISHOP[s];
+        EG_PST[Piece::W_ROOK][s]   = EG_PIECE[PieceType::ROOK]   + EG_ROOK[s];
+        EG_PST[Piece::W_QUEEN][s]  = EG_PIECE[PieceType::QUEEN]  + EG_QUEEN[s];
+        EG_PST[Piece::W_KING][s]   = EG_PIECE[PieceType::KING]   + EG_KING[s];
+    }
+    // Negras: flip tablero
+    for (int s = 0; s < SQ64_SIZE; ++s) {
+        int fs = flip(s);
+        MG_PST[Piece::B_PAWN][s]   = MG_PIECE[PieceType::PAWN]   + MG_PAWN[fs];
+        MG_PST[Piece::B_KNIGHT][s] = MG_PIECE[PieceType::KNIGHT] + MG_KNIGHT[fs];
+        MG_PST[Piece::B_BISHOP][s] = MG_PIECE[PieceType::BISHOP] + MG_BISHOP[fs];
+        MG_PST[Piece::B_ROOK][s]   = MG_PIECE[PieceType::ROOK]   + MG_ROOK[fs];
+        MG_PST[Piece::B_QUEEN][s]  = MG_PIECE[PieceType::QUEEN]  + MG_QUEEN[fs];
+        MG_PST[Piece::B_KING][s]   = MG_PIECE[PieceType::KING]   + MG_KING[fs];
+
+        EG_PST[Piece::B_PAWN][s]   = EG_PIECE[PieceType::PAWN]   + EG_PAWN[fs];
+        EG_PST[Piece::B_KNIGHT][s] = EG_PIECE[PieceType::KNIGHT] + EG_KNIGHT[fs];
+        EG_PST[Piece::B_BISHOP][s] = EG_PIECE[PieceType::BISHOP] + EG_BISHOP[fs];
+        EG_PST[Piece::B_ROOK][s]   = EG_PIECE[PieceType::ROOK]   + EG_ROOK[fs];
+        EG_PST[Piece::B_QUEEN][s]  = EG_PIECE[PieceType::QUEEN]  + EG_QUEEN[fs];
+        EG_PST[Piece::B_KING][s]   = EG_PIECE[PieceType::KING]   + EG_KING[fs];
     }
 
-    for(int p = Piece::W_PAWN, pt = PieceType::PAWN; p <= Piece::W_KING; ++p, ++pt){
-        for(int sq = 0; sq < SQ64_SIZE; ++sq){
-            mgPestoScore[p][sq] = MG_PIECE_SCORES[pt] + MG_PESTO_TABLES[pt][sq];
-            egPestoScore[p][sq] = EG_PIECE_SCORES[pt] + EG_PESTO_TABLES[pt][sq];
-        }
+    // Máscaras de peón aislado (columna sin peones propios en adyacentes)
+    for (int s = 0; s < SQ64_SIZE; ++s) {
+        int file = s & 7; // 0..7
+        ISOLATED_MASKS[s] = adjacent_files_mask(file);
     }
 
-    for(int p = Piece::B_PAWN, pt = PieceType::PAWN; p <= Piece::B_KING; ++p, pt++){
-        for(int sq = 0; sq < SQ64_SIZE; ++sq){
-            mgPestoScore[p][sq] = MG_PIECE_SCORES[pt] + MG_PESTO_TABLES[pt][flip(sq)];
-            egPestoScore[p][sq] = EG_PIECE_SCORES[pt] + EG_PESTO_TABLES[pt][flip(sq)];
-        }
-    }
+    // Máscaras de pasado: para cada color y casilla, columnas adyacentes + delante
+    for (int s = 0; s < SQ64_SIZE; ++s) {
+        int file = s & 7;
+        Bitboard adj = adjacent_files_mask(file) | file_mask(file);
 
+        // Blanco: delante = ranks superiores (mayor índice)
+        Bitboard aheadW = 0ULL;
+        int rankW = s >> 3;
+        for (int r = rankW + 1; r < 8; ++r) aheadW |= (adj & (0xFFULL << (r * 8)));
+        PASSED_MASKS[WHITE][s] = aheadW;
+
+        // Negro: delante = ranks inferiores (menor índice)
+        Bitboard aheadB = 0ULL;
+        int rankB = s >> 3;
+        for (int r = 0; r < rankB; ++r) aheadB |= (adj & (0xFFULL << (r * 8)));
+        PASSED_MASKS[BLACK][s] = aheadB;
+    }
 }
 
-void init_isolated_masks() {
-    for (Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64) {
-        File file = square_file(sq64);
+// ---------- Eval principal ----------
+Score calc_score(const Position& pos) {
+    Score mg[COLOR_SIZE] = {0,0};
+    Score eg[COLOR_SIZE] = {0,0};
+    int phase = 0;
 
-        Bitboard mask = ZERO;
-        if (file > 0) mask |= Bitboards::FILE_A_MASK << (file - 1); 
-        if (file < 7) mask |= Bitboards::FILE_A_MASK << (file + 1); 
-
-        isolatedPawnMasks[sq64] = mask;
+    // --- PST por piezas (sumas MG/EG + fase) ---
+    // Peones
+    Bitboard wp = pos.get_pieceTypes_bitboard(WHITE, PAWN);
+    while (wp) {
+        Square64 s{ __builtin_ctzll(wp) };
+        mg[WHITE] += MG_PST[Piece::W_PAWN][s];
+        eg[WHITE] += EG_PST[Piece::W_PAWN][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::W_PAWN];
+        wp &= wp - 1;
     }
+    Bitboard bp = pos.get_pieceTypes_bitboard(BLACK, PAWN);
+    while (bp) {
+        Square64 s{ __builtin_ctzll(bp) };
+        mg[BLACK] += MG_PST[Piece::B_PAWN][s];
+        eg[BLACK] += EG_PST[Piece::B_PAWN][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::B_PAWN];
+        bp &= bp - 1;
+    }
+
+    // Caballos
+    Bitboard wn = pos.get_pieceTypes_bitboard(WHITE, KNIGHT);
+    while (wn) {
+        Square64 s{ __builtin_ctzll(wn) };
+        mg[WHITE] += MG_PST[Piece::W_KNIGHT][s];
+        eg[WHITE] += EG_PST[Piece::W_KNIGHT][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::W_KNIGHT];
+        wn &= wn - 1;
+    }
+    Bitboard bn = pos.get_pieceTypes_bitboard(BLACK, KNIGHT);
+    while (bn) {
+        Square64 s{ __builtin_ctzll(bn) };
+        mg[BLACK] += MG_PST[Piece::B_KNIGHT][s];
+        eg[BLACK] += EG_PST[Piece::B_KNIGHT][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::B_KNIGHT];
+        bn &= bn - 1;
+    }
+
+    // Alfiles
+    Bitboard wb = pos.get_pieceTypes_bitboard(WHITE, BISHOP);
+    while (wb) {
+        Square64 s{ __builtin_ctzll(wb) };
+        mg[WHITE] += MG_PST[Piece::W_BISHOP][s];
+        eg[WHITE] += EG_PST[Piece::W_BISHOP][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::W_BISHOP];
+        wb &= wb - 1;
+    }
+    Bitboard bb = pos.get_pieceTypes_bitboard(BLACK, BISHOP);
+    while (bb) {
+        Square64 s{ __builtin_ctzll(bb) };
+        mg[BLACK] += MG_PST[Piece::B_BISHOP][s];
+        eg[BLACK] += EG_PST[Piece::B_BISHOP][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::B_BISHOP];
+        bb &= bb - 1;
+    }
+
+    // Torres
+    Bitboard wr = pos.get_pieceTypes_bitboard(WHITE, ROOK);
+    while (wr) {
+        Square64 s{ __builtin_ctzll(wr) };
+        mg[WHITE] += MG_PST[Piece::W_ROOK][s];
+        eg[WHITE] += EG_PST[Piece::W_ROOK][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::W_ROOK];
+        wr &= wr - 1;
+    }
+    Bitboard br = pos.get_pieceTypes_bitboard(BLACK, ROOK);
+    while (br) {
+        Square64 s{ __builtin_ctzll(br) };
+        mg[BLACK] += MG_PST[Piece::B_ROOK][s];
+        eg[BLACK] += EG_PST[Piece::B_ROOK][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::B_ROOK];
+        br &= br - 1;
+    }
+
+    // Damas
+    Bitboard wq = pos.get_pieceTypes_bitboard(WHITE, QUEEN);
+    while (wq) {
+        Square64 s{ __builtin_ctzll(wq) };
+        mg[WHITE] += MG_PST[Piece::W_QUEEN][s];
+        eg[WHITE] += EG_PST[Piece::W_QUEEN][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::W_QUEEN];
+        wq &= wq - 1;
+    }
+    Bitboard bq = pos.get_pieceTypes_bitboard(BLACK, QUEEN);
+    while (bq) {
+        Square64 s{ __builtin_ctzll(bq) };
+        mg[BLACK] += MG_PST[Piece::B_QUEEN][s];
+        eg[BLACK] += EG_PST[Piece::B_QUEEN][s];
+        phase += PHASE_PIECE_WEIGHT[Piece::B_QUEEN];
+        bq &= bq - 1;
+    }
+
+    // Reyes
+    Bitboard wk = pos.get_pieceTypes_bitboard(WHITE, KING);
+    while (wk) {
+        Square64 s{ __builtin_ctzll(wk) };
+        mg[WHITE] += MG_PST[Piece::W_KING][s];
+        eg[WHITE] += EG_PST[Piece::W_KING][s];
+        wk &= wk - 1;
+    }
+    Bitboard bk = pos.get_pieceTypes_bitboard(BLACK, KING);
+    while (bk) {
+        Square64 s{ __builtin_ctzll(bk) };
+        mg[BLACK] += MG_PST[Piece::B_KING][s];
+        eg[BLACK] += EG_PST[Piece::B_KING][s];
+        bk &= bk - 1;
+    }
+
+    // --- Estructura de peones: aislados + pasados ---
+    // Precalcula bitboards de peones por color
+    Bitboard WP = pos.get_pieceTypes_bitboard(WHITE, PAWN);
+    Bitboard BP = pos.get_pieceTypes_bitboard(BLACK, PAWN);
+
+    // Aislados (no hay peón propio en columnas adyacentes)
+    Bitboard wIso = 0ULL, bIso = 0ULL;
+    Bitboard tmp = WP;
+    while (tmp) {
+        Square64 s{ __builtin_ctzll(tmp) };
+        Bitboard sameFileAdj = ISOLATED_MASKS[s] & WP;
+        if (!sameFileAdj) {
+            mg[WHITE] += ISOLATED_PAWN_PENALTY_MG;
+            eg[WHITE] += ISOLATED_PAWN_PENALTY_EG;
+            wIso |= (1ULL << s);
+        }
+        tmp &= tmp - 1;
+    }
+    tmp = BP;
+    while (tmp) {
+        Square64 s{ __builtin_ctzll(tmp) };
+        Bitboard sameFileAdj = ISOLATED_MASKS[s] & BP;
+        if (!sameFileAdj) {
+            mg[BLACK] += ISOLATED_PAWN_PENALTY_MG;
+            eg[BLACK] += ISOLATED_PAWN_PENALTY_EG;
+            bIso |= (1ULL << s);
+        }
+        tmp &= tmp - 1;
+    }
+
+    // Pasados: no hay peones rivales por delante en misma/adyacentes
+    tmp = WP;
+    Bitboard occ = pos.get_occupied_bitboard(WHITE) | pos.get_occupied_bitboard(BLACK);
+    while (tmp) {
+        Square64 s{ __builtin_ctzll(tmp) };
+        if ((PASSED_MASKS[WHITE][s] & BP) == 0ULL) {
+            int rank = (s >> 3) + 1; // 1..8
+            Score addMG = PASSED_MG[rank];
+            Score addEG = PASSED_EG[rank];
+
+            // Descuento si bloqueado
+            int aheadSq = s + 8; // casilla delante
+            bool blocked = (aheadSq < 64) && ((occ & (1ULL << aheadSq)) != 0);
+            if (blocked) { addMG = addMG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN;
+                           addEG = addEG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN; }
+
+            // Descuento si la casilla delante está controlada por rival (si tienes attacks_to)
+            // if (pos.square_attacked_by(BLACK, aheadSq)) {
+            //     addMG = addMG * PASSED_UNSAFE_NUM / PASSED_UNSAFE_DEN;
+            //     addEG = addEG * PASSED_UNSAFE_NUM / PASSED_UNSAFE_DEN;
+            // }
+
+            mg[WHITE] += addMG;
+            eg[WHITE] += addEG;
+        }
+        tmp &= tmp - 1;
+    }
+    tmp = BP;
+    while (tmp) {
+        Square64 s{ __builtin_ctzll(tmp) };
+        if ((PASSED_MASKS[BLACK][s] & WP) == 0ULL) {
+            int rankFromWhite = (s >> 3) + 1;           // 1..8
+            int rankFromBlack = 9 - rankFromWhite;      // 1..8 relativo a negras
+            Score addMG = PASSED_MG[rankFromBlack];
+            Score addEG = PASSED_EG[rankFromBlack];
+
+            int aheadSq = s - 8;
+            bool blocked = (aheadSq >= 0) && ((occ & (1ULL << aheadSq)) != 0);
+            if (blocked) { addMG = addMG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN;
+                           addEG = addEG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN; }
+
+            // if (pos.square_attacked_by(WHITE, aheadSq)) {
+            //     addMG = addMG * PASSED_UNSAFE_NUM / PASSED_UNSAFE_DEN;
+            //     addEG = addEG * PASSED_UNSAFE_NUM / PASSED_UNSAFE_DEN;
+            // }
+
+            mg[BLACK] += addMG;
+            eg[BLACK] += addEG;
+        }
+        tmp &= tmp - 1;
+    }
+
+    // --- Mezcla MG/EG y devuelve relativo al lado al mover ---
+    Color stm = pos.get_side_to_move();
+    Score mgDiff = mg[stm] - mg[~stm];
+    Score egDiff = eg[stm] - eg[~stm];
+
+    if (phase > MAX_PHASE_PIECE_WEIGHT) phase = MAX_PHASE_PIECE_WEIGHT;
+    return mg_eg_blend(mgDiff, egDiff, phase);
 }
 
-void init_passed_masks(){
-    for (Square64 sq64 = SQ64_A1; sq64 < SQ64_SIZE; ++sq64) {
-        File file = square_file(sq64); 
-        Rank rank = square_rank(sq64);
-
-        Bitboard files =
-            Bitboards::FILE_A_MASK << file |
-            (file > 0 ? Bitboards::FILE_A_MASK << (file - 1) : ZERO) |
-            (file < 7 ? Bitboards::FILE_A_MASK << (file + 1) : ZERO);
-
-        Bitboard white_forward = (rank < 7) ? (~ZERO << ((rank + 1) * 8)) : ZERO;
-        Bitboard black_forward = (ONE << (rank * 8)) - ONE;
-
-        passedMasks[WHITE][sq64] = files & white_forward;
-        passedMasks[BLACK][sq64] = files & black_forward;
-    }
-}
-
-Score calc_score(const Position &position){
-
-    //TODO chage Score types and GamePhaseWeitht when are not exaclty scores
-    Score mgScores[COLOR_SIZE];
-    Score egScores[COLOR_SIZE];
-    GamePhaseWeight gamePhase = 0;
-
-    mgScores[WHITE] = 0;
-    mgScores[BLACK] = 0;
-    egScores[WHITE] = 0;
-    egScores[BLACK] = 0;
-
-    Bitboard whitePawnIt = position.get_pieceTypes_bitboard(WHITE, PAWN);
-    Bitboard whitePawns = whitePawnIt;
-
-    Bitboard blackPawnIt = position.get_pieceTypes_bitboard(BLACK, PAWN);
-    Bitboard blackPawns = blackPawnIt;
-
-    while (whitePawnIt) {
-        Square64 sq64{Bitboards::ctz(whitePawnIt)};
-        mgScores[WHITE] += mgPestoScore[W_PAWN][sq64];
-        egScores[WHITE] += egPestoScore[W_PAWN][sq64];
-
-        if ((whitePawns & isolatedPawnMasks[sq64]) == ZERO){
-            mgScores[WHITE] += MG_ISOLATED_PAWN_PENALTY;
-            egScores[WHITE] += EG_ISOLATED_PAWN_PENALTY;           
-        }
-        if ((passedMasks[WHITE][sq64] & blackPawns) == ZERO) {
-            Rank rank = square_rank(sq64);                 
-            mgScores[WHITE] += MG_PASSED_PAWN_BONUS_BY_RANK[rank];
-            egScores[WHITE] += EG_PASSED_PAWN_BONUS_BY_RANK[rank];
-        }
-        //gamePhase += PHASE_PIECE_WEIGHT[W_PAWN];
-        whitePawnIt &= whitePawnIt - 1;
-    }
-
-    while (blackPawnIt) {
-        Square64 sq64{Bitboards::ctz(blackPawnIt)};
-        mgScores[BLACK] += mgPestoScore[B_PAWN][sq64];
-        egScores[BLACK] += egPestoScore[B_PAWN][sq64];
-
-        if ((blackPawns & isolatedPawnMasks[sq64]) == ZERO){
-            mgScores[BLACK] += MG_ISOLATED_PAWN_PENALTY;
-            egScores[BLACK] += EG_ISOLATED_PAWN_PENALTY;           
-        }
-        if ((passedMasks[BLACK][sq64] & whitePawns) == ZERO) {
-            Rank rank = square_rank(sq64);                 
-            mgScores[BLACK] += MG_PASSED_PAWN_BONUS_BY_RANK[7-rank];
-            egScores[BLACK] += EG_PASSED_PAWN_BONUS_BY_RANK[7-rank];
-        }
-        //gamePhase += PHASE_PIECE_WEIGHT[B_PAWN];
-        blackPawnIt &= blackPawnIt - 1;
-    }
-
-    Bitboard whiteKnightIt = position.get_pieceTypes_bitboard(WHITE, KNIGHT);
-    while (whiteKnightIt) {
-        Square64 sq64{Bitboards::ctz(whiteKnightIt)};
-        mgScores[WHITE] += mgPestoScore[W_KNIGHT][sq64];
-        egScores[WHITE] += egPestoScore[W_KNIGHT][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[W_KNIGHT];
-        whiteKnightIt &= whiteKnightIt - 1;
-    }
-
-    Bitboard blackKnightIt = position.get_pieceTypes_bitboard(BLACK, KNIGHT);
-    while (blackKnightIt) {
-        Square64 sq64{Bitboards::ctz(blackKnightIt)};
-        mgScores[BLACK] += mgPestoScore[B_KNIGHT][sq64];
-        egScores[BLACK] += egPestoScore[B_KNIGHT][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[B_KNIGHT];
-        blackKnightIt &= blackKnightIt - 1;
-    }
-
-    Bitboard whiteBishopIt = position.get_pieceTypes_bitboard(WHITE, BISHOP);
-    while (whiteBishopIt) {
-        Square64 sq64{Bitboards::ctz(whiteBishopIt)};
-        mgScores[WHITE] += mgPestoScore[W_BISHOP][sq64];
-        egScores[WHITE] += egPestoScore[W_BISHOP][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[W_BISHOP];
-        whiteBishopIt &= whiteBishopIt - 1;
-    }
-
-    Bitboard blackBishopIt = position.get_pieceTypes_bitboard(BLACK, BISHOP);
-    while (blackBishopIt) {
-        Square64 sq64{Bitboards::ctz(blackBishopIt)};
-        mgScores[BLACK] += mgPestoScore[B_BISHOP][sq64];
-        egScores[BLACK] += egPestoScore[B_BISHOP][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[B_BISHOP];
-        blackBishopIt &= blackBishopIt - 1;
-    }
-
-    Bitboard whiteRookIt = position.get_pieceTypes_bitboard(WHITE, ROOK);
-    while (whiteRookIt) {
-        Square64 sq64{Bitboards::ctz(whiteRookIt)};
-        mgScores[WHITE] += mgPestoScore[W_ROOK][sq64];
-        egScores[WHITE] += egPestoScore[W_ROOK][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[W_ROOK];
-        whiteRookIt &= whiteRookIt - 1;
-    }
-
-    Bitboard blackRookIt = position.get_pieceTypes_bitboard(BLACK, ROOK);
-    while (blackRookIt) {
-        Square64 sq64{Bitboards::ctz(blackRookIt)};
-        mgScores[BLACK] += mgPestoScore[B_ROOK][sq64];
-        egScores[BLACK] += egPestoScore[B_ROOK][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[B_ROOK];
-        blackRookIt &= blackRookIt - 1;
-    }
-
-    Bitboard whiteQueenIt = position.get_pieceTypes_bitboard(WHITE, QUEEN);
-    while (whiteQueenIt) {
-        Square64 sq64{Bitboards::ctz(whiteQueenIt)};
-        mgScores[WHITE] += mgPestoScore[W_QUEEN][sq64];
-        egScores[WHITE] += egPestoScore[W_QUEEN][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[W_QUEEN];
-        whiteQueenIt &= whiteQueenIt - 1;
-    }
-
-    Bitboard blackQueenIt = position.get_pieceTypes_bitboard(BLACK, QUEEN);
-    while (blackQueenIt) {
-        Square64 sq64{Bitboards::ctz(blackQueenIt)};
-        mgScores[BLACK] += mgPestoScore[B_QUEEN][sq64];
-        egScores[BLACK] += egPestoScore[B_QUEEN][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[B_QUEEN];
-        blackQueenIt &= blackQueenIt - 1;
-    }
-
-    Bitboard whiteKingIt = position.get_pieceTypes_bitboard(WHITE, KING);
-    while (whiteKingIt) {
-        Square64 sq64{Bitboards::ctz(whiteKingIt)};
-        mgScores[WHITE] += mgPestoScore[W_KING][sq64];
-        egScores[WHITE] += egPestoScore[W_KING][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[W_KING];
-        whiteKingIt &= whiteKingIt - 1;
-    }
-
-    Bitboard blackKingIt = position.get_pieceTypes_bitboard(BLACK, KING);
-    while (blackKingIt) {
-        Square64 sq64{Bitboards::ctz(blackKingIt)};
-        mgScores[BLACK] += mgPestoScore[B_KING][sq64];
-        egScores[BLACK] += egPestoScore[B_KING][sq64];
-        gamePhase += PHASE_PIECE_WEIGHT[B_KING];
-        blackKingIt &= blackKingIt - 1;
-    }
-
-    Color siteToMove = position.get_side_to_move();
-    Score mgScore = mgScores[siteToMove] - mgScores[~siteToMove];
-    Score egScore = egScores[siteToMove] - egScores[~siteToMove];
-
-
-    GamePhaseWeight mgGamePhaseWeight = 0;
-    GamePhaseWeight egGamePhaseWeight = 0;
-
-    mgGamePhaseWeight = (gamePhase > MAX_PHASE_PIECE_WEIGHT) ? MAX_PHASE_PIECE_WEIGHT : gamePhase;
-    egGamePhaseWeight = MAX_PHASE_PIECE_WEIGHT - mgGamePhaseWeight;
-
-    return ((mgScore * mgGamePhaseWeight) + (egScore * egGamePhaseWeight)) / 24;
-
+static inline Score mg_eg_blend(Score mg, Score eg, int phase) {
+    // phase = 0 → puro EG; phase = MAX → puro MG
+    return (mg * phase + eg * (MAX_PHASE_PIECE_WEIGHT - phase)) / MAX_PHASE_PIECE_WEIGHT;
 }
 
 bool material_draw(const Position& pos) {
@@ -531,10 +552,6 @@ bool material_draw(const Position& pos) {
     return false;
 }
 
-int flip(int sq){
-    return sq^56;
-}
 
-}
-
-}
+} // namespace Evaluate
+} // namespace Xake
