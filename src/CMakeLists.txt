@@ -2,6 +2,7 @@ add_library(src
 position.cpp
 attacks.cpp
 movegen.cpp
+timemanager.cpp
 search.cpp
 evaluate.cpp
 uci.cpp

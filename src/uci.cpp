@@ -1,6 +1,7 @@
 #include "uci.h"
 #include "position.h"
 #include "search.h"
+#include "timemanager.h"
 
 #include <iostream>
 #include <sstream>
@@ -187,60 +188,47 @@ void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo, 
 
 }
 
-void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo){
+void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo) {
 
     std::string arg;
-    searchInfo.depth = MAX_DEPTH;
-    searchInfo.stopTime = Xake::NO_TIME;
-    searchInfo.startTime = Xake::NO_TIME;
-    searchInfo.moveTime = Xake::NO_TIME;
-    searchInfo.realTime = Xake::NO_TIME;
-    searchInfo.timeOver = false;
-    searchInfo.stop = false;
+
+    searchInfo.depth     = MAX_DEPTH;
+    searchInfo.stop      = false;
     searchInfo.searchPly = 0;
-    Xake::Time colorTime = Xake::NO_TIME;    
-    Xake::Time moveTime = Xake::NO_TIME; 
-    Xake::Time colorInc = 0;   
-    Xake::MovesSize movesToGo = 30;
 
-    while (is >> arg)
-    { 
-        if(arg == "depth")
-            is >> searchInfo.depth;
-        else if(arg == "wtime" && pos.get_side_to_move() == WHITE)
-            is >> colorTime;
-        else if(arg == "btime" && pos.get_side_to_move() == BLACK)
-            is >> colorTime;
-        else if(arg == "winc" && pos.get_side_to_move() == WHITE)
-            is >> colorInc;
-        else if(arg == "binc" && pos.get_side_to_move() == BLACK)
-            is >> colorInc;
-        else if(arg == "movestogo")
-            is >> movesToGo;
-        else if(arg == "movetime")
-            is >> moveTime;
-        else if(arg == "infinite")
-            moveTime = Xake::NO_TIME;
+    using TM = TimeManager;
+    TM::BudgetParams bP;
+    TM &tm = searchInfo.timeManager;
+    tm.mark_start();
+
+    auto read_ms = [&](std::optional<TM::Ms>& dst) {
+        long long v;
+        if (is >> v) dst = TM::Ms{v};
+    };
+
+    auto read_int = [&](std::optional<int>& dst) {
+        int v;
+        if (is >> v) dst = v;
+    };  
+
+    // Parseo UCI
+    while (is >> arg) {
+        if      (arg == "depth")    { is >> searchInfo.depth; }
+        else if (arg == "wtime" && pos.get_side_to_move() == WHITE) { read_ms(bP.colorTimeMs); bP.ply = pos.get_ply(); }
+        else if (arg == "btime" && pos.get_side_to_move() == BLACK) { read_ms(bP.colorTimeMs); bP.ply = pos.get_ply(); }
+        else if (arg == "winc"  && pos.get_side_to_move() == WHITE) { read_ms(bP.incMs); }
+        else if (arg == "binc"  && pos.get_side_to_move() == BLACK) { read_ms(bP.incMs); }
+        else if (arg == "movestogo") { read_int(bP.movesToGo); }
+        else if (arg == "movetime")  { read_ms(bP.moveTimeMs); }
+        else if (arg == "infinite")  { bP.moveTimeMs.reset(); bP.colorTimeMs.reset(); }
     }
 
-    searchInfo.startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    tm.allocate_from_go(bP);
 
-    if(moveTime != Xake::NO_TIME){
-        searchInfo.moveTime = moveTime;
-        searchInfo.stopTime = searchInfo.startTime + searchInfo.moveTime;    
-    }else if (colorTime != Xake::NO_TIME){
-        colorTime /= movesToGo;
-        colorTime -= 50;
-        searchInfo.moveTime = colorTime + colorInc;
-        searchInfo.stopTime = searchInfo.startTime + searchInfo.moveTime; 
-    }
-
-    std::cout <<
-    "max time ms: " << searchInfo.moveTime << 
-    " depth: " << searchInfo.depth << 
-    "\n";
-
+    const auto rem = tm.remaining_ms();
+    std::cout << "info string search depth " << searchInfo.depth
+              << " remaining " << (rem ? std::to_string(rem->count()) + "ms" : "infinite")
+              << std::endl;
 }
 
 void uci_info(){

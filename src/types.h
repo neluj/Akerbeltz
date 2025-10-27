@@ -14,7 +14,6 @@ using DepthSize = int;
 using NodesSize = uint64_t;
 using MovesSize = int;
 using Key = uint64_t;
-using Time = int64_t;
 
 constexpr int MAX_POSITION_MOVES_SIZE = 255;
 constexpr int MAX_GAME_MOVES = 2048;
@@ -22,8 +21,6 @@ constexpr int MAX_SAME_PIECE = 10;
 constexpr int MAX_DEPTH = 64;
 
 constexpr int CASTLING_POSIBILITIES = 4 * 4;
-
-constexpr Xake::Time NO_TIME = -1;
 
 enum PieceType{
   NO_PIECE_TYPE,

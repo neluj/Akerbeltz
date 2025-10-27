@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "move.h"
+#include "timemanager.h"
 
 #include <atomic>
 
@@ -15,11 +16,7 @@ namespace Search{
         DepthSize depth;
         NodesSize nodes;
         DepthSize searchPly;
-        Xake::Time startTime;
-        Xake::Time stopTime;
-        Xake::Time moveTime;
-        Xake::Time realTime;
-        bool timeOver;
+        Xake::TimeManager timeManager;
         std::atomic_bool stop;
     };
 

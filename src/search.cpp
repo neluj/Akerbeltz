@@ -26,75 +26,67 @@ void perft(Position &position, DepthSize depth);
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth);
 Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta);
 void clean_search_info(SearchInfo &searchInfo);
-void check_time(SearchInfo &searchInfo);
 void pick_move(int moveIndx, MoveGen::MoveList &moveList);
 bool is_draw(const Position &position, const SearchInfo &searchInfo);
+static Move first_legal_move(Position& position);
+void print_iter_info(DepthSize currentDepth, int bestMoveScore, Move bestMove, SearchInfo &searchInfo);
 
 
 void search(Position &position, SearchInfo &searchInfo){
 
     int bestMoveScore = -CHECKMATE_SCORE;
-    Move bestMove = 0;
+    // fallback
+    Move bestMove = first_legal_move(position);
+    if (!bestMove) { std::cout << "bestmove 0000\n"; return; }
 
     clean_search_info(searchInfo);
 
+    NodesSize prevTotalNodes = searchInfo.nodes;
+    uint64_t  lastIterNodes  = 0;   
+
     for(DepthSize currentDepth = 1; currentDepth <= searchInfo.depth; ++currentDepth){
-        
+
+        const TimeManager::Ms iterStartMs = searchInfo.timeManager.elapsed_ms();
+
         bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
-        
-        if(searchInfo.timeOver || searchInfo.stop){
+
+        //Necessary for avoid loading partially calculated pv line
+        if (searchInfo.timeManager.out_of_time() || searchInfo.stop) {
             break;
         }
-        
-        searchInfo.realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()).count() - searchInfo.startTime;
-        
 
         PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
-        bestMove = pvLine.moves[0];
+        if (pvLine.depth > 0) bestMove = pvLine.moves[0];
+        
+        print_iter_info(currentDepth, bestMoveScore, bestMove, searchInfo);
 
+        // Check iteration times
+        const auto iterEndMs  = searchInfo.timeManager.elapsed_ms();
+        const TimeManager::Ms iterMs  = iterEndMs - iterStartMs;
+        const uint64_t iterNodes = searchInfo.nodes - prevTotalNodes;
 
-        std::cout <<
-        "info" << 
-        " depth " << currentDepth << 
-        " score cp " << bestMoveScore << 
-        " move " << algebraic_move(bestMove) <<
-        " nodes " << searchInfo.nodes <<
-        " time " << searchInfo.realTime;
+        // Calc if new iteration is possible
+        searchInfo.timeManager.on_iteration_finished(iterNodes, lastIterNodes);
+        lastIterNodes   = iterNodes;
+        prevTotalNodes  = searchInfo.nodes;
 
-        std::cout << " pv";
-
-        for(DepthSize pvLineDepth = 0; pvLineDepth < pvLine.depth; ++pvLineDepth){
-            std::cout << " " << algebraic_move(pvLine.moves[pvLineDepth]);
+        if (!searchInfo.timeManager.enough_time_for_next_iteration(iterMs)) {
+            break;
         }
 
-        std::cout << std::endl;
-        //std::cout << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
-        //std::cout << "move:" << algebraic_move(veryBestMove) << " score: " << bestMoveScore << " depth: " << currentDepth << "\n";
-        
     }
 
-    std::cout << "bestmove " << algebraic_move(bestMove) << std::endl; 
-
+    std::cout << "bestmove " << algebraic_move(bestMove) << "\n";
 }
+
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth){
 
+    if (is_draw(position, searchInfo)) { return DRAW_SOCORE; }
 
-    if(depth==0){
-        ++searchInfo.nodes;
-        return quiescence_search(position, searchInfo, alpha, beta);
-    }
-
-    if((searchInfo.nodes & 2047) == 0){
-        check_time(searchInfo);
-    }
+    if(depth==0) { return quiescence_search(position, searchInfo, alpha, beta); }
 
     ++searchInfo.nodes;
-
-    if (is_draw(position, searchInfo)){
-        return DRAW_SOCORE;
-    }
 
     bool isCheck = position.square_is_attacked_bySide( Square64(Bitboards::ctz(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING))), ~position.get_side_to_move());
 
@@ -147,10 +139,10 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         position.undo_move();
         --searchInfo.searchPly;
 
-        if(searchInfo.timeOver || searchInfo.stop){
-            return DRAW_SOCORE;
+        if ((searchInfo.nodes & 2047) == 0) {
+            if (searchInfo.timeManager.out_of_time() || searchInfo.stop) { break; }
         }
-        
+
         if(score>alpha){
             if(score>=beta){
 
@@ -187,10 +179,6 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
 Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta){
 
-    if((searchInfo.nodes & 2047) == 0){
-        check_time(searchInfo);
-    }
-
     ++searchInfo.nodes;
 
     if (is_draw(position, searchInfo)){
@@ -221,6 +209,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
 
         pick_move(mIndx, moveList);
+
         Move move = moveList.moves[mIndx];
         if(!position.do_move(move)){
             continue;
@@ -231,9 +220,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         position.undo_move();
         --searchInfo.searchPly;
 
-        if(searchInfo.timeOver || searchInfo.stop){
-            return 0;
-        }
+        if ((searchInfo.nodes & 2047) == 0 && (searchInfo.timeManager.out_of_time() || searchInfo.stop)) { break; }
         
         if(score>alpha){
             if(score>=beta){
@@ -254,6 +241,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 
 void clean_search_info(SearchInfo &searchInfo){
     searchInfo.nodes = 0;
+    //searchInfo.timeOver = false;
     
     for(int i = 0; i < MAX_KILLERMOVES; ++i){
         for(int x = 0; x < MAX_DEPTH; ++x){
@@ -271,19 +259,17 @@ bool is_draw(const Position &position, const SearchInfo &searchInfo) {
     if ((position.is_repetition() || position.get_fifty_moves_counter() >= 100) && searchInfo.searchPly) {
         return true;
     }
-
-    return Evaluate::material_draw(position);
+    return false;
 }
 
-void check_time(SearchInfo &searchInfo){
-    if(searchInfo.stopTime != NO_TIME){
-        Xake::Time timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-
-        if(timeMs >= searchInfo.stopTime){
-            searchInfo.timeOver = true;
-        }
+static Move first_legal_move(Position& position) {
+    MoveGen::MoveList ml;
+    MoveGen::generate_pseudo_moves(position, ml);
+    for (int i = 0; i < ml.size; ++i) {
+        Move m = ml.moves[i];
+        if (position.do_move(m)) { position.undo_move(); return m; }
     }
+    return 0;
 }
 
 void pick_move(int moveIndx, MoveGen::MoveList &moveList){
@@ -303,6 +289,25 @@ void pick_move(int moveIndx, MoveGen::MoveList &moveList){
     Move moveTemp = moveList.moves[moveIndx];
     moveList.moves[moveIndx] = moveList.moves[bestIndx];
     moveList.moves[bestIndx] = moveTemp;
+}
+
+void print_iter_info(DepthSize currentDepth, int bestMoveScore, Move bestMove, SearchInfo &searchInfo){
+
+        std::cout <<
+        "info" << 
+        " depth " << currentDepth << 
+        " score cp " << bestMoveScore << 
+        " move " << algebraic_move(bestMove) <<
+        " nodes " << searchInfo.nodes <<
+        " time " << searchInfo.timeManager.elapsed_ms().count();
+
+        std::cout << " pv";
+
+        for(DepthSize pvLineDepth = 0; pvLineDepth < pvLine.depth; ++pvLineDepth){
+            std::cout << " " << algebraic_move(pvLine.moves[pvLineDepth]);
+        }
+
+        std::cout << std::endl;
 }
 
 
@@ -361,12 +366,9 @@ NodesSize perftTest(Position &position, SearchInfo &searchInfo){
 
     }
 
-    searchInfo.realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-    std::chrono::high_resolution_clock::now().time_since_epoch()).count() - searchInfo.startTime;
-
     std::cout << "\n" << 
-    "total nodes size: " << allNodesCounter << 
-    " time ms: " << searchInfo.realTime <<
+    "total nodes size: " << allNodesCounter <<
+    " time ms: " << searchInfo.timeManager.elapsed_ms().count() <<
     "\n\n";
 
     return allNodesCounter;
