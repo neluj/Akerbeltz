@@ -23,6 +23,7 @@ ADJ_DRAW_SCORE=10
 CONCURRENCY_OVERRIDE=""
 A_NAME_OVERRIDE=""
 B_NAME_OVERRIDE=""
+DEBUG=false
 #SEED=""
 ENGINES_TSV=""
 OPENINGS_FILE=""
@@ -53,6 +54,7 @@ Optional:
   --concurrency <N>        Concurrency (default: auto = max(1,nproc-1))
   --adjudicate             Enable resign/draw adjudication (defaults baked in)
   --seed <int>             RNG seed (uses -srand)
+  --debug <true|false>     If true, enable cutechess -debug and write UCI I/O to logs/<tag>.debug
 EOF
 }
 
@@ -73,7 +75,12 @@ while [[ $# -gt 0 ]]; do
     --adjudicate) ADJUDICATE=true; shift;;
     #--seed) SEED="${2:-}"; shift 2;;
     --a) A_NAME_OVERRIDE="${2:-}"; shift 2;;
-    --b) B_NAME_OVERRIDE="${2:-}"; shift 2;;
+    --b) B_NAME_OVERRIDE="${2:-}"; shift 2;;--debug)
+  case "${2:-}" in
+    true|TRUE|True|1|yes|on) DEBUG=true;;
+    *) DEBUG=false;;
+  esac
+  shift 2;;
     -h|--help) usage; exit 0;;
     *) die "Unknown option: $1";;
   esac
@@ -88,6 +95,7 @@ need date
 need mkdir
 need nproc
 need tee
+need stdbuf
 need cutechess-cli
 
 [[ -n "$ENGINES_TSV" ]] || { usage; die "--engines is required."; }
@@ -228,6 +236,7 @@ shopt -u nocasematch
 ts="$(timestamp)"
 LOGFILE="./logs/smoke_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.log"
 PGNFILE="./pgn/smoke_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.pgn"
+DEBUGFILE="./logs/smoke_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.debug"
 
 # --- Adjudication flags ---
 ADJ_FLAGS=()
@@ -249,25 +258,62 @@ echo "Concurrency:   $CONCURRENCY"
 echo "Logs:          $LOGFILE"
 echo "PGN:           $PGNFILE"
 $ADJUDICATE && echo "Adjudication:  resign ${ADJ_RESIGN_SCORE}/${ADJ_RESIGN_MOVES}, draw ${ADJ_DRAW_MOVENUM}/${ADJ_DRAW_MOVES} score=${ADJ_DRAW_SCORE}"
+echo "Debug:         $([[ $DEBUG == true ]] && echo "$DEBUGFILE (enabled, UCI I/O to file)" || echo "off")"
 
 #trap "echo 'Aborting…'; kill 0 || true" INT TERM
 #Add the next line to cutechess-cli for adding seed by parameter
 #-srand "$SEED" \
 
-set -x
-cutechess-cli \
-  $ENG_A \
-  $ENG_B \
-  -each proto=uci tc="$TC" timemargin=50 ponder=false \
-  -openings file="$OPENINGS_FILE" format=epd order=random plies="$BOOK_PLIES" \
-  -repeat \
-  -games 2 \
-  -rounds "$ROUNDS" \
-  -concurrency "$CONCURRENCY" \
-  "${ADJ_FLAGS[@]}" \
-  -pgnout "$PGNFILE" \
-  2>&1 | tee "$LOGFILE"
-set +x
+# --- Build command ---
+CMD=( cutechess-cli
+  $ENG_A
+  $ENG_B
+  -each proto=uci tc="$TC" timemargin=50 ponder=false
+  -openings "file=$OPENINGS_FILE" "format=epd" "order=random" "plies=$BOOK_PLIES"
+  -repeat
+  -games 2
+  -rounds "$ROUNDS"
+  -concurrency "$CONCURRENCY"
+  "${ADJ_FLAGS[@]}"
+  -pgnout "$PGNFILE"
+)
+
+# Enable cutechess internal debug only if requested
+$DEBUG && CMD+=( -debug all )
+
+# --- Execution (with optional UCI I/O capture to .debug) ---
+if $DEBUG; then
+  {
+    echo "=== DEBUG $(date) ==="
+    echo "Workdir: $(pwd)"
+    echo "nproc: $(nproc)"
+    echo "--- Full command ---"
+    printf '%q ' "${CMD[@]}"; echo
+    echo "--- BEGIN UCI I/O ---"
+  } > "$DEBUGFILE"
+
+  stdbuf -oL -eL "${CMD[@]}" 2>&1 \
+    | awk -v dbg="$DEBUGFILE" '
+        function ts(   t,cmd){
+          cmd="date +\"%Y-%m-%d %H:%M:%S,%3N\" 2>/dev/null"
+          cmd|getline t
+          close(cmd)
+          return t
+        }
+        {
+          line=$0
+          # cutechess -debug emits lines like: "NNN <engine>(idx): ..." or "NNN >engine(idx): ..."
+          if (line ~ /^[[:space:]]*[0-9]+[[:space:]][<>]/) {
+            print ts(), line >> dbg
+            fflush(dbg)
+            next
+          }
+          print
+        }
+      ' | tee "$LOGFILE"
+else
+  "${CMD[@]}" 2>&1 | tee "$LOGFILE"
+fi
 
 # --- Summary from PGN ---
 # Count results from PGN [Result "..."]

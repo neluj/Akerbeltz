@@ -35,6 +35,7 @@ OPENINGS_FILE=""
 TC="$TC_DEFAULT"
 ROUNDS=""   # not set by default; SPRT decides
 GAMES=""    # optional override
+DEBUG=false # depuración desactivada por defecto
 
 die(){ echo "ERROR: $*" >&2; exit 1; }
 need(){ command -v "$1" >/dev/null 2>&1 || die "'$1' not found in PATH."; }
@@ -53,6 +54,7 @@ Optional:
   --hash <MB>                 Global default if TSV empty (default ${HASH_DEFAULT})
   --book-depth <ply>          If EPD, default ${BOOK_PLIES_DEFAULT}
   --concurrency <N>           Default: auto max(1,nproc-1)
+  --debug <true|false>        Default: false (UCI I/O con timestamps a logs/<tag>.debug)
   --seed <int>                RNG seed for -srand
   --adjudicate                Enable resign/draw (conservative defaults)
   --sprt-elo0 <n>             H0 (default ${ELO0})
@@ -80,6 +82,12 @@ while [[ $# -gt 0 ]]; do
     --concurrency) CONCURRENCY_OVERRIDE="${2:-}"; shift 2;;
     #--seed) SEED="${2:-}"; shift 2;;
     --adjudicate) ADJUDICATE=true; shift;;
+    --debug)
+      case "${2:-}" in
+        true|TRUE|True|1|yes|on) DEBUG=true;;
+        *) DEBUG=false;;
+      esac
+      shift 2;;
     --sprt-elo0) ELO0="${2:-}"; shift 2;;
     --sprt-elo1) ELO1="${2:-}"; shift 2;;
     --sprt-alpha) ALPHA="${2:-}"; shift 2;;
@@ -91,7 +99,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-need cutechess-cli; need awk; need nproc; need tee
+need cutechess-cli; need awk; need nproc; need tee; need stdbuf
 [[ -n "$ENGINES_TSV" && -f "$ENGINES_TSV" ]] || { usage; die "--engines required"; }
 [[ -n "$OPENINGS_FILE" && -f "$OPENINGS_FILE" ]] || { usage; die "--openings required"; }
 
@@ -169,6 +177,7 @@ fi
 ts="$(timestamp)"
 LOGFILE="./logs/sprt_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.log"
 PGNFILE="./pgn/sprt_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.pgn"
+DEBUGFILE="./logs/sprt_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.debug"
 
 echo "=== SPRT configuration ==="
 echo "Engines TSV:   $ENGINES_TSV"
@@ -182,6 +191,7 @@ echo "Concurrency:   $CONCURRENCY"
 #echo "Seed:          $SEED"
 echo "Logs:          $LOGFILE"
 echo "PGN:           $PGNFILE"
+echo "Debug:         $([[ $DEBUG == true ]] && echo "$DEBUGFILE (enabled, UCI I/O to file)" || echo "off")"
 
 #trap "echo 'Aborting…'; kill 0 || true" INT TERM
 
@@ -201,9 +211,41 @@ CMD=( cutechess-cli
 [[ -n "$ROUNDS" ]] && CMD+=( -rounds "$ROUNDS" )
 if [[ -n "$GAMES" ]]; then CMD+=( -games "$GAMES" ); else CMD+=( -games 2 ); fi
 
-set -x
-"${CMD[@]}" 2>&1 | tee "$LOGFILE"
-set +x
+$DEBUG && CMD+=( -debug all)
+
+# --- Ejecución con/ sin captura de UCI I/O ---
+if $DEBUG; then
+  {
+    echo "=== DEBUG $(date) ==="
+    echo "Workdir: $(pwd)"
+    echo "nproc: $(nproc)"
+    echo "--- Full command ---"
+    printf '%q ' "${CMD[@]}"; echo
+    echo "--- BEGIN UCI I/O ---"
+  } > "$DEBUGFILE"
+
+  stdbuf -oL -eL "${CMD[@]}" 2>&1 \
+    | awk -v dbg="$DEBUGFILE" '
+        function ts(   t,cmd){
+          cmd="date +\"%Y-%m-%d %H:%M:%S,%3N\" 2>/dev/null"
+          cmd|getline t
+          close(cmd)
+          return t
+        }
+        {
+          line=$0
+          # Formato de cutechess -debug: "NNN <engine>(idx): ..." ó "NNN >engine(idx): ..."
+          if (line ~ /^[[:space:]]*[0-9]+[[:space:]][<>]/) {
+            print ts(), line >> dbg
+            fflush(dbg)
+            next
+          }
+          print
+        }
+      ' | tee "$LOGFILE"
+else
+  "${CMD[@]}" 2>&1 | tee "$LOGFILE"
+fi
 
 # Print quick summary: count games + grep for sprt decision
 if [[ -f "$PGNFILE" ]]; then

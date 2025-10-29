@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 # Long Time Control confirmation with cutechess-cli.
-# - Round-robin across TSV engines by default (or --pairwise for A vs B).
-# - PGN openings (curated) recommended; color-balanced with -repeat + -games 2.
-# - Default TC: 40/300+3 (fallback to 45+0.45 with --tc if preferred).
-# - Prints standings and writes JSON summary to logs/ltc_<timestamp>.json.
 
 set -euo pipefail
 
@@ -32,6 +28,7 @@ ENGINES_TSV=""
 OPENINGS_FILE=""
 TC="$TC_DEFAULT"
 ROUNDS="$ROUNDS_DEFAULT"
+DEBUG=false   # depuración desactivada por defecto
 
 die(){ echo "ERROR: $*" >&2; exit 1; }
 need(){ command -v "$1" >/dev/null 2>&1 || die "'$1' not found in PATH."; }
@@ -51,6 +48,7 @@ Optional general:
   --concurrency <N>         Default: auto max(1,nproc-1)
   --seed <int>              RNG seed
   --adjudicate              Enable conservative adjudication
+  --debug <true|false>      Default: false (UCI I/O con timestamps a logs/<tag>_<ts>.debug)
 Round-robin / selection:
   --pairwise                Use A vs B only
   --a <name>  --b <name>    Pairwise engine selection
@@ -79,12 +77,18 @@ while [[ $# -gt 0 ]]; do
     --b) B_NAME_OVERRIDE="${2:-}"; shift 2;;
     --include) INCLUDE_CSV="${2:-}"; shift 2;;
     --book-depth) BOOK_PLIES="${2:-}"; shift 2;;
+    --debug)
+      case "${2:-}" in
+        true|TRUE|True|1|yes|on) DEBUG=true;;
+        *) DEBUG=false;;
+      esac
+      shift 2;;
     -h|--help) usage; exit 0;;
     *) die "Unknown option: $1";;
   esac
 done
 
-need cutechess-cli; need awk; need sed; need grep; need nproc; need tee; need tr
+need cutechess-cli; need awk; need sed; need grep; need nproc; need tee; need tr; need stdbuf
 [[ -n "$ENGINES_TSV" && -f "$ENGINES_TSV" ]] || { usage; die "--engines required"; }
 [[ -n "$OPENINGS_FILE" && -f "$OPENINGS_FILE" ]] || { usage; die "--openings required"; }
 
@@ -96,9 +100,6 @@ if [[ -n "$CONCURRENCY_OVERRIDE" ]]; then
 else
   CPU="$(nproc)"; CONCURRENCY=$(( CPU>1 ? CPU-1 : 1 ))
 fi
-
-# Seed
-#if [[ -z "$SEED" ]]; then SEED="$(( (RANDOM<<16) ^ RANDOM ))"; fi
 
 # TSV lines
 mapfile -t LINES < <(awk -F'\t' 'NR==1{next} NF && $0!~/^[ \t]*#/{print}' "$ENGINES_TSV")
@@ -134,7 +135,6 @@ fi
 # Build engines and compute effective per-engine threads to avoid oversubscription
 TOTAL_CPU="$(nproc)"
 if [[ -n "${GLOBAL_THREADS:-}" ]]; then base_thr="$GLOBAL_THREADS"; else base_thr="$THREADS_DEFAULT"; fi
-# If threads*CONCURRENCY > TOTAL_CPU, reduce threads
 eff_thr="$base_thr"
 if (( base_thr * CONCURRENCY > TOTAL_CPU )); then
   eff_thr=$(( TOTAL_CPU / CONCURRENCY ))
@@ -145,10 +145,7 @@ build_engine(){
   local name="$1"; local line="${ENGINE_BY_NAME[$name]}"
   IFS=$'\t' read -r _name cmd args thr hash uci <<<"$line"
   [[ -x "$cmd" ]] || die "Engine binary not executable: $cmd"
-  #local threads="${thr:-$eff_thr}"
-  #local hashmb="${hash:-${GLOBAL_HASH:-$HASH_DEFAULT}}"
-  #local optstr=" option.Hash=${hashmb} option.Threads=${threads}"
-  local optstr=""   #Remove if some param is used
+  local optstr=""
   if [[ -n "${uci:-}" ]]; then
     IFS=';' read -ra opts <<<"$uci"
     for kv in "${opts[@]}"; do [[ -z "$kv" ]]&&continue; key="${kv%%=*}"; val="${kv#*=}"; optstr+=" option.${key}=${val}"; done
@@ -160,7 +157,7 @@ build_engine(){
 ENGINE_CLAUSES=()
 for n in "${SELECTED[@]}"; do ENGINE_CLAUSES+=( "$(build_engine "$n")" ); done
 
-# Openings: prefer PGN; support EPD as fallback
+# Openings
 ext="${OPENINGS_FILE##*.}"; lower_ext="$(echo "$ext"|tr '[:upper:]' '[:lower:]')"
 OPEN_FLAGS=()
 case "$lower_ext" in
@@ -180,6 +177,7 @@ TAG=$([[ $PAIRWISE == true ]] && echo "ltc_pairwise" || echo "ltc_rr")
 LOGFILE="./logs/${TAG}_${ts}.log"
 PGNFILE="./pgn/${TAG}_${ts}.pgn"
 JSONFILE="./logs/ltc_${ts}.json"
+DEBUGFILE="./logs/${TAG}_${ts}.debug"
 
 echo "=== LTC configuration ==="
 echo "Mode:          $([[ $PAIRWISE == true ]] && echo "pairwise" || echo "round-robin")"
@@ -189,13 +187,12 @@ echo "Openings:      $OPENINGS_FILE (format: $lower_ext) with color-swap"
 echo "Rounds/Pair:   $ROUNDS   (games/round=2, repeat openings)"
 echo "TC:            $TC"
 echo "Concurrency:   $CONCURRENCY   (effective per-engine threads ~${eff_thr})"
-#echo "Seed:          $SEED"
 echo "Logs:          $LOGFILE"
 echo "PGN:           $PGNFILE"
+echo "Debug:         $([[ $DEBUG == true ]] && echo "$DEBUGFILE (enabled, UCI I/O to file)" || echo "off")"
 $ADJUDICATE && echo "Adjudication:  resign ${ADJ_RESIGN_SCORE}/${ADJ_RESIGN_MOVES}, draw ${ADJ_DRAW_MOVENUM}/${ADJ_DRAW_MOVES} score=${ADJ_DRAW_SCORE}"
 
-#trap "echo 'Aborting…'; kill 0 || true" INT TERM
-
+# Construcción del comando
 CMD=( cutechess-cli
   ${ENGINE_CLAUSES[@]}
   -each proto=uci tc="$TC" timemargin=50 ponder=false
@@ -204,29 +201,55 @@ CMD=( cutechess-cli
   -games 2
   -rounds "$ROUNDS"
   -concurrency "$CONCURRENCY"
-  #-srand "$SEED"
   "${ADJ_FLAGS[@]}"
   -pgnout "$PGNFILE"
 )
 
-# Tournament mode: round-robin unless explicitly pairwise with two engines
-if $PAIRWISE; then
-  # cutechess default tournament is round-robin; with only two engines it's effectively head-to-head.
-  :
+# Activamos el debug interno de cutechess sólo si se solicita (lo capturaremos sin mostrarlo)
+$DEBUG && CMD+=( -debug )
+
+# Modo torneo
+if $PAIRWISE; then :; else CMD+=( -tournament round-robin ); fi
+
+# --- Ejecución ---
+if $DEBUG; then
+  # Cabecera del .debug
+  {
+    echo "=== DEBUG $(date) ==="
+    echo "Workdir: $(pwd)"
+    echo "nproc: $(nproc)"
+    echo "--- Full command ---"
+    printf '%q ' "${CMD[@]}"; echo
+    echo "--- BEGIN UCI I/O ---"
+  } > "$DEBUGFILE"
+
+  # Un único awk decide: si es línea de protocolo, la manda SOLO al .debug; lo demás va a consola y .log
+  stdbuf -oL -eL "${CMD[@]}" 2>&1 \
+    | awk -v dbg="$DEBUGFILE" '
+        function ts(   t,cmd){
+          cmd="date +\"%Y-%m-%d %H:%M:%S,%3N\" 2>/dev/null"
+          cmd|getline t
+          close(cmd)
+          return t
+        }
+        {
+          line=$0
+          # Formato de cutechess -debug: "NNN <engine>(idx): ..." ó "NNN >engine(idx): ..."
+          if (line ~ /^[[:space:]]*[0-9]+[[:space:]][<>]/) {
+            print ts(), line >> dbg
+            fflush(dbg)
+            next
+          }
+          print
+        }
+      ' | tee "$LOGFILE"
 else
-  CMD+=( -tournament round-robin )
+  "${CMD[@]}" 2>&1 | tee "$LOGFILE"
 fi
 
-set -x
-"${CMD[@]}" 2>&1 | tee "$LOGFILE"
-set +x
-
 # --- Produce standings + JSON from PGN ---
-# Parse PGN -> standings (console) + JSON without sed hacks (no trailing commas).
 awk -v json="$JSONFILE" -v pgn="$PGNFILE" '
-  BEGIN{
-    FS="\""; OFS="";
-  }
+  BEGIN{ FS="\""; OFS=""; }
   /^\[White "/ { white=$2 }
   /^\[Black "/ { black=$2 }
   /^\[Result "/{
@@ -244,7 +267,6 @@ awk -v json="$JSONFILE" -v pgn="$PGNFILE" '
     games[white]++; games[black]++
   }
   END{
-    # Console standings
     for(i=1;i<=ord;i++){
       n=order[i]
       p=(pts[n]+0)
@@ -252,8 +274,6 @@ awk -v json="$JSONFILE" -v pgn="$PGNFILE" '
       sc=(g>0)?(100.0*p/g):0
       printf "%-24s  Pts: %6.1f  W:%4d  D:%4d  L:%4d  G:%4d  Score: %6.1f%%\n", n, p, w, d, l, g, sc
     }
-
-    # Proper JSON output
     print "{" > json
     print "  \"meta\": {\"pgn\": \"" pgn "\"}," >> json
     print "  \"standings\": [" >> json
