@@ -227,8 +227,6 @@ void no_special_moves(const Position &pos, MoveList &moveList){
         }
         pieceBitboards &= pieceBitboards - 1;
     }
-
-
 }
 
 template<Color C>
@@ -274,7 +272,7 @@ void bishop_moves(const Position &pos, MoveList &moveList){
     Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, BISHOP);
     while (fromBitboard) {
         Square64 from{Bitboards::ctz(fromBitboard)};
-        Bitboard attacks = Attacks::sliding_diagonal_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
+        Bitboard attacks = Attacks::sliding_diagonal_attacks(from, pos.get_occupied_bitboard(COLOR_NC));
         Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
         
         if constexpr(MT == QUIET){
@@ -294,7 +292,7 @@ void rook_moves(const Position &pos, MoveList &moveList){
     Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, ROOK);
     while (fromBitboard) {
         Square64 from{Bitboards::ctz(fromBitboard)};
-        Bitboard attacks = Attacks::sliding_side_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
+        Bitboard attacks = Attacks::sliding_side_attacks(from, pos.get_occupied_bitboard(COLOR_NC));
         Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
         
         if constexpr(MT == QUIET){
@@ -314,8 +312,8 @@ void queen_moves(const Position &pos, MoveList &moveList){
     Bitboard fromBitboard = pos.get_pieceTypes_bitboard(C, QUEEN);
     while (fromBitboard) {
         Square64 from{Bitboards::ctz(fromBitboard)};
-        Bitboard attacks =   Attacks::sliding_diagonal_attacks(pos.get_occupied_bitboard(COLOR_NC), from)
-                           | Attacks::sliding_side_attacks(pos.get_occupied_bitboard(COLOR_NC), from);
+        Bitboard attacks =   Attacks::sliding_diagonal_attacks(from, pos.get_occupied_bitboard(COLOR_NC))
+                           | Attacks::sliding_side_attacks(from, pos.get_occupied_bitboard(COLOR_NC));
         Bitboard captureAttacks = pos.get_occupied_bitboard(~C) & attacks;
         
         if constexpr(MT == QUIET){
@@ -363,7 +361,6 @@ void extract_quiet_moves(Square64 from, Bitboard toBitboard, MoveList &moveList)
         toBitboard &= toBitboard - 1;
     }
 }
-
 
 template<Direction D, SpecialMove SM>
 void extract_capture_moves(const Position &pos, Bitboard toBitboard, MoveList &moveList){

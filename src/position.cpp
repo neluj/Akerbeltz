@@ -3,8 +3,7 @@
 
 #include <random>
 
-namespace Xake
-{
+namespace Xake{
 
 namespace Zobrist{
 
@@ -285,8 +284,8 @@ bool Position::square_is_attacked_bySide(Square64 sq64, Color side) const{
     return   (Attacks::pawnAttacks[~side][sq64] & pieceTypesBitboards[side][PAWN])
            | (Attacks::knightAttacks[sq64] & pieceTypesBitboards[side][KNIGHT])
            | (Attacks::kingAttacks[sq64] &  pieceTypesBitboards[side][KING])
-           | (Attacks::sliding_diagonal_attacks(occupiedBitboards[COLOR_NC], sq64) & (pieceTypesBitboards[side][BISHOP] | pieceTypesBitboards[side][QUEEN]))
-           | (Attacks::sliding_side_attacks(occupiedBitboards[COLOR_NC], sq64) & (pieceTypesBitboards[side][ROOK] | pieceTypesBitboards[side][QUEEN]));
+           | (Attacks::sliding_diagonal_attacks( sq64, occupiedBitboards[COLOR_NC]) & (pieceTypesBitboards[side][BISHOP] | pieceTypesBitboards[side][QUEEN]))
+           | (Attacks::sliding_side_attacks(sq64, occupiedBitboards[COLOR_NC]) & (pieceTypesBitboards[side][ROOK] | pieceTypesBitboards[side][QUEEN]));
 }
 
 

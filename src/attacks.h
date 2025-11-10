@@ -29,8 +29,8 @@ namespace Attacks {
     extern Bitboard kingAttacks[SQ64_SIZE];
     
     void init();
-    Bitboard sliding_side_attacks(Bitboard occupied,Square64 sq64);
-    Bitboard sliding_diagonal_attacks(Bitboard occupied,Square64 sq64);
+    Bitboard sliding_side_attacks(Square64 sq64, Bitboard occupied);
+    Bitboard sliding_diagonal_attacks(Square64 sq64, Bitboard occupied);
 };  
 
 } // namespace Xake
