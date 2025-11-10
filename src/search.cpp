@@ -76,7 +76,7 @@ void search(Position &position, SearchInfo &searchInfo){
 
     }
 
-    std::cout << "bestmove " << algebraic_move(bestMove) << "\n";
+    std::cout << "bestmove " << algebraic_move(bestMove) << std::endl;
 }
 
 
@@ -88,7 +88,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     ++searchInfo.nodes;
 
-    bool isCheck = position.square_is_attacked_bySide( Square64(Bitboards::ctz(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING))), ~position.get_side_to_move());
+    bool isCheck = position.square_is_attacked_bySide(Square64(Bitboards::ctz(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING))), ~position.get_side_to_move());
 
     if(isCheck){
         depth++;
