@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <vector>
 #include "position.h"
 #include "attacks.h"
 //TODO use gmock
@@ -21,6 +22,87 @@ class PositionTest : public ::testing::Test
     Position position;
     const std::string FEN_INIT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 };
+
+namespace {
+Evaluate::GamePhaseWeight manualPhaseWeight(const Position& pos) {
+    Evaluate::GamePhaseWeight total = 0;
+    for (Color color : {Color::WHITE, Color::BLACK}) {
+        for (int pt = PieceType::PAWN; pt <= PieceType::KING; ++pt) {
+            const auto pieceType = static_cast<PieceType>(pt);
+            Bitboard bitboard = pos.get_pieceTypes_bitboard(color, pieceType);
+            const Evaluate::GamePhaseWeight count = static_cast<Evaluate::GamePhaseWeight>(Bitboards::cpop(bitboard));
+            if (!count) continue;
+            const Piece piece = make_piece(color, pieceType);
+            total += count * Evaluate::PHASE_PIECE_WEIGHT[piece];
+        }
+    }
+    return total;
+}
+}
+
+TEST_F(PositionTest, GamePhaseWeightMatchesManualCount) {
+    const std::vector<std::string> fens = {
+        FEN_INIT_POSITION,
+        "4k3/8/8/8/8/8/8/4K3 w - - 0 1",
+        "rnbq1bnr/pppp1ppp/8/4p3/8/8/PPPPPPPP/RNBQKBNR b KQ - 0 3",
+        "4k3/8/8/8/4P3/4N3/4R3/4K3 w - - 12 37"
+    };
+
+    for (const auto& fen : fens) {
+        position.set_FEN(fen);
+        const auto expected = manualPhaseWeight(position);
+        EXPECT_EQ(position.game_phase_weight(), expected) << "FEN: " << fen;
+    }
+}
+
+TEST_F(PositionTest, GamePhaseWeightUpdatesOnAddRemove) {
+    const std::string baseFen = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
+    position.set_FEN(baseFen);
+    Evaluate::GamePhaseWeight expected = manualPhaseWeight(position);
+    EXPECT_EQ(position.game_phase_weight(), expected);
+
+    position.add_piece(SQ64_A1, Piece::W_ROOK);
+    expected += Evaluate::PHASE_PIECE_WEIGHT[Piece::W_ROOK];
+    EXPECT_EQ(position.game_phase_weight(), expected);
+    EXPECT_EQ(position.game_phase_weight(), manualPhaseWeight(position));
+
+    position.add_piece(SQ64_H8, Piece::B_QUEEN);
+    expected += Evaluate::PHASE_PIECE_WEIGHT[Piece::B_QUEEN];
+    EXPECT_EQ(position.game_phase_weight(), expected);
+    EXPECT_EQ(position.game_phase_weight(), manualPhaseWeight(position));
+
+    position.remove_piece(SQ64_A1);
+    expected -= Evaluate::PHASE_PIECE_WEIGHT[Piece::W_ROOK];
+    EXPECT_EQ(position.game_phase_weight(), expected);
+    EXPECT_EQ(position.game_phase_weight(), manualPhaseWeight(position));
+
+    position.remove_piece(SQ64_H8);
+    expected -= Evaluate::PHASE_PIECE_WEIGHT[Piece::B_QUEEN];
+    EXPECT_EQ(position.game_phase_weight(), expected);
+    EXPECT_EQ(position.game_phase_weight(), manualPhaseWeight(position));
+}
+
+TEST_F(PositionTest, GamePhaseWeightAndEndgameToggleOnCapture) {
+    const std::string fen = "4k3/8/8/8/3b4/8/3R4/3QK3 w - - 0 1";
+    position.set_FEN(fen);
+    Evaluate::GamePhaseWeight expected = manualPhaseWeight(position);
+    ASSERT_FALSE(position.is_endgame_phase());
+    ASSERT_EQ(position.game_phase_weight(), expected);
+
+    Move capture = make_capture_move(SQ64_D2, SQ64_D4, SpecialMove::NO_SPECIAL, Piece::W_ROOK, Piece::B_BISHOP);
+    ASSERT_TRUE(position.do_move(capture));
+
+    expected -= Evaluate::PHASE_PIECE_WEIGHT[Piece::B_BISHOP];
+    EXPECT_EQ(position.game_phase_weight(), expected);
+    EXPECT_EQ(position.game_phase_weight(), manualPhaseWeight(position));
+    EXPECT_TRUE(position.is_endgame_phase());
+
+    position.undo_move();
+    expected += Evaluate::PHASE_PIECE_WEIGHT[Piece::B_BISHOP];
+    EXPECT_EQ(position.game_phase_weight(), expected);
+    EXPECT_EQ(position.game_phase_weight(), manualPhaseWeight(position));
+    EXPECT_FALSE(position.is_endgame_phase());
+}
 
 TEST_F(PositionTest, RandomSetPosition){
     const std::string RANDOM_FEN_POSITION = "rnbqk3/PPpBpppP/8/1Q2N3/8/7K/R15p/8 w KQkq c3 34 1";

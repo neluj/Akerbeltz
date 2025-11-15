@@ -14,7 +14,17 @@ namespace Evaluate{
     using Score = int;
     using GamePhaseWeight = int;
 
-    constexpr Score CHECKMATE_SCORE = 30000;
+    inline constexpr GamePhaseWeight MAX_PHASE_PIECE_WEIGHT = 24;
+    inline constexpr GamePhaseWeight ENDGAME_PHASE_THRESHOLD = 6;
+    inline constexpr GamePhaseWeight PHASE_PIECE_WEIGHT[Piece::PIECE_SIZE] = {
+        /*NO*/ 0,
+        /*W_P*/ 0, /*W_N*/1, /*W_B*/1, /*W_R*/2, /*W_Q*/4, /*W_K*/0,
+        /*gap*/ 0, 0,
+        /*B_P*/ 0, /*B_N*/1, /*B_B*/1, /*B_R*/2, /*B_Q*/4, /*B_K*/0,
+        /*gap*/ 0
+    };
+
+    constexpr Score CHECKMATE_SCORE = 900000;
     constexpr Score DRAW_SOCORE = 0;
 
     void init();

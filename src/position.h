@@ -16,6 +16,7 @@ namespace Xake{
         unsigned short int movesCounter;
         Square64 enpassantSquare;
         Key positionKey;
+        Evaluate::GamePhaseWeight phaseWeight;
     };
 
 class Position{
@@ -37,13 +38,17 @@ public:
     Key get_key() const;
     bool square_is_attacked_bySide(Square64 square, Color side) const; 
     bool is_repetition() const;
+    Evaluate::GamePhaseWeight game_phase_weight() const;
+    bool is_endgame_phase() const;
 
     //Move related functions
     bool do_move(Move move);
     void undo_move();
     void move_piece(Square64 from, Square64 to);
     void remove_piece(Square64 square);
-    void add_piece(Square64 square, Piece piece);    
+    void add_piece(Square64 square, Piece piece);
+    void do_null_move();
+    void undo_null_move();    
 
 private:
 
@@ -96,6 +101,12 @@ inline Bitboard Position::get_occupied_bitboard(Color color) const{
 }
 inline Key Position::get_key() const{
     return moveHistory[ply-1].positionKey;
+}
+inline Evaluate::GamePhaseWeight Position::game_phase_weight() const{
+    return moveHistory[ply-1].phaseWeight;
+}
+inline bool Position::is_endgame_phase() const{
+    return game_phase_weight() <= Evaluate::ENDGAME_PHASE_THRESHOLD;
 }
 
 

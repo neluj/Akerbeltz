@@ -23,7 +23,7 @@ MoveScore searchHistory[PIECE_SIZE][SQ64_SIZE];
 
 void perft(Position &position, DepthSize depth);
 
-Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth);
+Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth, bool nullMovePrune);
 Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta);
 void clean_search_info(SearchInfo &searchInfo);
 void pick_move(int moveIndx, MoveGen::MoveList &moveList);
@@ -48,7 +48,7 @@ void search(Position &position, SearchInfo &searchInfo){
 
         const TimeManager::Ms iterStartMs = searchInfo.timeManager.elapsed_ms();
 
-        bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth);
+        bestMoveScore = alpha_beta(position, searchInfo, -CHECKMATE_SCORE, CHECKMATE_SCORE, currentDepth, true);
 
         //Necessary for avoid loading partially calculated pv line
         if (searchInfo.timeManager.out_of_time() || searchInfo.stop) {
@@ -80,7 +80,7 @@ void search(Position &position, SearchInfo &searchInfo){
 }
 
 
-Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth){
+Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth, bool nullMovePrune){
 
     if (is_draw(position, searchInfo)) { return DRAW_SOCORE; }
 
@@ -92,6 +92,27 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     if(isCheck){
         depth++;
+    }
+    else if (nullMovePrune && depth >= 3 && !position.is_endgame_phase()) {
+
+        const DepthSize R = 2; 
+
+        position.do_null_move();
+        ++searchInfo.searchPly;
+
+        Score nullScore = -alpha_beta(position,
+                                      searchInfo,
+                                      -beta,
+                                      -beta + 1,
+                                      depth - 1 - R,
+                                      false);
+
+        position.undo_null_move();
+        --searchInfo.searchPly;
+
+        if (nullScore >= beta) {
+            return beta;
+        }
     }
 
     MoveGen::MoveList moveList;
@@ -135,7 +156,7 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         ++searchInfo.searchPly;
         ++legalMoves;
         
-        score = -alpha_beta(position, searchInfo, -beta, -alpha, depth - 1);
+        score = -alpha_beta(position, searchInfo, -beta, -alpha, depth - 1, true);
         position.undo_move();
         --searchInfo.searchPly;
 

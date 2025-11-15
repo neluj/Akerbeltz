@@ -15,16 +15,6 @@ static Bitboard PASSED_MASKS[COLOR_SIZE][SQ64_SIZE];
 static Score MG_PST[PIECE_SIZE][SQ64_SIZE];
 static Score EG_PST[PIECE_SIZE][SQ64_SIZE];
 
-// Peso de fase por pieza (similar a V140)
-constexpr int PHASE_PIECE_WEIGHT[PIECE_SIZE] = {
-/*NO*/ 0,
-/*W_P*/ 0, /*W_N*/1, /*W_B*/1, /*W_R*/2, /*W_Q*/4, /*W_K*/0,
-/*gap*/ 0, 0,
-/*B_P*/ 0, /*B_N*/1, /*B_B*/1, /*B_R*/2, /*B_Q*/4, /*B_K*/0,
-/*gap*/ 0
-};
-constexpr Score MAX_PHASE_PIECE_WEIGHT = 24;
-
 // ---------- Material base MG/EG (escala compacta, segura) ----------
 constexpr Score MG_PIECE[PIECETYPE_SIZE] = { 0, 100, 325, 330, 500, 975, 0 };
 constexpr Score EG_PIECE[PIECETYPE_SIZE] = { 0, 100, 320, 330, 510, 975, 0 };
@@ -32,146 +22,152 @@ constexpr Score EG_PIECE[PIECETYPE_SIZE] = { 0, 100, 320, 330, 510, 975, 0 };
 // ---------- PSQT MG/EG (64 c/u, base sólida, “tuned-friendly”) ----------
 // Notación: tablas para BLANCAS. Para NEGRAS se hace flip(sq).
 // Peón
-static const Score MG_PAWN[64] = {
-   0,  0,  0,  0,  0,  0,  0,  0,
- -10,  2, -6,-10, -8, 12, 16,-12,
- -12, -4, -2, -4,  4,  6, 14, -8,
- -10, -4,  0, 10, 12,  6,  8, -8,
-  -6,  8,  6, 12, 14,  8, 10, -8,
-  -2,  6, 16, 22, 32, 24, 12, -6,
-  10, 18, 10, 22, 16, 26,  8, -2,
-   0,  0,  0,  0,  0,  0,  0,  0,
-};
-static const Score EG_PAWN[64] = {
-   0,  0,  0,  0,  0,  0,  0,  0,
-   8,  6,  6,  8, 10,  2,  2, -4,
-   2,  6, -2,  2,  2, -2,  0, -6,
-  10,  8,  0, -2, -2, -2,  4,  0,
-  20, 16,  8,  4,  0,  6, 14, 14,
-  70, 78, 66, 54, 46, 46, 70, 72,
- 150,145,130,115,125,115,140,155,
-   0,  0,  0,  0,  0,  0,  0,  0,
+static constexpr int MG_PAWN[64] = {
+     0,  0,  0,  0,  0,  0,  0,  0,
+     5, 10, 10,-20,-20, 10, 10,  5,
+     5, -5,-10,  0,  0,-10, -5,  5,
+     0,  0,  0, 20, 20,  0,  0,  0,
+     5,  5, 10, 25, 25, 10,  5,  5,
+    10, 10, 20, 30, 30, 20, 10, 10,
+    50, 50, 50, 50, 50, 50, 50, 50,
+     0,  0,  0,  0,  0,  0,  0,  0
 };
 
-// Caballo
-static const Score MG_KNIGHT[64] = {
- -80,-30,-40,-30,-30,-40,-30,-80,
- -30, -5, -5,  0,  0, -5, -5,-30,
- -25,  0, 10, 12, 12, 10,  0,-20,
- -20,  0, 12, 20, 20, 12,  0,-20,
- -20,  0, 12, 20, 20, 12,  0,-20,
- -25,  0, 10, 12, 12, 10,  0,-20,
- -30, -5, -5,  0,  0, -5, -5,-30,
- -80,-30,-40,-30,-30,-40,-30,-80,
-};
-static const Score EG_KNIGHT[64] = {
- -60,-40,-35,-30,-30,-35,-40,-60,
- -35,-25,-15, -8, -8,-15,-25,-35,
- -30,-15,  0,  4,  4,  0,-15,-30,
- -28,-10,  4, 10, 10,  4,-10,-28,
- -28,-10,  4, 10, 10,  4,-10,-28,
- -30,-15,  0,  4,  4,  0,-15,-30,
- -35,-25,-15, -8, -8,-15,-25,-35,
- -60,-40,-35,-30,-30,-35,-40,-60,
+static constexpr int EG_PAWN[64] = {
+     0,  0,  0,  0,  0,  0,  0,  0,
+    10, 10, 10, 10, 10, 10, 10, 10,
+     5,  5, 10, 15, 15, 10,  5,  5,
+     0,  0,  0, 20, 20,  0,  0,  0,
+     5,  5, 10, 25, 25, 10,  5,  5,
+    10, 10, 20, 30, 30, 20, 10, 10,
+    35, 35, 35, 35, 35, 35, 35, 35,
+     0,  0,  0,  0,  0,  0,  0,  0
 };
 
-// Alfil
-static const Score MG_BISHOP[64] = {
- -30,-10,-15,-12,-12,-15,-10,-30,
-  -8,  4,  4,  6,  6,  8,  4, -6,
-  -8,  6,  8, 10, 10, 12,  6, -4,
-  -6, 10, 10, 16, 18, 12, 10, -4,
-  -6,  8, 10, 18, 20, 14,  8, -6,
- -10,  6, 10, 12, 12, 14,  6,-12,
- -14, -8, -4, -2, -2, -4, -8,-14,
- -22,-10,-12,-12,-12,-12,-10,-22,
-};
-static const Score EG_BISHOP[64] = {
- -22,-12,-10, -8, -8,-10,-12,-22,
- -10,  2,  4,  6,  6,  4,  2, -8,
-  -8,  4,  8, 10, 10,  8,  4, -6,
-  -6,  8, 10, 12, 12, 10,  8, -6,
-  -6,  8, 10, 12, 12, 10,  8, -6,
-  -8,  4,  8, 10, 10,  8,  4, -6,
- -10,  2,  4,  6,  6,  4,  2, -8,
- -22,-12,-10, -8, -8,-10,-12,-22,
+// KNIGHT
+static constexpr int MG_KNIGHT[64] = {
+   -50,-40,-30,-30,-30,-30,-40,-50,
+   -40,-20,  0,  0,  0,  0,-20,-40,
+   -30,  0, 10, 15, 15, 10,  0,-30,
+   -30,  5, 15, 20, 20, 15,  5,-30,
+   -30,  0, 15, 20, 20, 15,  0,-30,
+   -30,  5, 10, 15, 15, 10,  5,-30,
+   -40,-20,  0,  5,  5,  0,-20,-40,
+   -50,-40,-30,-30,-30,-30,-40,-50
 };
 
-// Torre
-static const Score MG_ROOK[64] = {
- -10, -8, -6, -4, -4, -6, -8,-10,
-  -6, -2,  0,  2,  2,  0, -2, -6,
-  -6,  0,  2,  4,  4,  2,  0, -6,
-  -6,  0,  4,  6,  6,  4,  0, -6,
-  -6,  0,  4,  6,  6,  4,  0, -6,
-  -6,  0,  2,  4,  4,  2,  0, -6,
-  -6, -2,  0,  2,  2,  0, -2, -6,
- -10, -8, -6, -4, -4, -6, -8,-10,
-};
-static const Score EG_ROOK[64] = {
- -10, -8, -6, -4, -4, -6, -8,-10,
-  -6, -2,  0,  2,  2,  0, -2, -6,
-  -6,  0,  2,  4,  4,  2,  0, -6,
-  -6,  0,  4,  6,  6,  4,  0, -6,
-  -6,  0,  4,  6,  6,  4,  0, -6,
-  -6,  0,  2,  4,  4,  2,  0, -6,
-  -6, -2,  0,  2,  2,  0, -2, -6,
- -10, -8, -6, -4, -4, -6, -8,-10,
+static constexpr int EG_KNIGHT[64] = {
+   -50,-40,-30,-30,-30,-30,-40,-50,
+   -40,-20,  0,  5,  5,  0,-20,-40,
+   -30,  0, 15, 15, 15, 15,  0,-30,
+   -30,  5, 15, 20, 20, 15,  5,-30,
+   -30,  0, 15, 20, 20, 15,  0,-30,
+   -30,  5, 10, 15, 15, 10,  5,-30,
+   -40,-20,  0,  5,  5,  0,-20,-40,
+   -50,-40,-30,-30,-30,-30,-40,-50
 };
 
-// Dama (PST contenida; el valor viene del material)
-static const Score MG_QUEEN[64] = {
- -12,-10, -8, -6, -6, -8,-10,-12,
-  -8, -6, -2,  0,  0, -2, -6, -8,
-  -8, -2,  2,  4,  4,  2, -2, -8,
-  -6,  0,  4,  8,  8,  4,  0, -6,
-  -6,  0,  4,  8,  8,  4,  0, -6,
-  -8, -2,  2,  4,  4,  2, -2, -8,
-  -8, -6, -2,  0,  0, -2, -6, -8,
- -12,-10, -8, -6, -6, -8,-10,-12,
-};
-static const Score EG_QUEEN[64] = {
- -12,-10, -8, -6, -6, -8,-10,-12,
-  -8, -6, -2,  0,  0, -2, -6, -8,
-  -8, -2,  2,  4,  4,  2, -2, -8,
-  -6,  0,  4,  8,  8,  4,  0, -6,
-  -6,  0,  4,  8,  8,  4,  0, -6,
-  -8, -2,  2,  4,  4,  2, -2, -8,
-  -8, -6, -2,  0,  0, -2, -6, -8,
- -12,-10, -8, -6, -6, -8,-10,-12,
+// BISHOP
+static constexpr int MG_BISHOP[64] = {
+   -20,-10,-10,-10,-10,-10,-10,-20,
+   -10,  5,  0,  0,  0,  0,  5,-10,
+   -10, 10, 10, 10, 10, 10, 10,-10,
+   -10,  0, 10, 10, 10, 10,  0,-10,
+   -10,  5,  5, 10, 10,  5,  5,-10,
+   -10,  0,  5, 10, 10,  5,  0,-10,
+   -10,  0,  0,  0,  0,  0,  0,-10,
+   -20,-10,-10,-10,-10,-10,-10,-20
 };
 
-// Rey
-static const Score MG_KING[64] = {
- -30,-40,-40,-50,-50,-40,-40,-30,
- -30,-40,-45,-55,-55,-45,-40,-30,
- -30,-38,-50,-60,-60,-50,-38,-30,
- -25,-30,-40,-55,-55,-40,-30,-25,
- -20,-20,-30,-40,-40,-30,-20,-20,
- -10,-10,-20,-25,-25,-20,-10,-10,
-  10, 10,  0, -5, -5,  0, 10, 10,
-  30, 40, 30,  5,  0, 10, 40, 30,
+static constexpr int EG_BISHOP[64] = {
+   -10,-10,-10,-10,-10,-10,-10,-10,
+   -10,  0,  0,  0,  0,  0,  0,-10,
+   -10, 10, 10, 10, 10, 10, 10,-10,
+   -10,  0, 10, 15, 15, 10,  0,-10,
+   -10,  5,  5, 15, 15,  5,  5,-10,
+   -10,  0,  5, 10, 10,  5,  0,-10,
+   -10,  0,  0,  0,  0,  0,  0,-10,
+   -10,-10,-10,-10,-10,-10,-10,-10
 };
-static const Score EG_KING[64] = {
- -40,-30,-20,-10,-10,-20,-30,-40,
- -30,-10,  0, 10, 10,  0,-10,-30,
- -20,  0, 15, 25, 25, 15,  0,-20,
- -10, 10, 25, 35, 35, 25, 10,-10,
- -10, 10, 25, 35, 35, 25, 10,-10,
- -20,  0, 15, 25, 25, 15,  0,-20,
- -30,-10,  0, 10, 10,  0,-10,-30,
- -40,-30,-20,-10,-10,-20,-30,-40,
+
+// ROOK
+static constexpr int MG_ROOK[64] = {
+     0,  0,  5, 10, 10,  5,  0,  0,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+     5, 10, 10, 10, 10, 10, 10,  5,
+     0,  0,  0,  0,  0,  0,  0,  0
+};
+
+static constexpr int EG_ROOK[64] = {
+     0,  0,  5, 10, 10,  5,  0,  0,
+     0,  5,  5,  5,  5,  5,  5,  0,
+     0,  5, 10, 10, 10, 10,  5,  0,
+     0,  5, 10, 15, 15, 10,  5,  0,
+     0,  5, 10, 15, 15, 10,  5,  0,
+     0,  5, 10, 10, 10, 10,  5,  0,
+     0,  5,  5,  5,  5,  5,  5,  0,
+     0,  0,  0,  0,  0,  0,  0,  0
+};
+
+// QUEEN (muy suave, la afinaremos más adelante)
+static constexpr int MG_QUEEN[64] = {
+   -10,-10,-10, -5, -5,-10,-10,-10,
+   -10,  0,  0,  0,  0,  0,  0,-10,
+   -10,  0,  5,  5,  5,  5,  0,-10,
+    -5,  0,  5,  5,  5,  5,  0, -5,
+     0,  0,  5,  5,  5,  5,  0, -5,
+   -10,  5,  5,  5,  5,  5,  0,-10,
+   -10,  0,  5,  0,  0,  0,  0,-10,
+   -10,-10,-10, -5, -5,-10,-10,-10
+};
+
+static constexpr int EG_QUEEN[64] = {
+   -10,-10,-10, -5, -5,-10,-10,-10,
+   -10,  0,  0,  0,  0,  0,  0,-10,
+   -10,  0,  5,  5,  5,  5,  0,-10,
+    -5,  0,  5,  5,  5,  5,  0, -5,
+     0,  0,  5,  5,  5,  5,  0, -5,
+   -10,  5,  5,  5,  5,  5,  0,-10,
+   -10,  0,  5,  0,  0,  0,  0,-10,
+   -10,-10,-10, -5, -5,-10,-10,-10
+};
+
+// KING
+static constexpr int MG_KING[64] = {
+   -30,-40,-40,-50,-50,-40,-40,-30,
+   -30,-40,-40,-50,-50,-40,-40,-30,
+   -30,-40,-40,-50,-50,-40,-40,-30,
+   -30,-40,-40,-50,-50,-40,-40,-30,
+   -20,-30,-30,-40,-40,-30,-30,-20,
+   -10,-20,-20,-20,-20,-20,-20,-10,
+    20, 20,  0,  0,  0,  0, 20, 20,
+    20, 30, 10,  0,  0, 10, 30, 20
+};
+
+static constexpr int EG_KING[64] = {
+   -50,-40,-30,-20,-20,-30,-40,-50,
+   -30,-20,-10,  0,  0,-10,-20,-30,
+   -30,-10, 20, 30, 30, 20,-10,-30,
+   -30,-10, 30, 40, 40, 30,-10,-30,
+   -30,-10, 30, 40, 40, 30,-10,-30,
+   -30,-10, 20, 30, 30, 20,-10,-30,
+   -30,-30,  0,  0,  0,  0,-30,-30,
+   -50,-30,-30,-30,-30,-30,-30,-50
 };
 
 // ---------- Estructura de peones ----------
 // Penalización peón aislado (MG/EG) — moderada y segura en escala de 100
-constexpr Score ISOLATED_PAWN_PENALTY_MG = -10;
-constexpr Score ISOLATED_PAWN_PENALTY_EG = -18;
+constexpr Score ISOLATED_PAWN_PENALTY_MG = -12;
+constexpr Score ISOLATED_PAWN_PENALTY_EG = -6;
 
 // Bonus peón pasado por rango (1..7; 8=coronación)
 // MG: conservador; EG: más fuerte (principal fuerza aquí)
-static const Score PASSED_MG[8] = { 0, 0,  4, 10, 20, 36, 60, 0 };
-static const Score PASSED_EG[8] = { 0, 0,  8, 18, 34, 60,100, 0 };
+static const Score PASSED_MG[8] = { 0, 0,  6, 14, 26, 42, 70, 0 };
+static const Score PASSED_EG[8] = { 0, 2, 10, 22, 38, 60, 95, 0 };
 
 // Descuentos contextuales
 constexpr int PASSED_BLOCKED_NUM = 1;   // ×1/4 si bloqueado
@@ -278,7 +274,7 @@ Score calc_score(const Position& pos) {
     // Peones
     Bitboard wp = pos.get_pieceTypes_bitboard(WHITE, PAWN);
     while (wp) {
-        Square64 s{ __builtin_ctzll(wp) };
+        Square64 s{ Bitboards::ctz(wp) };
         mg[WHITE] += MG_PST[Piece::W_PAWN][s];
         eg[WHITE] += EG_PST[Piece::W_PAWN][s];
         phase += PHASE_PIECE_WEIGHT[Piece::W_PAWN];
@@ -286,7 +282,7 @@ Score calc_score(const Position& pos) {
     }
     Bitboard bp = pos.get_pieceTypes_bitboard(BLACK, PAWN);
     while (bp) {
-        Square64 s{ __builtin_ctzll(bp) };
+        Square64 s{ Bitboards::ctz(bp) };
         mg[BLACK] += MG_PST[Piece::B_PAWN][s];
         eg[BLACK] += EG_PST[Piece::B_PAWN][s];
         phase += PHASE_PIECE_WEIGHT[Piece::B_PAWN];
@@ -296,7 +292,7 @@ Score calc_score(const Position& pos) {
     // Caballos
     Bitboard wn = pos.get_pieceTypes_bitboard(WHITE, KNIGHT);
     while (wn) {
-        Square64 s{ __builtin_ctzll(wn) };
+        Square64 s{ Bitboards::ctz(wn) };
         mg[WHITE] += MG_PST[Piece::W_KNIGHT][s];
         eg[WHITE] += EG_PST[Piece::W_KNIGHT][s];
         phase += PHASE_PIECE_WEIGHT[Piece::W_KNIGHT];
@@ -304,7 +300,7 @@ Score calc_score(const Position& pos) {
     }
     Bitboard bn = pos.get_pieceTypes_bitboard(BLACK, KNIGHT);
     while (bn) {
-        Square64 s{ __builtin_ctzll(bn) };
+        Square64 s{ Bitboards::ctz(bn) };
         mg[BLACK] += MG_PST[Piece::B_KNIGHT][s];
         eg[BLACK] += EG_PST[Piece::B_KNIGHT][s];
         phase += PHASE_PIECE_WEIGHT[Piece::B_KNIGHT];
@@ -314,7 +310,7 @@ Score calc_score(const Position& pos) {
     // Alfiles
     Bitboard wb = pos.get_pieceTypes_bitboard(WHITE, BISHOP);
     while (wb) {
-        Square64 s{ __builtin_ctzll(wb) };
+        Square64 s{ Bitboards::ctz(wb) };
         mg[WHITE] += MG_PST[Piece::W_BISHOP][s];
         eg[WHITE] += EG_PST[Piece::W_BISHOP][s];
         phase += PHASE_PIECE_WEIGHT[Piece::W_BISHOP];
@@ -322,7 +318,7 @@ Score calc_score(const Position& pos) {
     }
     Bitboard bb = pos.get_pieceTypes_bitboard(BLACK, BISHOP);
     while (bb) {
-        Square64 s{ __builtin_ctzll(bb) };
+        Square64 s{ Bitboards::ctz(bb) };
         mg[BLACK] += MG_PST[Piece::B_BISHOP][s];
         eg[BLACK] += EG_PST[Piece::B_BISHOP][s];
         phase += PHASE_PIECE_WEIGHT[Piece::B_BISHOP];
@@ -332,7 +328,7 @@ Score calc_score(const Position& pos) {
     // Torres
     Bitboard wr = pos.get_pieceTypes_bitboard(WHITE, ROOK);
     while (wr) {
-        Square64 s{ __builtin_ctzll(wr) };
+        Square64 s{ Bitboards::ctz(wr) };
         mg[WHITE] += MG_PST[Piece::W_ROOK][s];
         eg[WHITE] += EG_PST[Piece::W_ROOK][s];
         phase += PHASE_PIECE_WEIGHT[Piece::W_ROOK];
@@ -340,7 +336,7 @@ Score calc_score(const Position& pos) {
     }
     Bitboard br = pos.get_pieceTypes_bitboard(BLACK, ROOK);
     while (br) {
-        Square64 s{ __builtin_ctzll(br) };
+        Square64 s{ Bitboards::ctz(br) };
         mg[BLACK] += MG_PST[Piece::B_ROOK][s];
         eg[BLACK] += EG_PST[Piece::B_ROOK][s];
         phase += PHASE_PIECE_WEIGHT[Piece::B_ROOK];
@@ -350,7 +346,7 @@ Score calc_score(const Position& pos) {
     // Damas
     Bitboard wq = pos.get_pieceTypes_bitboard(WHITE, QUEEN);
     while (wq) {
-        Square64 s{ __builtin_ctzll(wq) };
+        Square64 s{ Bitboards::ctz(wq) };
         mg[WHITE] += MG_PST[Piece::W_QUEEN][s];
         eg[WHITE] += EG_PST[Piece::W_QUEEN][s];
         phase += PHASE_PIECE_WEIGHT[Piece::W_QUEEN];
@@ -358,7 +354,7 @@ Score calc_score(const Position& pos) {
     }
     Bitboard bq = pos.get_pieceTypes_bitboard(BLACK, QUEEN);
     while (bq) {
-        Square64 s{ __builtin_ctzll(bq) };
+        Square64 s{ Bitboards::ctz(bq) };
         mg[BLACK] += MG_PST[Piece::B_QUEEN][s];
         eg[BLACK] += EG_PST[Piece::B_QUEEN][s];
         phase += PHASE_PIECE_WEIGHT[Piece::B_QUEEN];
@@ -368,14 +364,14 @@ Score calc_score(const Position& pos) {
     // Reyes
     Bitboard wk = pos.get_pieceTypes_bitboard(WHITE, KING);
     while (wk) {
-        Square64 s{ __builtin_ctzll(wk) };
+        Square64 s{ Bitboards::ctz(wk) };
         mg[WHITE] += MG_PST[Piece::W_KING][s];
         eg[WHITE] += EG_PST[Piece::W_KING][s];
         wk &= wk - 1;
     }
     Bitboard bk = pos.get_pieceTypes_bitboard(BLACK, KING);
     while (bk) {
-        Square64 s{ __builtin_ctzll(bk) };
+        Square64 s{ Bitboards::ctz(bk) };
         mg[BLACK] += MG_PST[Piece::B_KING][s];
         eg[BLACK] += EG_PST[Piece::B_KING][s];
         bk &= bk - 1;
@@ -383,14 +379,14 @@ Score calc_score(const Position& pos) {
 
     // --- Estructura de peones: aislados + pasados ---
     // Precalcula bitboards de peones por color
-    Bitboard WP = pos.get_pieceTypes_bitboard(WHITE, PAWN);
-    Bitboard BP = pos.get_pieceTypes_bitboard(BLACK, PAWN);
+    //Bitboard WP = pos.get_pieceTypes_bitboard(WHITE, PAWN);
+    //Bitboard BP = pos.get_pieceTypes_bitboard(BLACK, PAWN);
 
-    // Aislados (no hay peón propio en columnas adyacentes)
+/*     // Aislados (no hay peón propio en columnas adyacentes)
     Bitboard wIso = 0ULL, bIso = 0ULL;
     Bitboard tmp = WP;
     while (tmp) {
-        Square64 s{ __builtin_ctzll(tmp) };
+        Square64 s{ Bitboards::ctz(tmp) };
         Bitboard sameFileAdj = ISOLATED_MASKS[s] & WP;
         if (!sameFileAdj) {
             mg[WHITE] += ISOLATED_PAWN_PENALTY_MG;
@@ -401,7 +397,7 @@ Score calc_score(const Position& pos) {
     }
     tmp = BP;
     while (tmp) {
-        Square64 s{ __builtin_ctzll(tmp) };
+        Square64 s{ Bitboards::ctz(tmp) };
         Bitboard sameFileAdj = ISOLATED_MASKS[s] & BP;
         if (!sameFileAdj) {
             mg[BLACK] += ISOLATED_PAWN_PENALTY_MG;
@@ -409,23 +405,23 @@ Score calc_score(const Position& pos) {
             bIso |= (1ULL << s);
         }
         tmp &= tmp - 1;
-    }
+    } */
 
     // Pasados: no hay peones rivales por delante en misma/adyacentes
-    tmp = WP;
+/*     tmp = WP;
     Bitboard occ = pos.get_occupied_bitboard(WHITE) | pos.get_occupied_bitboard(BLACK);
     while (tmp) {
-        Square64 s{ __builtin_ctzll(tmp) };
+        Square64 s{ Bitboards::ctz(tmp) };
         if ((PASSED_MASKS[WHITE][s] & BP) == 0ULL) {
             int rank = (s >> 3) + 1; // 1..8
             Score addMG = PASSED_MG[rank];
             Score addEG = PASSED_EG[rank];
 
             // Descuento si bloqueado
-            int aheadSq = s + 8; // casilla delante
-            bool blocked = (aheadSq < 64) && ((occ & (1ULL << aheadSq)) != 0);
-            if (blocked) { addMG = addMG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN;
-                           addEG = addEG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN; }
+            //int aheadSq = s + 8; // casilla delante
+            //bool blocked = (aheadSq < 64) && ((occ & (1ULL << aheadSq)) != 0);
+            //if (blocked) { addMG = addMG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN;
+            //               addEG = addEG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN; }
 
             // Descuento si la casilla delante está controlada por rival (si tienes attacks_to)
             // if (pos.square_attacked_by(BLACK, aheadSq)) {
@@ -440,17 +436,17 @@ Score calc_score(const Position& pos) {
     }
     tmp = BP;
     while (tmp) {
-        Square64 s{ __builtin_ctzll(tmp) };
+        Square64 s{ Bitboards::ctz(tmp) };
         if ((PASSED_MASKS[BLACK][s] & WP) == 0ULL) {
             int rankFromWhite = (s >> 3) + 1;           // 1..8
             int rankFromBlack = 9 - rankFromWhite;      // 1..8 relativo a negras
             Score addMG = PASSED_MG[rankFromBlack];
             Score addEG = PASSED_EG[rankFromBlack];
 
-            int aheadSq = s - 8;
-            bool blocked = (aheadSq >= 0) && ((occ & (1ULL << aheadSq)) != 0);
-            if (blocked) { addMG = addMG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN;
-                           addEG = addEG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN; }
+            //int aheadSq = s - 8;
+            //bool blocked = (aheadSq >= 0) && ((occ & (1ULL << aheadSq)) != 0);
+            //if (blocked) { addMG = addMG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN;
+            //               addEG = addEG * PASSED_BLOCKED_NUM / PASSED_BLOCKED_DEN; }
 
             // if (pos.square_attacked_by(WHITE, aheadSq)) {
             //     addMG = addMG * PASSED_UNSAFE_NUM / PASSED_UNSAFE_DEN;
@@ -461,7 +457,7 @@ Score calc_score(const Position& pos) {
             eg[BLACK] += addEG;
         }
         tmp &= tmp - 1;
-    }
+    } */
 
     // --- Mezcla MG/EG y devuelve relativo al lado al mover ---
     Color stm = pos.get_side_to_move();

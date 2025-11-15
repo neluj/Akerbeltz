@@ -75,6 +75,7 @@ void Position::clear_position_info(){
     moveHistory[ply-1].movesCounter = 1;
     moveHistory[ply-1].enpassantSquare = SQ64_NO_SQUARE;
     moveHistory[ply-1].positionKey = 0;
+    moveHistory[ply-1].phaseWeight = 0;
 
 }
 
@@ -300,6 +301,7 @@ bool Position::do_move(Move move){
 
     ++ply;
     moveHistory[ply-1].positionKey = moveHistory[ply-2].positionKey;
+    moveHistory[ply-1].phaseWeight = moveHistory[ply-2].phaseWeight;
     moveHistory[ply-1].positionKey ^= Zobrist::castlingRight[moveHistory[ply-2].castlingRight];
 
     if(specialMove != SpecialMove::NO_SPECIAL){
@@ -459,6 +461,7 @@ void Position::undo_move(){
     moveHistory[ply-1].movesCounter = 0;
     moveHistory[ply-1].enpassantSquare = Square64::SQ64_NO_SQUARE;
     moveHistory[ply-1].positionKey = 0;
+    moveHistory[ply-1].phaseWeight = 0;
 
     --ply;
 
@@ -492,6 +495,7 @@ void Position::remove_piece(Square64 square){
     mailbox[square] = NO_PIECE;
     Color pieceColor = piece_color(piece);
     PieceType pieceType = piece_type(piece);
+    moveHistory[ply-1].phaseWeight -= Evaluate::PHASE_PIECE_WEIGHT[piece];
 
     pieceTypesBitboards[pieceColor][pieceType] = Bitboards::clear_pieces(pieceTypesBitboards[pieceColor][pieceType], square);
     occupiedBitboards[pieceColor] = Bitboards::clear_pieces(occupiedBitboards[pieceColor], square);
@@ -511,9 +515,56 @@ void Position::add_piece(Square64 square, Piece piece){
     occupiedBitboards[pieceColor] = Bitboards::set_pieces(occupiedBitboards[pieceColor], square);
     occupiedBitboards[Color::COLOR_NC] = Bitboards::set_pieces(occupiedBitboards[Color::COLOR_NC], square);
 
+    moveHistory[ply-1].phaseWeight += Evaluate::PHASE_PIECE_WEIGHT[piece];
+
     //Update key
     moveHistory[ply-1].positionKey ^= Zobrist::pieceSquare[piece][square];
 
 }
+
+
+void Position::do_null_move() {
+
+    ++ply;
+    moveHistory[ply-1].positionKey = moveHistory[ply-2].positionKey;
+    moveHistory[ply-1].phaseWeight = moveHistory[ply-2].phaseWeight;
+    moveHistory[ply-1].positionKey ^= Zobrist::castlingRight[moveHistory[ply-2].castlingRight];
+    moveHistory[ply-1].castlingRight = moveHistory[ply-2].castlingRight;
+    moveHistory[ply-1].positionKey ^= Zobrist::castlingRight[moveHistory[ply-1].castlingRight];
+
+    moveHistory[ply-1].nextMove = NOMOVE;
+
+    moveHistory[ply-1].fiftyMovesCounter = moveHistory[ply-2].fiftyMovesCounter + 1;
+
+    moveHistory[ply-1].movesCounter = moveHistory[ply-2].movesCounter;
+    if (sideToMove == Color::BLACK)
+        moveHistory[ply-1].movesCounter = moveHistory[ply-2].movesCounter + 1;
+
+    if (moveHistory[ply-2].enpassantSquare != Square64::SQ64_NO_SQUARE) {
+        moveHistory[ply-1].positionKey ^= Zobrist::enpassantSquare[square_file(moveHistory[ply-2].enpassantSquare)];
+    }
+
+    moveHistory[ply-1].enpassantSquare = Square64::SQ64_NO_SQUARE;
+
+    sideToMove =~ sideToMove;
+    moveHistory[ply-1].positionKey ^= Zobrist::blackMoves;
+}
+
+void Position::undo_null_move(){
+    
+    sideToMove =~ sideToMove;
+
+    moveHistory[ply-1].nextMove = 0;
+    moveHistory[ply-1].castlingRight = NO_RIGHT;
+    moveHistory[ply-1].fiftyMovesCounter = 0;
+    moveHistory[ply-1].movesCounter = 0;
+    moveHistory[ply-1].enpassantSquare = Square64::SQ64_NO_SQUARE;
+    moveHistory[ply-1].positionKey = 0;
+    moveHistory[ply-1].phaseWeight = 0;
+
+    --ply;
+}
+
+
 
 } // namespace Xake
