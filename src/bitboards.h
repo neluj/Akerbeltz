@@ -2,6 +2,7 @@
 #define INCLUDE_BITBOARDS_H
 
 #include "types.h"
+#include <iostream>
 
 namespace Xake{
 
@@ -86,9 +87,17 @@ namespace Bitboards {
 
     }
 
+    inline void print_bitboard(Bitboard board) {
+        for (Rank rank = RANK_8; rank >= RANK_1; --rank) {         
+            for (File file = FILE_A; file < FILE_SIZE; ++file) {       
+                Square64 square = make_square64(rank, file);
+                std::cout << ((board >> square) & ONE);
+            }
+            std::cout << '\n';
+        }
+    }
+
 };
-
-
 } // namespace Xake
 
 #endif // #ifndef INCLUDE_BITBOARDS_H

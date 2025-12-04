@@ -6,8 +6,6 @@
 
 namespace Xake {
 
-class Position;
-
 namespace PVTable {
 
     struct PVLine {
@@ -15,23 +13,19 @@ namespace PVTable {
         DepthSize depth;
     };
 
-    struct Entry {
-        Key  key;
-        Move move;
-    };
+    extern Move      pvTable[MAX_DEPTH][MAX_DEPTH];
+    extern DepthSize pvLength[MAX_DEPTH];
 
-    constexpr std::size_t PVTableSize   = 0x100000 * 128; 
-    constexpr std::size_t PVTableEntries = PVTableSize / sizeof(Entry);
+    void clear();
 
-    extern Entry table[PVTableEntries];
+    void clear_ply(DepthSize ply);
 
-    void init();
-    void insert_entry(const Position& position, Move move);
-    Move probe_move(const Position& position);
-    void load_pv_line(PVLine& pvLine, DepthSize depth, Position& position);
+    void update_line(DepthSize ply, Move bestMove);
 
-}
+    void get_pv_line(PVLine &pvLine);
 
-}
+} // namespace PVTable
+
+} // namespace Xake
 
 #endif

@@ -3,6 +3,7 @@
 #include "movegen.h"
 #include "position.h"
 #include "pvtable.h"
+#include "ttable.h"
 
 #include <iostream>
 
@@ -29,7 +30,7 @@ void clean_search_info(SearchInfo &searchInfo);
 void pick_move(int moveIndx, MoveGen::MoveList &moveList);
 bool is_draw(const Position &position, const SearchInfo &searchInfo);
 static Move first_legal_move(Position& position);
-void print_iter_info(DepthSize currentDepth, int bestMoveScore, Move bestMove, SearchInfo &searchInfo);
+void print_iter_info(DepthSize currentDepth, Score bestPosScore, SearchInfo &searchInfo);
 
 
 void search(Position &position, SearchInfo &searchInfo){
@@ -55,10 +56,10 @@ void search(Position &position, SearchInfo &searchInfo){
             break;
         }
 
-        PVTable::load_pv_line(pvLine, MAX_DEPTH, position);
+        PVTable::get_pv_line(pvLine);
         if (pvLine.depth > 0) bestMove = pvLine.moves[0];
         
-        print_iter_info(currentDepth, bestMoveScore, bestMove, searchInfo);
+        print_iter_info(currentDepth, bestMoveScore, searchInfo);
 
         // Check iteration times
         const auto iterEndMs  = searchInfo.timeManager.elapsed_ms();
@@ -81,6 +82,8 @@ void search(Position &position, SearchInfo &searchInfo){
 
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth, bool nullMovePrune){
+
+    PVTable::clear_ply(searchInfo.searchPly);
 
     if (is_draw(position, searchInfo)) { return DRAW_SOCORE; }
 
@@ -115,34 +118,55 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
         }
     }
 
+    const Score alphaOrig = alpha;
+    const Key key = position.get_key();
+
+    TT::Entry ttEntry;
+    Move hashMove = NOMOVE;
+
+    if (TT::probe(key, ttEntry)) {
+        hashMove = ttEntry.move; 
+
+        if (ttEntry.depth >= depth) {
+            Score ttScore = ttEntry.score;
+
+            if (ttEntry.flag == TT::FLAG_EXACT)
+                return ttScore;
+            else if (ttEntry.flag == TT::FLAG_LOWERBOUND && ttScore >= beta)
+                return ttScore;
+            else if (ttEntry.flag == TT::FLAG_UPPERBOUND && ttScore <= alpha)
+                return ttScore;
+        }
+    }
+
     MoveGen::MoveList moveList;
     MoveGen::generate_pseudo_moves(position, moveList);
 
-    Move pvMove = PVTable::probe_move(position);
-
     //Set move scores
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
-        if(equal_move(moveList.moves[mIndx], pvMove)){
-            moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], PV_SCORE);
-        }else if(is_capture(moveList.moves[mIndx])){
-            if(move_special(moveList.moves[mIndx]) == ENPASSANT){
-                moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], MVVLVAScores[PAWN][PAWN]);
+
+        Move move = moveList.moves[mIndx];
+
+        if(equal_move(move, hashMove)){
+            moveList.moves[mIndx] = set_heuristic_score(move, PV_SCORE);
+        }else if(is_capture(move)){
+            if(move_special(move) == ENPASSANT){
+                moveList.moves[mIndx] = set_heuristic_score(move, MVVLVAScores[PAWN][PAWN]);
             }
             else{
-                moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], MVVLVAScores[piece_type(attacker_piece(moveList.moves[mIndx]))][piece_type(captured_piece(moveList.moves[mIndx]))]);
+                moveList.moves[mIndx] = set_heuristic_score(move, MVVLVAScores[piece_type(attacker_piece(move))][piece_type(captured_piece(move))]);
             }
         }
-        else if(equal_move(moveList.moves[mIndx], killerMoves[0][searchInfo.searchPly])){
-            moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_0);
-        }else if(equal_move(moveList.moves[mIndx], killerMoves[1][searchInfo.searchPly])){
-            moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], KILLERMOVE_SOCORE_1);
+        else if(equal_move(move, killerMoves[0][searchInfo.searchPly])){
+            moveList.moves[mIndx] = set_heuristic_score(move, KILLERMOVE_SOCORE_0);
+        }else if(equal_move(move, killerMoves[1][searchInfo.searchPly])){
+            moveList.moves[mIndx] = set_heuristic_score(move, KILLERMOVE_SOCORE_1);
         }else{ 
-            moveList.moves[mIndx] = set_heuristic_score(moveList.moves[mIndx], searchHistory[position.get_mailbox_piece(move_from(moveList.moves[mIndx]))][move_to(moveList.moves[mIndx])]);
+            moveList.moves[mIndx] = set_heuristic_score(move, searchHistory[position.get_mailbox_piece(move_from(move))][move_to(move)]);
         }
     }
 
     Score score = -CHECKMATE_SCORE;
-    Score oldAlpha = alpha;
     Move bestMove = 0;
     int legalMoves = 0;
 
@@ -172,35 +196,48 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
                     killerMoves[0][searchInfo.searchPly] = raw_move(move);
                 }
 
+                TT::store(key, depth, beta, TT::FLAG_LOWERBOUND, move);
+
                 return beta;
             }
+            
             alpha = score;
             bestMove = move;
 
             if(!is_capture(bestMove)){
                 searchHistory[position.get_mailbox_piece(move_from(bestMove))][move_to(bestMove)] += depth;
             }
+
+            PVTable::update_line(searchInfo.searchPly, bestMove);
         }
     }
 
-    if(legalMoves == 0){
-        if(isCheck)
-            return -CHECKMATE_SCORE + searchInfo.searchPly;
-        else
-            return DRAW_SOCORE;
+    if (legalMoves == 0) {
+        Score res = isCheck
+            ? -CHECKMATE_SCORE + searchInfo.searchPly
+            : DRAW_SOCORE;
+
+        TT::store(key, depth, res, TT::FLAG_EXACT, NOMOVE);
+        return res;
     }
 
-    if(alpha != oldAlpha){
-        PVTable::insert_entry(position, raw_move(bestMove));
+    TT::Flag flag;
+    if (alpha <= alphaOrig) {
+        flag = TT::FLAG_UPPERBOUND;  
+    } else {
+        flag = TT::FLAG_EXACT;       
     }
 
+    TT::store(key, depth, alpha, flag, bestMove);
     return alpha;
     
 }
 
 Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta){
 
-    ++searchInfo.nodes;
+    PVTable::clear_ply(searchInfo.searchPly);
+
+    ++searchInfo.nodes;  
 
     if (is_draw(position, searchInfo)){
         return DRAW_SOCORE;
@@ -224,7 +261,6 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     MoveGen::generate_pseudo_captures(position, moveList);
 
     score = -CHECKMATE_SCORE;
-    Score oldAlpha = alpha;
     Move bestMove = 0;
 
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
@@ -249,11 +285,9 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
             }
             alpha = score;
             bestMove = move;
-        }
-    }
 
-    if(alpha != oldAlpha){
-        PVTable::insert_entry(position, raw_move(bestMove));
+            PVTable::update_line(searchInfo.searchPly, bestMove);
+        }
     }
 
     return alpha;
@@ -262,6 +296,8 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 
 void clean_search_info(SearchInfo &searchInfo){
     searchInfo.nodes = 0;
+    PVTable::clear();
+    TT::clear();
     //searchInfo.timeOver = false;
     
     for(int i = 0; i < MAX_KILLERMOVES; ++i){
@@ -312,13 +348,13 @@ void pick_move(int moveIndx, MoveGen::MoveList &moveList){
     moveList.moves[bestIndx] = moveTemp;
 }
 
-void print_iter_info(DepthSize currentDepth, int bestMoveScore, Move bestMove, SearchInfo &searchInfo){
+void print_iter_info(DepthSize currentDepth, Score bestPosScore, SearchInfo &searchInfo){
 
         std::cout <<
         "info" << 
         " depth " << currentDepth << 
-        " score cp " << bestMoveScore << 
-        " move " << algebraic_move(bestMove) <<
+        " score cp " << bestPosScore << 
+        " move " << algebraic_move(pvLine.moves[0]) <<
         " nodes " << searchInfo.nodes <<
         " time " << searchInfo.timeManager.elapsed_ms().count();
 

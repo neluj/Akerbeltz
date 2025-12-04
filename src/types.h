@@ -10,7 +10,7 @@
 
 namespace Xake{
 
-using DepthSize = int;
+using DepthSize = uint16_t;
 using NodesSize = uint64_t;
 using MovesSize = int;
 using Key = uint64_t;
@@ -18,7 +18,7 @@ using Key = uint64_t;
 constexpr int MAX_POSITION_MOVES_SIZE = 255;
 constexpr int MAX_GAME_MOVES = 2048;
 constexpr int MAX_SAME_PIECE = 10;
-constexpr int MAX_DEPTH = 64;
+constexpr DepthSize MAX_DEPTH = 64;
 
 constexpr int CASTLING_POSIBILITIES = 4 * 4;
 
@@ -154,10 +154,14 @@ constexpr Square64 operator-(Square64& sq1, int sq2) { return Square64(int(sq1) 
 inline Square64& operator--(Square64& sq) { return sq = Square64(int(sq) - 1); }
 
 inline File& operator++(File& f) { return f = File(int(f) + 1); }
+inline File& operator--(File& f) { return f = File(int(f) - 1); }
 constexpr File operator+(File f1, int f2) { return File (int(f1) + f2); }
 inline File&   operator+=(File& f1, int f2) { return f1 = f1 + f2; }
 
 inline Rank& operator--(Rank& r) { return r = Rank(int(r) - 1); }
+inline Rank& operator++(Rank& r) { return r = Rank(int(r) + 1); }
+constexpr Rank operator+(Rank r1, int r2) { return Rank(int(r1) + r2); }
+inline Rank& operator+=(Rank& r1, int r2) { return r1 = r1 + r2; }
 
 inline CastlingRight&   operator|=(CastlingRight& cr1, int cr2){ return cr1 = CastlingRight(cr1 | cr2); }
 constexpr CastlingRight   operator&(CastlingRight cr1, int cr2){ return CastlingRight(int(cr1) & cr2); }
