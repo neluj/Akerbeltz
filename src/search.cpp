@@ -2,7 +2,6 @@
 
 #include "movegen.h"
 #include "position.h"
-#include "pvtable.h"
 #include "ttable.h"
 
 #include <iostream>
@@ -14,7 +13,7 @@ namespace Search{
 using namespace Evaluate;
 
 static NodesSize leafCounter;
-PVTable::PVLine pvLine;
+TT::PVLine pvLine;
 
 //Killer heuristic
 Move killerMoves[MAX_KILLERMOVES][MAX_DEPTH];
@@ -56,7 +55,7 @@ void search(Position &position, SearchInfo &searchInfo){
             break;
         }
 
-        PVTable::get_pv_line(pvLine);
+        TT::load_pv_line(position, pvLine, MAX_DEPTH);
         if (pvLine.depth > 0) bestMove = pvLine.moves[0];
         
         print_iter_info(currentDepth, bestMoveScore, searchInfo);
@@ -82,8 +81,6 @@ void search(Position &position, SearchInfo &searchInfo){
 
 
 Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score beta, DepthSize depth, bool nullMovePrune){
-
-    PVTable::clear_ply(searchInfo.searchPly);
 
     if (is_draw(position, searchInfo)) { return DRAW_SOCORE; }
 
@@ -208,7 +205,6 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
                 searchHistory[position.get_mailbox_piece(move_from(bestMove))][move_to(bestMove)] += depth;
             }
 
-            PVTable::update_line(searchInfo.searchPly, bestMove);
         }
     }
 
@@ -234,8 +230,6 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 }
 
 Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha, Score beta){
-
-    PVTable::clear_ply(searchInfo.searchPly);
 
     ++searchInfo.nodes;  
 
@@ -285,9 +279,11 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
             }
             alpha = score;
             bestMove = move;
-
-            PVTable::update_line(searchInfo.searchPly, bestMove);
         }
+    }
+
+    if (bestMove != NOMOVE) {
+        TT::store(position.get_key(), 0, alpha, TT::FLAG_EXACT, bestMove);
     }
 
     return alpha;
@@ -296,7 +292,6 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 
 void clean_search_info(SearchInfo &searchInfo){
     searchInfo.nodes = 0;
-    PVTable::clear();
     TT::clear();
     //searchInfo.timeOver = false;
     

@@ -1,7 +1,6 @@
 #include "position.h"
 #include "attacks.h"
 #include "evaluate.h"
-#include "pvtable.h"
 #include "ttable.h"
 #include "uci.h"
 

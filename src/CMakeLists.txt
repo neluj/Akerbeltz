@@ -6,6 +6,5 @@ timemanager.cpp
 search.cpp
 evaluate.cpp
 uci.cpp
-pvtable.cpp
 ttable.cpp
 )

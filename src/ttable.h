@@ -9,6 +9,8 @@
 
 namespace Xake {
 
+class Position;
+
 namespace TT {
 
     using Evaluate::Score;
@@ -34,12 +36,19 @@ namespace TT {
 
     extern Entry table[TTEntries];
 
-    void clear(); 
+    struct PVLine {
+        Move moves[MAX_DEPTH];
+        DepthSize depth;
+    };
+
+    void clear();
 
     // Returns true if key exist
     bool probe(Key key, Entry &outEntry);
 
     void store(Key key, DepthSize depth, Score score, Flag flag, Move bestMove);
+
+    void load_pv_line(Position& pos, PVLine& line, DepthSize depth = MAX_DEPTH);
 
 } // namespace TT
 

@@ -1,4 +1,5 @@
 #include "ttable.h"
+#include "position.h"
 #include <cstring>
 #include <algorithm>
 #include <limits>
@@ -28,9 +29,7 @@ namespace TT {
         std::size_t index = key % TTEntries;
         Entry &e = table[index];
 
-        // Simple replacement policy: keep the entry with greater depth
-        if (e.key != 0 && e.key != key && e.depth > depth)
-            return;
+        if (e.depth > depth && (e.key == key || e.key != 0)) return;
 
         e.key   = key;
         e.depth = depth;
@@ -39,6 +38,23 @@ namespace TT {
         e.score = score;
     }
 
-} // namespace TT
+    void load_pv_line(Position& pos, PVLine& pvLine, DepthSize depth) {
+  
+        pvLine.depth = 0;
+
+        Entry entry;
+        while (pvLine.depth < depth && TT::probe(pos.get_key(), entry )) {
+            Move m = entry.move;
+            if (m == NOMOVE) break;
+
+            if (!pos.do_move(m)) break;
+            pvLine.moves[pvLine.depth++] = raw_move(m);
+        }
+
+        DepthSize counter = pvLine.depth;
+        while (counter > 0){ pos.undo_move(); --counter;}
+    }
+  
+}// namespace TT
 
 } // namespace Xake
