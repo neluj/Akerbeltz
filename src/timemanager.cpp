@@ -15,14 +15,13 @@ namespace Xake {
 
     std::optional<TimeManager::Ms> TimeManager::remaining_ms() const {
         if (deadline == TimePoint::max())
-            return std::nullopt; // infinito
+            return std::nullopt; // Infinite
         auto remaining = deadline - now_tp();
         if (remaining < Duration::zero()) remaining = Duration::zero();
         return std::chrono::duration_cast<Ms>(remaining);
     }
 
-        // -------- Calculate budget from "go" --------
-   void TimeManager::allocate_from_go(const BudgetParams &params)
+   void TimeManager::allocate_budget(const BudgetParams &params)
     {
         if (!started) { mark_start(); }
         
@@ -69,15 +68,15 @@ namespace Xake {
             Ms inc  = params.incMs.value_or(Ms{0});
             Ms mtms = base + inc;
                     
-            // Reserva mínima de seguridad (mejor que 50%):
+            // Minimum safety buffer (preferably >50%):
             Ms remain  = params.colorTimeMs.value();
-            Ms reserve = std::max(params.overhead * 2, Ms{50}); // 2x overhead o 50ms
+            Ms reserve = std::max(params.overhead * 2, Ms{50});
                     
-            // Solo capear si esperamos >2 jugadas; en 1–2 jugadas no recortes agresivo.
+            // Only buffer in if we expect >2 steps; for 1–2 steps, avoid aggressive cuts
             if (mtg > 2 && mtms > remain - reserve)
                 mtms = remain - reserve;
                     
-            // Aplica overhead al final como ya hacías
+            // Apply overhead
             if (mtms > params.overhead) mtms -= params.overhead; else mtms = Ms::zero();
             deadline = (mtms == Ms::zero()) ? now_tp() : now_tp() + std::chrono::duration_cast<Duration>(mtms);
         }

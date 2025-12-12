@@ -23,9 +23,8 @@ public:
         Ms  overhead  {Ms(5)}; 
     };
 
-    // -------- Base clock --------
     static inline TimePoint now_tp() { return Clock::now(); }
-    // -------- Inicio / elapsed --------
+
     inline void mark_start() { startPoint = now_tp(); started = true; }
 
     inline Ms elapsed_ms() const { return std::chrono::duration_cast<Ms>(now_tp() - startPoint); }
@@ -33,7 +32,7 @@ public:
     inline void on_iteration_finished(uint64_t iterNodes, uint64_t prevIterNodes){
         if (!prevIterNodes) return;
         const double r = double(iterNodes) / double(prevIterNodes);
-        ema_growth = ema_growth ? 0.7*ema_growth + 0.3*r : r; // igual que antes
+        ema_growth = ema_growth ? 0.7*ema_growth + 0.3*r : r;
     }
  
     inline bool out_of_time() const { return now_tp() >= deadline; }
@@ -42,10 +41,10 @@ public:
 
     std::optional<Ms> remaining_ms() const;
 
-    void allocate_from_go(const BudgetParams &params);
+    void allocate_budget(const BudgetParams &params);
 
 private:
-    // -------- State --------
+
     TimePoint startPoint     {};
     bool started = false;
     TimePoint deadline  {TimePoint::max()};

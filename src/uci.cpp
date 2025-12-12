@@ -32,9 +32,6 @@ void run(){
 
     uci_info();
 
-    //if(argc<2)
-    //    token = "quit";
-
     do{
         getline(std::cin, inputStr);
         std::istringstream is(inputStr);
@@ -223,7 +220,7 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
         else if (arg == "infinite")  { bP.moveTimeMs.reset(); bP.colorTimeMs.reset(); }
     }
 
-    tm.allocate_from_go(bP);
+    tm.allocate_budget(bP);
 
     const auto rem = tm.remaining_ms();
     std::cout << "info string search depth " << searchInfo.depth
