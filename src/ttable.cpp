@@ -1,21 +1,47 @@
 #include "ttable.h"
 #include "position.h"
-#include <cstring>
+
 #include <algorithm>
-#include <limits>
+#include <vector>
 
 namespace Xake {
 
 namespace TT {
 
-    Entry table[TTEntries];
+    std::size_t clamp_mb(std::size_t sizeMB);
+    std::size_t entry_count(std::size_t sizeMB);
+
+    std::size_t ttSizeMB = TT::DEFAULT_TT_MB;
+    std::vector<Entry> table(entry_count(ttSizeMB));
+
+    constexpr std::size_t mb_to_bytes(std::size_t mb) { return mb * 1024ULL * 1024ULL; }
+
+    std::size_t clamp_mb(std::size_t sizeMB) {
+        sizeMB = std::max(TT::MIN_TT_MB, sizeMB);
+        sizeMB = std::min(TT::MAX_TT_MB, sizeMB);
+        return sizeMB;
+    }
+
+    std::size_t entry_count(std::size_t sizeMB) {
+        const auto bytes = mb_to_bytes(sizeMB);
+        return std::max<std::size_t>(1, bytes / sizeof(Entry));
+    }
+
+    void resize(std::size_t sizeMB) {
+        ttSizeMB = clamp_mb(sizeMB);
+        table.assign(entry_count(ttSizeMB), Entry{});
+    }
+
+    std::size_t current_size_mb() { return ttSizeMB; }
 
     void clear() {
-        std::memset(table, 0, sizeof(table));
+        std::fill(table.begin(), table.end(), Entry{});
     }
 
     bool probe(Key key, Entry &outEntry) {
-        std::size_t index = key % TTEntries;
+        if (table.empty()) return false;
+
+        std::size_t index = key % table.size();
         Entry &e = table[index];
 
         if (e.key == 0 || e.key != key)
@@ -26,7 +52,9 @@ namespace TT {
     }
 
     void store(Key key, DepthSize depth, Score score, Flag flag, Move bestMove) {
-        std::size_t index = key % TTEntries;
+        if (table.empty()) return;
+
+        std::size_t index = key % table.size();
         Entry &e = table[index];
 
         if (e.depth > depth && (e.key == key || e.key != 0)) return;

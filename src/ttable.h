@@ -5,6 +5,7 @@
 #include "move.h"
 #include "evaluate.h"
 
+#include <cstddef>
 #include <cstdint>
 
 namespace Xake {
@@ -14,6 +15,10 @@ class Position;
 namespace TT {
 
     using Evaluate::Score;
+
+    constexpr std::size_t DEFAULT_TT_MB = 128;
+    constexpr std::size_t MIN_TT_MB     = 4;
+    constexpr std::size_t MAX_TT_MB     = 4096;
 
     enum Flag : uint8_t {
         FLAG_NONE,
@@ -30,16 +35,14 @@ namespace TT {
         Move       move;   // Best move from position
     };
 
-    constexpr std::size_t TTSizeMB      = 128; // 128 MB
-    constexpr std::size_t TTBytes       = TTSizeMB * 1024ULL * 1024ULL;
-    constexpr std::size_t TTEntries     = TTBytes / sizeof(Entry);
-
-    extern Entry table[TTEntries];
-
     struct PVLine {
         Move moves[MAX_DEPTH];
         DepthSize depth;
     };
+
+    void resize(std::size_t sizeMB);
+
+    std::size_t current_size_mb();
 
     void clear();
 

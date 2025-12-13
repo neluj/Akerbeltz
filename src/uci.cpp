@@ -2,9 +2,12 @@
 #include "position.h"
 #include "search.h"
 #include "timemanager.h"
+#include "ttable.h"
 
+#include <exception>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <thread>
 #include <functional>
 
@@ -19,6 +22,7 @@ Move make_move(const Position &pos, std::string algebraic_move);
 void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo, std::thread &searchThread);
 void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo);
 void uci_info();
+void setoption(std::istringstream &is);
 
 void run(){
 
@@ -58,6 +62,9 @@ void run(){
         else if (token == "uci")
             uci_info();
         
+        else if (token == "setoption")
+            setoption(is);
+
         else if (token == "stop"){
             searchInfo.stop = true;
             if(searchThread.joinable())
@@ -208,7 +215,7 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
         if (is >> v) dst = v;
     };  
 
-    // Parseo UCI
+    // UCI parse
     while (is >> arg) {
         if      (arg == "depth")    { is >> searchInfo.depth; }
         else if (arg == "wtime" && pos.get_side_to_move() == WHITE) { read_ms(bP.colorTimeMs); bP.ply = pos.get_ply(); }
@@ -232,8 +239,39 @@ void uci_info(){
 
     std::cout << "id name Xake 0.0.1" << "\n";
     std::cout << "id author Julen Aristondo" << "\n";
+    std::cout << "option name Hash type spin default " << TT::DEFAULT_TT_MB
+              << " min " << TT::MIN_TT_MB
+              << " max " << TT::MAX_TT_MB << "\n";
     std::cout << "uciok" << "\n";
 
+}
+
+void setoption(std::istringstream &is) {
+
+    std::string token;
+    std::string name;
+    std::string value;
+
+    while (is >> token) {
+        if (token == "name") {
+            while (is >> token && token != "value") {
+                if (!name.empty()) name += " ";
+                name += token;
+            }
+            if (token == "value") {
+                is >> value;
+            }
+            break;
+        }
+    }
+
+    if (name == "Hash" && !value.empty()) {
+
+        const std::size_t hashMB = std::stoull(value);
+        TT::resize(hashMB);
+        std::cout << "info string Hash set to " << TT::current_size_mb() << " MB" << std::endl;
+
+    }
 }
 
 }
