@@ -1,4 +1,3 @@
-// TODO https://www.chessprogramming.org/Simplified_Evaluation_Function
 #ifndef INCLUDE_EVALUATE_H
 #define INCLUDE_EVALUATE_H
 
@@ -11,7 +10,11 @@ class Position;
 
 namespace Evaluate{
 
-    using Score = int;
+    using Score = int32_t;
+    
+    constexpr Score CHECKMATE_SCORE = 900000;
+    constexpr Score DRAW_SOCORE = 0;
+
     using GamePhaseWeight = int;
 
     inline constexpr GamePhaseWeight MAX_PHASE_PIECE_WEIGHT = 24;
@@ -23,9 +26,6 @@ namespace Evaluate{
         /*B_P*/ 0, /*B_N*/1, /*B_B*/1, /*B_R*/2, /*B_Q*/4, /*B_K*/0,
         /*gap*/ 0
     };
-
-    constexpr Score CHECKMATE_SCORE = 900000;
-    constexpr Score DRAW_SOCORE = 0;
 
     void init();
 
