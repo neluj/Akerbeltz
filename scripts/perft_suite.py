@@ -112,7 +112,7 @@ class Engine:
 
         t0 = time.time()
         self._writeln(f"position fen {fen}")
-        self._writeln(f"go perft depth {depth}")
+        self._writeln(f"go perft {depth}")
         # Read until "total nodes size:" line arrives or timeout
         try:
             nodes, raw = self._read_total_nodes(timeout_sec or self.timeout_sec)

@@ -1,4 +1,5 @@
 #include "uci.h"
+#include "engine_info.h"
 #include "position.h"
 #include "search.h"
 #include "timemanager.h"
@@ -34,54 +35,65 @@ void run(){
 
     std::string inputStr, token;
 
-    uci_info();
-
-    do{
-        getline(std::cin, inputStr);
+    while (std::getline(std::cin, inputStr)) {
         std::istringstream is(inputStr);
 
-        is >> token;
+        if (!(is >> token))
+            continue;
 
-        if (token == "go")
+        if (token == "go"){
             go(pos, is, searchInfo, searchThread);
+            continue;
+        }
 
-        else if (token == "position")
+        else if (token == "position"){
             position(pos, is);
-        //REVIEW
+            continue;
+        }
+
         else if (token == "ucinewgame"){
             is.str("startpos");
             position(pos, is);
+            continue;
         }
         
-        else if(token == "d")
+        else if(token == "d"){
             std::cout << pos;
+            continue;
+        }
         
-        else if (token == "isready")
+        else if (token == "isready"){
             std::cout << "readyok" << std::endl;
-
-        else if (token == "uci")
-            uci_info();
+            continue;
+        }
         
-        else if (token == "setoption")
+        else if (token == "uci"){
+            uci_info();
+            continue;
+        }
+        
+        else if (token == "setoption"){
             setoption(is);
+            continue;
+        }
 
         else if (token == "stop"){
             searchInfo.stop = true;
-            if(searchThread.joinable())
-                searchThread.join();
+            continue;
         }
         
-        else if(token == "quit"){
+        else if (token == "quit"){
             searchInfo.stop = true;
-            if(searchThread.joinable())
-                searchThread.join();
             break;
         }
-    
-        else 
-            std::cout << "Unknown command " << token << "." << " Type 'quit' for quit program." << std::endl;
 
-    }while(token != "quit");
+        std::cout << "Unknown UCI command " << token << "."
+                  << " Type 'quit' for quit program." << std::endl;
+    }
+
+    searchInfo.stop = true;
+    if(searchThread.joinable())
+        searchThread.join();
 
 }
 
@@ -115,25 +127,15 @@ void position(Position & pos, std::istringstream &is){
 Move make_move(const Position &pos, std::string algebraic_move){
     
     //return error
-    if( algebraic_move.size() < 4 || algebraic_move.size() > 5 ){
-        return 0;
-    }
+    if( algebraic_move.size() < 4 || algebraic_move.size() > 5 ) { return 0; }
     
-    if(algebraic_move[0] - 'a' > 8 || algebraic_move[0] - 'a' < 0){
-        return 0;
-    }
+    if(algebraic_move[0] - 'a' > 8 || algebraic_move[0] - 'a' < 0) { return 0; }
 
-    if(algebraic_move[2] - 'a' > 8 || algebraic_move[2] - 'a' < 0){
-        return 0;
-    }
+    if(algebraic_move[2] - 'a' > 8 || algebraic_move[2] - 'a' < 0) { return 0; }
     
-    if(algebraic_move[1] - '1' > 8 || algebraic_move[1] - '1' < 0){
-        return 0;
-    }
+    if(algebraic_move[1] - '1' > 8 || algebraic_move[1] - '1' < 0) { return 0; }
 
-    if(algebraic_move[3] - '1' > 8 || algebraic_move[3] - '1' < 0){
-        return 0;
-    }
+    if(algebraic_move[3] - '1' > 8 || algebraic_move[3] - '1' < 0) { return 0; }
 
 	Square64 from = Square64(((algebraic_move[1] - '1') * 8 ) + (algebraic_move[0] - 'a'));
 	Square64 to   = Square64(((algebraic_move[3] - '1') * 8 ) + (algebraic_move[2] - 'a')); 
@@ -179,8 +181,13 @@ void go(Position & pos, std::istringstream &is, Search::SearchInfo &searchInfo, 
     is >> arg;
 
     if(arg == "perft"){
-        go_info(pos, is, searchInfo);
-        Search::perftTest(pos, searchInfo);
+
+        std::string depthToken;
+         
+        if ((is >> depthToken)) {
+            searchInfo.depth = std::stoi(depthToken);
+            Search::perftTest(pos, searchInfo);
+        }
     }
     else{
         is.seekg(isParamPos);
@@ -217,7 +224,7 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
 
     // UCI parse
     while (is >> arg) {
-        if      (arg == "depth")    { is >> searchInfo.depth; }
+        if      (arg == "depth") { std::string depthToken; if ((is >> depthToken)) searchInfo.depth = std::stoi(depthToken); }
         else if (arg == "wtime" && pos.get_side_to_move() == WHITE) { read_ms(bP.colorTimeMs); bP.ply = pos.get_ply(); }
         else if (arg == "btime" && pos.get_side_to_move() == BLACK) { read_ms(bP.colorTimeMs); bP.ply = pos.get_ply(); }
         else if (arg == "winc"  && pos.get_side_to_move() == WHITE) { read_ms(bP.incMs); }
@@ -237,8 +244,8 @@ void go_info(const Position & pos, std::istringstream &is, Search::SearchInfo &s
 
 void uci_info(){
 
-    std::cout << "id name Xake 0.0.1" << "\n";
-    std::cout << "id author Julen Aristondo" << "\n";
+    std::cout << "id name " << ENGINE_NAME << " " << ENGINE_VERSION << "\n";
+    std::cout << "id author " << ENGINE_AUTHOR << "\n";
     std::cout << "option name Hash type spin default " << TT::DEFAULT_TT_MB
               << " min " << TT::MIN_TT_MB
               << " max " << TT::MAX_TT_MB << "\n";

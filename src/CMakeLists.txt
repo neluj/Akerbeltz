@@ -1,3 +1,9 @@
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/engine_info.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/engine_info.h
+  @ONLY
+)
+
 add_library(xake_core
   position.cpp
   attacks.cpp
@@ -9,7 +15,7 @@ add_library(xake_core
   ttable.cpp
 )
 
-target_include_directories(xake_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(xake_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(xake_core PUBLIC Threads::Threads)
 
 target_compile_options(xake_core PRIVATE -Wall -Wextra -Wpedantic $<$<CONFIG:Release>:-O3>)

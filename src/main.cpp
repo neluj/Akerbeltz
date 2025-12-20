@@ -1,14 +1,21 @@
 #include "position.h"
 #include "attacks.h"
 #include "evaluate.h"
-#include "ttable.h"
 #include "uci.h"
+#include "engine_info.h"
+
+#include <iostream>
 
 using namespace std;
 using namespace Xake;
 
 int main()
 {   
+    std::cout << ENGINE_NAME << " " << ENGINE_VERSION
+              << " by " << ENGINE_AUTHOR
+              << " (build " << __DATE__ << " " << __TIME__ << ")"
+              << std::endl;
+
     Attacks::init();
     Position::init();
     Evaluate::init();
