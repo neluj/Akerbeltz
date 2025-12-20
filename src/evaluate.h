@@ -32,6 +32,8 @@ namespace Evaluate{
     Score calc_score(const Position &position);
 
     bool material_draw(const Position& pos);
+
+    Score to_centipawns(Score score, GamePhaseWeight phaseWeight);
 }
 }
 

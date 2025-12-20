@@ -29,12 +29,12 @@ void clean_search_info(SearchInfo &searchInfo);
 void pick_move(int moveIndx, MoveGen::MoveList &moveList);
 bool is_draw(const Position &position, const SearchInfo &searchInfo);
 static Move first_legal_move(Position& position);
-void print_iter_info(DepthSize currentDepth, Score bestPosScore, SearchInfo &searchInfo);
+void print_iter_info(DepthSize currentDepth, Score bestmoveScoreCP, SearchInfo &searchInfo);
 
 
 void search(Position &position, SearchInfo &searchInfo){
 
-    int bestMoveScore = -CHECKMATE_SCORE;
+    Score bestMoveScore = -CHECKMATE_SCORE;
     // fallback
     Move bestMove = first_legal_move(position);
     if (!bestMove) { std::cout << "bestmove 0000\n"; return; }
@@ -58,7 +58,8 @@ void search(Position &position, SearchInfo &searchInfo){
         TT::load_pv_line(position, pvLine, MAX_DEPTH);
         if (pvLine.depth > 0) bestMove = pvLine.moves[0];
         
-        print_iter_info(currentDepth, bestMoveScore, searchInfo);
+        Score bestMoveScoreCP = to_centipawns(bestMoveScore, position.game_phase_weight());
+        print_iter_info(currentDepth, bestMoveScoreCP, searchInfo);
 
         // Check iteration times
         const auto iterEndMs  = searchInfo.timeManager.elapsed_ms();
@@ -343,12 +344,12 @@ void pick_move(int moveIndx, MoveGen::MoveList &moveList){
     moveList.moves[bestIndx] = moveTemp;
 }
 
-void print_iter_info(DepthSize currentDepth, Score bestPosScore, SearchInfo &searchInfo){
+void print_iter_info(DepthSize currentDepth, Score bestMoveScoreCP, SearchInfo &searchInfo){
 
         std::cout <<
         "info" << 
         " depth " << currentDepth << 
-        " score cp " << bestPosScore << 
+        " score cp " << bestMoveScoreCP << 
         " move " << algebraic_move(pvLine.moves[0]) <<
         " nodes " << searchInfo.nodes <<
         " time " << searchInfo.timeManager.elapsed_ms().count();

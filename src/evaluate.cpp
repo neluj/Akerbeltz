@@ -14,8 +14,8 @@ static inline int flip(int sq) { return sq ^ 56; }
 static inline Score mg_eg_blend(double mg, double eg, int mgWeight, int egWeight);
 
 // ---------- MG/EG Piece Values----------
-constexpr double MG_PIECE_SCORES[PieceType::PIECETYPE_SIZE] = {0.0, 82.5, 337.5, 365.0, 477.5, 1025.0, 20000.0};
-constexpr double EG_PIECE_SCORES[PieceType::PIECETYPE_SIZE] = {0.0, 94.0, 281.5, 297.5, 512.0, 936.5, 20000.0};
+constexpr Score MG_PIECE_SCORES[PieceType::PIECETYPE_SIZE] = {0, 82, 337, 365, 477, 1025, 20000};
+constexpr Score EG_PIECE_SCORES[PieceType::PIECETYPE_SIZE] = {0, 94, 281, 297, 512, 936, 20000};
 
 // Middle Game PSQT
 static constexpr Score MG_PAWN_TABLE[SQ64_SIZE] = {
@@ -409,6 +409,18 @@ bool material_draw(const Position& pos) {
 
     // Default: not a theoretical material draw.
     return false;
+}
+
+Score to_centipawns(Score score, GamePhaseWeight phaseWeight) {
+    const GamePhaseWeight mgWeight = std::min<GamePhaseWeight>(phaseWeight, MAX_PHASE_PIECE_WEIGHT);
+    const GamePhaseWeight egWeight = MAX_PHASE_PIECE_WEIGHT - mgWeight;
+    const double pawnValue = (MG_PIECE_SCORES[PieceType::PAWN] * mgWeight
+                             + EG_PIECE_SCORES[PieceType::PAWN] * egWeight)
+                             / static_cast<double>(MAX_PHASE_PIECE_WEIGHT);
+    if (pawnValue == 0.0) {
+        return 0;
+    }
+    return static_cast<Score>(std::lround(score * (100.0 / pawnValue)));
 }
 
 static inline Score mg_eg_blend(double mg, double eg, int mgWeight, int egWeight) {
