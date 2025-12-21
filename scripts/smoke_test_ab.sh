@@ -27,8 +27,8 @@ DEBUG=false
 #SEED=""
 ENGINES_TSV=""
 OPENINGS_FILE=""
-#GLOBAL_THREADS=""
-#GLOBAL_HASH=""
+GLOBAL_THREADS=""
+GLOBAL_HASH=""
 TC="$TC_DEFAULT"
 
 # --- Helpers ---
@@ -48,8 +48,8 @@ Optional:
   --b <name>               Engine B name (must match TSV 'name')
   --rounds <N>             Rounds (default: ${ROUNDS_DEFAULT})
   --tc <tc>                Time control (cutechess format; default: ${TC_DEFAULT})
-  --threads <N>            Global threads default if TSV empty (default: ${THREADS_DEFAULT})
-  --hash <MB>              Global hash default if TSV empty (default: ${HASH_DEFAULT})
+  --threads <N>            Global threads if TSV empty (optional)
+  --hash <MB>              Global hash if TSV empty (optional)
   --book-depth <ply>       EPD plies (default: ${BOOK_PLIES_DEFAULT})
   --concurrency <N>        Concurrency (default: auto = max(1,nproc-1))
   --adjudicate             Enable resign/draw adjudication (defaults baked in)
@@ -68,19 +68,20 @@ while [[ $# -gt 0 ]]; do
     --openings) OPENINGS_FILE="${2:-}"; shift 2;;
     --rounds) ROUNDS="${2:-}"; shift 2;;
     --tc) TC="${2:-}"; shift 2;;
-    #--threads) GLOBAL_THREADS="${2:-}"; shift 2;;
-    #--hash) GLOBAL_HASH="${2:-}"; shift 2;;
+    --threads) GLOBAL_THREADS="${2:-$THREADS_DEFAULT}"; shift 2;;
+    --hash) GLOBAL_HASH="${2:-$HASH_DEFAULT}"; shift 2;;
     --book-depth) BOOK_PLIES="${2:-}"; shift 2;;
     --concurrency) CONCURRENCY_OVERRIDE="${2:-}"; shift 2;;
     --adjudicate) ADJUDICATE=true; shift;;
     #--seed) SEED="${2:-}"; shift 2;;
     --a) A_NAME_OVERRIDE="${2:-}"; shift 2;;
-    --b) B_NAME_OVERRIDE="${2:-}"; shift 2;;--debug)
-  case "${2:-}" in
-    true|TRUE|True|1|yes|on) DEBUG=true;;
-    *) DEBUG=false;;
-  esac
-  shift 2;;
+    --b) B_NAME_OVERRIDE="${2:-}"; shift 2;;
+    --debug)
+      case "${2:-}" in
+        true|TRUE|True|1|yes|on) DEBUG=true;;
+        *) DEBUG=false;;
+      esac
+      shift 2;;
     -h|--help) usage; exit 0;;
     *) die "Unknown option: $1";;
   esac
@@ -172,9 +173,11 @@ fi
 # TSV cols: name  cmd  args  threads  hash  uci_options
 build_engine_clause() {
   local line="$1"
-  #local g_threads="${GLOBAL_THREADS:-$THREADS_DEFAULT}"
-  #local g_hash="${GLOBAL_HASH:-$HASH_DEFAULT}"
+  local g_threads="${GLOBAL_THREADS:-}"
+  local g_hash="${GLOBAL_HASH:-}"
   local name cmd args thr hash uci raw opts optstr=""
+  local has_hash_opt=false
+  local has_threads_opt=false
 
   IFS=$'\t' read -r name cmd args thr hash uci <<<"$line"
 
@@ -182,8 +185,8 @@ build_engine_clause() {
   [[ -x "$cmd" ]] || die "Engine is not executable: $cmd"
 
   # per-engine overrides
-  #local threads="${thr:-$g_threads}"
-  #local hashmb="${hash:-$g_hash}"
+  local threads="${thr:-$g_threads}"
+  local hashmb="${hash:-$g_hash}"
 
   # uci_options: Key=Val;Key2=Val2  -> option.Key=Val option.Key2=Val2
   if [[ -n "${uci:-}" ]]; then
@@ -191,12 +194,21 @@ build_engine_clause() {
     for kv in "${opts[@]}"; do
       [[ -z "$kv" ]] && continue
       key="${kv%%=*}"; val="${kv#*=}"
+      case "${key,,}" in
+        hash) has_hash_opt=true;;
+        threads) has_threads_opt=true;;
+      esac
       optstr+=" option.${key}=${val}"
     done
   fi
 
-  # Attach Hash/Threads always
-  #optstr+=" option.Hash=${hashmb} option.Threads=${threads}"
+  # Attach Hash/Threads only if provided and not already set in uci_options
+  if [[ -n "${hashmb:-}" && $has_hash_opt == false ]]; then
+    optstr+=" option.Hash=${hashmb}"
+  fi
+  if [[ -n "${threads:-}" && $has_threads_opt == false ]]; then
+    optstr+=" option.Threads=${threads}"
+  fi
 
   # Extra args (optional)
   local argstr=""
@@ -329,4 +341,3 @@ if [[ -f "$PGNFILE" ]]; then
 else
   die "cutechess did not produce PGN ($PGNFILE)."
 fi
-

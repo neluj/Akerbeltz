@@ -30,8 +30,8 @@ B_NAME_OVERRIDE=""
 #SEED=""
 ENGINES_TSV=""
 OPENINGS_FILE=""
-#GLOBAL_THREADS=""
-#GLOBAL_HASH=""
+GLOBAL_THREADS=""
+GLOBAL_HASH=""
 TC="$TC_DEFAULT"
 ROUNDS=""   # not set by default; SPRT decides
 GAMES=""    # optional override
@@ -50,8 +50,8 @@ Required:
 Optional:
   --a <name>  --b <name>      Pick engines by TSV 'name'
   --tc <tc>                   Default: ${TC_DEFAULT}
-  --threads <N>               Global default if TSV empty (default ${THREADS_DEFAULT})
-  --hash <MB>                 Global default if TSV empty (default ${HASH_DEFAULT})
+  --threads <N>               Global threads if TSV empty (optional)
+  --hash <MB>                 Global hash if TSV empty (optional)
   --book-depth <ply>          If EPD, default ${BOOK_PLIES_DEFAULT}
   --concurrency <N>           Default: auto max(1,nproc-1)
   --debug <true|false>        Default: false (UCI I/O con timestamps a logs/<tag>.debug)
@@ -76,8 +76,8 @@ while [[ $# -gt 0 ]]; do
     --a) A_NAME_OVERRIDE="${2:-}"; shift 2;;
     --b) B_NAME_OVERRIDE="${2:-}"; shift 2;;
     --tc) TC="${2:-}"; shift 2;;
-    #--threads) GLOBAL_THREADS="${2:-}"; shift 2;;
-    #--hash) GLOBAL_HASH="${2:-}"; shift 2;;
+    --threads) GLOBAL_THREADS="${2:-$THREADS_DEFAULT}"; shift 2;;
+    --hash) GLOBAL_HASH="${2:-$HASH_DEFAULT}"; shift 2;;
     --book-depth) BOOK_PLIES="${2:-}"; shift 2;;
     --concurrency) CONCURRENCY_OVERRIDE="${2:-}"; shift 2;;
     #--seed) SEED="${2:-}"; shift 2;;
@@ -138,16 +138,32 @@ fi
 # Build -engine (same logic as smoke)
 build_engine(){
   local line="$1"
-  #local gthr="${GLOBAL_THREADS:-$THREADS_DEFAULT}"
-  #local ghash="${GLOBAL_HASH:-$HASH_DEFAULT}"
+  local gthr="${GLOBAL_THREADS:-}"
+  local ghash="${GLOBAL_HASH:-}"
+  local has_hash_opt=false
+  local has_threads_opt=false
   IFS=$'\t' read -r name cmd args thr hash uci <<<"$line"
   [[ -x "$cmd" ]] || die "Engine binary not executable: $cmd"
-  #local threads="${thr:-$gthr}"; local hashmb="${hash:-$ghash}"
-  #local optstr=" option.Hash=${hashmb} option.Threads=${threads}"
-  local optstr=""   #Remove if some param is used
+  local threads="${thr:-$gthr}"
+  local hashmb="${hash:-$ghash}"
+  local optstr=""
   if [[ -n "${uci:-}" ]]; then
     IFS=';' read -ra opts <<<"$uci"
-    for kv in "${opts[@]}"; do [[ -z "$kv" ]]&&continue; key="${kv%%=*}"; val="${kv#*=}"; optstr+=" option.${key}=${val}"; done
+    for kv in "${opts[@]}"; do
+      [[ -z "$kv" ]] && continue
+      key="${kv%%=*}"; val="${kv#*=}"
+      case "${key,,}" in
+        hash) has_hash_opt=true;;
+        threads) has_threads_opt=true;;
+      esac
+      optstr+=" option.${key}=${val}"
+    done
+  fi
+  if [[ -n "${hashmb:-}" && $has_hash_opt == false ]]; then
+    optstr+=" option.Hash=${hashmb}"
+  fi
+  if [[ -n "${threads:-}" && $has_threads_opt == false ]]; then
+    optstr+=" option.Threads=${threads}"
   fi
   local argstr=""; [[ -n "${args:-}" ]] && argstr=" args=${args}"
   echo "-engine name=${name} cmd=${cmd}${argstr} proto=uci${optstr}"

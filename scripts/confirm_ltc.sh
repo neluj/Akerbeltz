@@ -21,8 +21,8 @@ A_NAME_OVERRIDE=""
 B_NAME_OVERRIDE=""
 
 CONCURRENCY_OVERRIDE=""
-#GLOBAL_THREADS=""
-#GLOBAL_HASH=""
+GLOBAL_THREADS=""
+GLOBAL_HASH=""
 #SEED=""
 ENGINES_TSV=""
 OPENINGS_FILE=""
@@ -43,8 +43,8 @@ Required:
 Optional general:
   --tc <tc>                 Default: ${TC_DEFAULT}
   --rounds <N>              Default: ${ROUNDS_DEFAULT} (per pairing)
-  --threads <N>             Global default if TSV empty (default ${THREADS_DEFAULT})
-  --hash <MB>               Global default if TSV empty (default ${HASH_DEFAULT})
+  --threads <N>             Global threads if TSV empty (optional)
+  --hash <MB>               Global hash if TSV empty (optional)
   --concurrency <N>         Default: auto max(1,nproc-1)
   --seed <int>              RNG seed
   --adjudicate              Enable conservative adjudication
@@ -67,8 +67,8 @@ while [[ $# -gt 0 ]]; do
     --openings) OPENINGS_FILE="${2:-}"; shift 2;;
     --tc) TC="${2:-}"; shift 2;;
     --rounds) ROUNDS="${2:-}"; shift 2;;
-    #--threads) GLOBAL_THREADS="${2:-}"; shift 2;;
-    #--hash) GLOBAL_HASH="${2:-}"; shift 2;;
+    --threads) GLOBAL_THREADS="${2:-$THREADS_DEFAULT}"; shift 2;;
+    --hash) GLOBAL_HASH="${2:-$HASH_DEFAULT}"; shift 2;;
     --concurrency) CONCURRENCY_OVERRIDE="${2:-}"; shift 2;;
     #--seed) SEED="${2:-}"; shift 2;;
     --adjudicate) ADJUDICATE=true; shift;;
@@ -143,12 +143,32 @@ fi
 
 build_engine(){
   local name="$1"; local line="${ENGINE_BY_NAME[$name]}"
+  local g_threads="${GLOBAL_THREADS:-}"
+  local g_hash="${GLOBAL_HASH:-}"
+  local has_hash_opt=false
+  local has_threads_opt=false
   IFS=$'\t' read -r _name cmd args thr hash uci <<<"$line"
   [[ -x "$cmd" ]] || die "Engine binary not executable: $cmd"
+  local threads="${thr:-$g_threads}"
+  local hashmb="${hash:-$g_hash}"
   local optstr=""
   if [[ -n "${uci:-}" ]]; then
     IFS=';' read -ra opts <<<"$uci"
-    for kv in "${opts[@]}"; do [[ -z "$kv" ]]&&continue; key="${kv%%=*}"; val="${kv#*=}"; optstr+=" option.${key}=${val}"; done
+    for kv in "${opts[@]}"; do
+      [[ -z "$kv" ]] && continue
+      key="${kv%%=*}"; val="${kv#*=}"
+      case "${key,,}" in
+        hash) has_hash_opt=true;;
+        threads) has_threads_opt=true;;
+      esac
+      optstr+=" option.${key}=${val}"
+    done
+  fi
+  if [[ -n "${hashmb:-}" && $has_hash_opt == false ]]; then
+    optstr+=" option.Hash=${hashmb}"
+  fi
+  if [[ -n "${threads:-}" && $has_threads_opt == false ]]; then
+    optstr+=" option.Threads=${threads}"
   fi
   local argstr=""; [[ -n "${args:-}" ]] && argstr=" args=${args}"
   echo "-engine name=${name} cmd=${cmd}${argstr} proto=uci${optstr}"
