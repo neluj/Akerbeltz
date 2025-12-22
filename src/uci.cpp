@@ -52,7 +52,9 @@ void run(){
         }
 
         else if (token == "ucinewgame"){
+            is.clear();
             is.str("startpos");
+            is.seekg(0);
             position(pos, is);
             continue;
         }
