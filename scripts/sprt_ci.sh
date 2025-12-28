@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPRT CI test with cutechess-cli.
-# - Two engines (first two in TSV by default, or --a/--b).
+# - Two engines (first two in engines file by default, or --a/--b).
 # - Openings: EPD or PGN; both colors per opening (-repeat + -games 2).
 # - Default SPRT: elo0=0 elo1=5 alpha=0.05 beta=0.05 (stop on decision).
 # - Default TC: 10+0.1.
@@ -10,7 +10,6 @@ set -euo pipefail
 
 # --- Defaults ---
 TC_DEFAULT="10+0.1"
-HASH_DEFAULT=256
 THREADS_DEFAULT=1
 BOOK_PLIES_DEFAULT=8
 ADJ_RESIGN_SCORE=700
@@ -31,7 +30,6 @@ B_NAME_OVERRIDE=""
 ENGINES_TSV=""
 OPENINGS_FILE=""
 GLOBAL_THREADS=""
-GLOBAL_HASH=""
 TC="$TC_DEFAULT"
 ROUNDS=""   # not set by default; SPRT decides
 GAMES=""    # optional override
@@ -41,20 +39,41 @@ die(){ echo "ERROR: $*" >&2; exit 1; }
 need(){ command -v "$1" >/dev/null 2>&1 || die "'$1' not found in PATH."; }
 timestamp(){ date +"%Y%m%d_%H%M%S"; }
 
+normalize_proto(){
+  local p="${1:-}" name="${2:-}"
+  case "${p,,}" in
+    ""|uci) echo "uci";;
+    xboard|winboard|wb) echo "xboard";;
+    *)
+      if [[ -n "$name" ]]; then
+        die "Unknown proto '$p' for engine '$name' (use uci or xboard/winboard)."
+      else
+        die "Unknown proto '$p' (use uci or xboard/winboard)."
+      fi
+      ;;
+  esac
+}
+
+read_sep_fields(){
+  local line="$1"
+  shift
+  local us=$'\x1f'
+  IFS="$us" read -r "$@" <<<"${line//;/$us}"
+}
+
 usage(){
   cat <<EOF
 Usage: $0 --engines engines.tsv --openings file.(epd|pgn) [options]
 Required:
-  --engines <path.tsv>
+  --engines <path.tsv>         Engines file (semicolon-separated: name;cmd;proto;hash; proto optional: uci|xboard)
   --openings <path.epd|pgn>
 Optional:
-  --a <name>  --b <name>      Pick engines by TSV 'name'
+  --a <name>  --b <name>      Pick engines by 'name' column
   --tc <tc>                   Default: ${TC_DEFAULT}
-  --threads <N>               Global threads if TSV empty (optional)
-  --hash <MB>                 Global hash if TSV empty (optional)
+  --threads <N>               Global threads (optional)
   --book-depth <ply>          If EPD, default ${BOOK_PLIES_DEFAULT}
   --concurrency <N>           Default: auto max(1,nproc-1)
-  --debug <true|false>        Default: false (UCI I/O con timestamps a logs/<tag>.debug)
+  --debug <true|false>        Default: false (protocol I/O con timestamps a logs/<tag>.debug)
   --seed <int>                RNG seed for -srand
   --adjudicate                Enable resign/draw (conservative defaults)
   --sprt-elo0 <n>             H0 (default ${ELO0})
@@ -77,7 +96,6 @@ while [[ $# -gt 0 ]]; do
     --b) B_NAME_OVERRIDE="${2:-}"; shift 2;;
     --tc) TC="${2:-}"; shift 2;;
     --threads) GLOBAL_THREADS="${2:-$THREADS_DEFAULT}"; shift 2;;
-    --hash) GLOBAL_HASH="${2:-$HASH_DEFAULT}"; shift 2;;
     --book-depth) BOOK_PLIES="${2:-}"; shift 2;;
     --concurrency) CONCURRENCY_OVERRIDE="${2:-}"; shift 2;;
     #--seed) SEED="${2:-}"; shift 2;;
@@ -115,14 +133,34 @@ fi
 # Seed
 #if [[ -z "$SEED" ]]; then SEED="$(( (RANDOM<<16) ^ RANDOM ))"; fi
 
-# TSV → lines
-mapfile -t LINES < <(awk -F'\t' 'NR==1{next} NF && $0!~/^[ \t]*#/{print}' "$ENGINES_TSV")
-[[ ${#LINES[@]} -ge 2 ]] || die "Need at least two engines in TSV."
+# Engines file lines (header optional; if present, columns: name cmd proto hash)
+mapfile -t LINES < <(awk -F';' '
+  BEGIN{OFS=";"}
+  NR==1{
+    for(i=1;i<=NF;i++){h[$i]=i}
+    if(h["name"] && h["cmd"]){ has_header=1; next }
+    has_header=0
+  }
+  NF && $0 !~ /^[ \t]*#/ {
+    if(has_header){
+      name = (h["name"] ? $(h["name"]) : "")
+      cmd = (h["cmd"] ? $(h["cmd"]) : "")
+      p = (h["proto"] ? h["proto"] : (h["protocol"] ? h["protocol"] : 0))
+      proto = (p ? $(p) : "")
+      hash = (h["hash"] ? $(h["hash"]) : "")
+      print name, cmd, proto, hash
+    } else {
+      name=$1; cmd=$2; proto=(NF>=3?$3:""); hash=(NF>=4?$4:"")
+      print name, cmd, proto, hash
+    }
+  }
+' "$ENGINES_TSV")
+[[ ${#LINES[@]} -ge 2 ]] || die "Need at least two engines in engines file."
 
 declare -A ENGINE_BY_NAME
-for ln in "${LINES[@]}"; do n="$(echo -e "$ln"|awk -F'\t' '{print $1}')"; ENGINE_BY_NAME["$n"]="$ln"; done
+for ln in "${LINES[@]}"; do n="$(echo -e "$ln"|awk -F';' '{print $1}')"; ENGINE_BY_NAME["$n"]="$ln"; done
 
-resolve_line(){ local n="$1"; local l="${ENGINE_BY_NAME[$n]:-}"; [[ -n "$l" ]] || die "Engine '$n' not in TSV"; echo "$l"; }
+resolve_line(){ local n="$1"; local l="${ENGINE_BY_NAME[$n]:-}"; [[ -n "$l" ]] || die "Engine '$n' not in engines file"; echo "$l"; }
 pick_two(){ echo -e "${LINES[0]}\n${LINES[1]}"; }
 
 if [[ -n "$A_NAME_OVERRIDE" && -n "$B_NAME_OVERRIDE" ]]; then
@@ -131,49 +169,35 @@ if [[ -n "$A_NAME_OVERRIDE" && -n "$B_NAME_OVERRIDE" ]]; then
 else
   mapfile -t PAIR < <(pick_two)
   A_LINE="${PAIR[0]}"; B_LINE="${PAIR[1]}"
-  A_NAME_OVERRIDE="$(echo -e "$A_LINE"|awk -F'\t' '{print $1}')"
-  B_NAME_OVERRIDE="$(echo -e "$B_LINE"|awk -F'\t' '{print $1}')"
+  A_NAME_OVERRIDE="$(echo -e "$A_LINE"|awk -F';' '{print $1}')"
+  B_NAME_OVERRIDE="$(echo -e "$B_LINE"|awk -F';' '{print $1}')"
 fi
 
 # Build -engine (same logic as smoke)
 build_engine(){
   local line="$1"
   local gthr="${GLOBAL_THREADS:-}"
-  local ghash="${GLOBAL_HASH:-}"
-  local has_hash_opt=false
-  local has_threads_opt=false
-  IFS=$'\t' read -r name cmd args thr hash uci <<<"$line"
+  local proto=""
+  read_sep_fields "$line" name cmd proto hash
+  proto="$(normalize_proto "$proto" "$name")"
   [[ -x "$cmd" ]] || die "Engine binary not executable: $cmd"
-  local threads="${thr:-$gthr}"
-  local hashmb="${hash:-$ghash}"
+  local threads="${gthr:-}"
+  local hashmb="${hash:-}"
   local optstr=""
-  if [[ -n "${uci:-}" ]]; then
-    IFS=';' read -ra opts <<<"$uci"
-    for kv in "${opts[@]}"; do
-      [[ -z "$kv" ]] && continue
-      key="${kv%%=*}"; val="${kv#*=}"
-      case "${key,,}" in
-        hash) has_hash_opt=true;;
-        threads) has_threads_opt=true;;
-      esac
-      optstr+=" option.${key}=${val}"
-    done
-  fi
-  if [[ -n "${hashmb:-}" && $has_hash_opt == false ]]; then
+  if [[ -n "${hashmb:-}" ]]; then
     optstr+=" option.Hash=${hashmb}"
   fi
-  if [[ -n "${threads:-}" && $has_threads_opt == false ]]; then
+  if [[ -n "${threads:-}" ]]; then
     optstr+=" option.Threads=${threads}"
   fi
-  local argstr=""; [[ -n "${args:-}" ]] && argstr=" args=${args}"
-  echo "-engine name=${name} cmd=${cmd}${argstr} proto=uci${optstr}"
+  echo "-engine name=${name} cmd=${cmd} proto=${proto}${optstr}"
 }
 
 ENG_A="$(build_engine "$A_LINE")"
 ENG_B="$(build_engine "$B_LINE")"
 
 # Optional safety: ensure we actually built both engines
-[[ -n "$ENG_A" && -n "$ENG_B" ]] || die "Empty engine clauses; check build_engine() / TSV input." #Remove if some param is used
+[[ -n "$ENG_A" && -n "$ENG_B" ]] || die "Empty engine clauses; check build_engine() / engines file input." #Remove if some param is used
 
 # Openings: detect format and set flags
 ext="${OPENINGS_FILE##*.}"; lower_ext="$(echo "$ext" | tr '[:upper:]' '[:lower:]')"
@@ -196,7 +220,7 @@ PGNFILE="./pgn/sprt_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.pgn"
 DEBUGFILE="./logs/sprt_${A_NAME_OVERRIDE}_vs_${B_NAME_OVERRIDE}_${ts}.debug"
 
 echo "=== SPRT configuration ==="
-echo "Engines TSV:   $ENGINES_TSV"
+echo "Engines file:  $ENGINES_TSV"
 echo "A vs B:        $A_NAME_OVERRIDE vs $B_NAME_OVERRIDE"
 echo "Openings:      $OPENINGS_FILE (format: $lower_ext) with color-swap"
 echo "TC:            $TC"
@@ -207,14 +231,14 @@ echo "Concurrency:   $CONCURRENCY"
 #echo "Seed:          $SEED"
 echo "Logs:          $LOGFILE"
 echo "PGN:           $PGNFILE"
-echo "Debug:         $([[ $DEBUG == true ]] && echo "$DEBUGFILE (enabled, UCI I/O to file)" || echo "off")"
+echo "Debug:         $([[ $DEBUG == true ]] && echo "$DEBUGFILE (enabled, protocol I/O to file)" || echo "off")"
 
 #trap "echo 'Aborting…'; kill 0 || true" INT TERM
 
 CMD=( cutechess-cli
   $ENG_A
   $ENG_B
-  -each proto=uci tc="$TC" timemargin=50 ponder=false
+  -each tc="$TC" timemargin=50 ponder=false
   "${OPEN_FLAGS[@]}"
   -repeat
   -concurrency "$CONCURRENCY"
@@ -229,7 +253,7 @@ if [[ -n "$GAMES" ]]; then CMD+=( -games "$GAMES" ); else CMD+=( -games 2 ); fi
 
 $DEBUG && CMD+=( -debug all)
 
-# --- Ejecución con/ sin captura de UCI I/O ---
+# --- Ejecución con/ sin captura de protocol I/O ---
 if $DEBUG; then
   {
     echo "=== DEBUG $(date) ==="
@@ -237,7 +261,7 @@ if $DEBUG; then
     echo "nproc: $(nproc)"
     echo "--- Full command ---"
     printf '%q ' "${CMD[@]}"; echo
-    echo "--- BEGIN UCI I/O ---"
+    echo "--- BEGIN PROTOCOL I/O ---"
   } > "$DEBUGFILE"
 
   stdbuf -oL -eL "${CMD[@]}" 2>&1 \
