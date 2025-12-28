@@ -1,3 +1,4 @@
 name;cmd;proto;hash
-Xake-64;../build/Xake-1.0.0;uci;64
-Xake-128;../build/Xake-1.0.0;uci;128
+Engine1;path/to/Engine1;proto;hash
+Engine2;path/to/Engine2;proto;hash
+Engine3;path/to/Engine3;proto;hash
