@@ -6,7 +6,7 @@
 namespace Xake{
 
 const std::string_view ENGINE_NAME{"@PROJECT_NAME@"};
-const std::string_view ENGINE_VERSION{"@PROJECT_VERSION@"};
+const std::string_view ENGINE_VERSION{"@XAKE_ENGINE_VERSION@"};
 const std::string_view ENGINE_AUTHOR{"@XAKE_ENGINE_AUTHOR@"};
 
 } // namespace Xake

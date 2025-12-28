@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(Xake VERSION 1.0.0 LANGUAGES CXX)
 
+set(XAKE_ENGINE_VERSION "${PROJECT_VERSION}" CACHE STRING "Engine version string")
 set(XAKE_ENGINE_AUTHOR "Julen Aristondo")
 
 set(CMAKE_CXX_STANDARD 23)
@@ -19,7 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR})
 
 find_package(Threads REQUIRED)
 
-option(XAKE_BUILD_TESTS "Build unit tests" ON)
+option(XAKE_BUILD_TESTS "Build unit tests" OFF)
 
 add_subdirectory(src)
 
