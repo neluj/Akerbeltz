@@ -116,13 +116,9 @@ void position(Position & pos, std::istringstream &is){
         return;
 
     pos.set_FEN(fen);
-    //VIDEO uno de los bugs que he tenido al ponerlo en marcha con el protocolo ha sido que a veces is >> arg; se salta y otras no. Solo
-    //se queda el salto en startpos, a que tiene que saltar dos palabras, no solo "moves", sino "startpos" tambien.
-    //is >> arg;
+
     while(is >> arg)
         pos.do_move(make_move(pos, arg));
-
-    //std::cout << pos;
     
 }
 

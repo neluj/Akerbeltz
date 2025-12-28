@@ -389,7 +389,6 @@ bool Position::do_move(Move move){
     Square64 kingsq64{Bitboards::ctz(kingBitboard)};
 
     if(square_is_attacked_bySide(kingsq64, ~sideToMove)){
-        //VIDEO
         sideToMove =~ sideToMove;
         moveHistory[ply-1].positionKey ^= Zobrist::blackMoves;
         undo_move();

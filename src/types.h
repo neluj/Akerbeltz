@@ -42,13 +42,6 @@ enum Piece : int{
 
 const std::string_view PIECE_NAMES{" PNBRQK  pnbrqk "};
 
-/*  NOTE 
-    IMPROVE 
-    inherits from int becouse if a member want to be a explicit number, like PIECE_SIZE=12, 
-    this 12 is an int type, and enum number by default are unsigned int types, so must be casted.
-    Inheriting from int, they all be int by default. This can be checked on cppinsishts
-*/
-
 enum Color : int{
   WHITE,
   BLACK,
@@ -59,7 +52,7 @@ enum Color : int{
 constexpr Piece make_piece(Color c, PieceType pt) { 
   return Piece(((c << 3) + pt) & ~(1 << 4)); 
 }
-//REVIEW para que sirve
+
 constexpr Color piece_color(Piece piece) { 
   return Color(piece >> 3);
 }

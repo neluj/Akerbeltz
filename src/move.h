@@ -5,7 +5,6 @@
 
 namespace Xake{
 
-// VIDEO
 /*Move:
 .... 0000 0000 0000 0000 0000 0000 0000 0011 1111 -> From
 .... 0000 0000 0000 0000 0000 0000 1111 1100 0000 -> To
@@ -54,7 +53,6 @@ enum MoveType{
     CAPTURE
 };
 
-// VIDEO
 enum SpecialMove: int{
     NO_SPECIAL          = 0,
     ENPASSANT           = 1,
