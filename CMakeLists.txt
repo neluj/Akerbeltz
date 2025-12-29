@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE RelWithDebInfo)  # mejor para depurar que Release puro
+  set(CMAKE_BUILD_TYPE Release)  # por defecto Release; para depurar especifica Debug o RelWithDebInfo
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -21,6 +21,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR})
 find_package(Threads REQUIRED)
 
 option(XAKE_BUILD_TESTS "Build unit tests" OFF)
+set(XAKE_ARCH "" CACHE STRING "Optional -march value (e.g., native, x86-64-v3). Leave empty for generic builds.")
 
 add_subdirectory(src)
 

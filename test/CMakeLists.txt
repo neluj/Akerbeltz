@@ -23,7 +23,10 @@ uci_integration_test.cpp
 
 target_link_libraries(${PROJECT_NAME}-test PRIVATE GTest::gtest_main xake_core)
 target_compile_options(${PROJECT_NAME}-test PRIVATE -Wall -Wextra -Wpedantic $<$<CONFIG:Release>:-O3>)
-set_target_properties(${PROJECT_NAME}-test PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+set_target_properties(${PROJECT_NAME}-test PROPERTIES
+  OUTPUT_NAME "Xake-${XAKE_ENGINE_VERSION}-test"
+  INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
+)
 
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME}-test)

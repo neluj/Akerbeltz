@@ -25,5 +25,10 @@ target_link_libraries(Xake PRIVATE xake_core)
 target_compile_options(Xake PRIVATE -Wall -Wextra -Wpedantic $<$<CONFIG:Release>:-O3>)
 set_target_properties(Xake PROPERTIES OUTPUT_NAME "Xake-${XAKE_ENGINE_VERSION}")
 
+if(XAKE_ARCH)
+  target_compile_options(xake_core PRIVATE "-march=${XAKE_ARCH}")
+  target_compile_options(Xake PRIVATE "-march=${XAKE_ARCH}")
+endif()
+
 set_target_properties(Xake PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 set_target_properties(xake_core PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
