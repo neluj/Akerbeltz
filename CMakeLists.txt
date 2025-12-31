@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)  # por defecto Release; para depurar especifica Debug o RelWithDebInfo
+  set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
