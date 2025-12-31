@@ -60,11 +60,10 @@ Core layout and where to look for each subsystem:
 - [Bitboards](https://www.chessprogramming.org/Bitboards) per color and piece type, plus occupancy for white/black/all.
 - [Mailbox](https://www.chessprogramming.org/Mailbox) array for piece-on-square lookups and FEN I/O.
 - [Zobrist Hashing](https://www.chessprogramming.org/Zobrist_Hashing) incremental key for TT/repetition (piece-square, castling, en passant, side).
-- [Make and Unmake](https://www.chessprogramming.org/Make_and_Unmake) history stack with castling rights, en passant square, 50-move counter, ply, and phase weight.
 
 ### Move Generation
 - [Move Generation](https://www.chessprogramming.org/Move_Generation) uses pseudo-legal generation per side; legality is verified by make/unmake in search.
-- [Attack Tables](https://www.chessprogramming.org/Attack_Tables) for pawn, knight, and king attacks.
+- [Attack Tables](https://www.chessprogramming.org/Attacks) for pawn, knight, and king attacks.
 - [Magic Bitboards](https://www.chessprogramming.org/Magic_Bitboards) for sliding piece attacks (rook/bishop/queen).
 
 ### Time management
