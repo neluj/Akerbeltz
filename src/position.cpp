@@ -71,8 +71,8 @@ void Position::clear_position_info(){
 
     moveHistory[ply-1].nextMove = 0;
     moveHistory[ply-1].castlingRight = NO_RIGHT;
-    moveHistory[ply-1].fiftyMovesCounter = 0;
-    moveHistory[ply-1].movesCounter = 1;
+    moveHistory[ply-1].fiftyHalfMoves = 0;
+    moveHistory[ply-1].fullMoves = 1;
     moveHistory[ply-1].enpassantSquare = SQ64_NO_SQUARE;
     moveHistory[ply-1].positionKey = 0;
     moveHistory[ply-1].phaseWeight = 0;
@@ -189,10 +189,10 @@ void Position::set_FEN(std::string fenNotation){
     }
 
     //5.- Set fifty moves counter
-    iss >> moveHistory[ply-1].fiftyMovesCounter;
+    iss >> moveHistory[ply-1].fiftyHalfMoves;
 
     //6.- Set move counter
-    iss >>  moveHistory[ply-1].movesCounter;
+    iss >>  moveHistory[ply-1].fullMoves;
 
     calc_key();
 
@@ -270,7 +270,7 @@ void Position::calc_key(){
 
 bool Position::is_repetition() const {
 
-    for(int i = ply-1 - moveHistory[ply-1].fiftyMovesCounter; i < ply - 1; ++i){
+    for(int i = ply-1 - moveHistory[ply-1].fiftyHalfMoves; i < ply - 1; ++i){
 
         if(moveHistory[ply-1].positionKey == moveHistory[i].positionKey){
             return true;
@@ -345,17 +345,17 @@ bool Position::do_move(Move move){
 
     //Set fifty moves counter
     Piece capturedPiece = captured_piece(move);
-    moveHistory[ply-1].fiftyMovesCounter = moveHistory[ply-2].fiftyMovesCounter+1;
+    moveHistory[ply-1].fiftyHalfMoves = moveHistory[ply-2].fiftyHalfMoves+1;
 
     if(capturedPiece != Piece::NO_PIECE){
         remove_piece(to);
-        moveHistory[ply-1].fiftyMovesCounter = 0;
+        moveHistory[ply-1].fiftyHalfMoves = 0;
     }
 
     //If black move, add 1 to moves counter
-    moveHistory[ply-1].movesCounter = moveHistory[ply-2].movesCounter;
+    moveHistory[ply-1].fullMoves = moveHistory[ply-2].fullMoves;
     if(sideToMove==Color::BLACK)
-        moveHistory[ply-1].movesCounter = moveHistory[ply-2].movesCounter+1;
+        moveHistory[ply-1].fullMoves = moveHistory[ply-2].fullMoves+1;
 
     //Set enpassant square
     if(moveHistory[ply-2].enpassantSquare != Square64::SQ64_NO_SQUARE){
@@ -363,7 +363,7 @@ bool Position::do_move(Move move){
     }
     moveHistory[ply-1].enpassantSquare = Square64::SQ64_NO_SQUARE;
     if(piece_type(mailbox[from]) == PieceType::PAWN){
-        moveHistory[ply-1].fiftyMovesCounter = 0;
+        moveHistory[ply-1].fiftyHalfMoves = 0;
         
         if(sideToMove==Color::WHITE && specialMove == SpecialMove::PAWN_START){
             moveHistory[ply-1].enpassantSquare = Square64(from + Direction::NORTH);
@@ -456,8 +456,8 @@ void Position::undo_move(){
 
     moveHistory[ply-2].nextMove = 0;
     moveHistory[ply-1].castlingRight = NO_RIGHT;
-    moveHistory[ply-1].fiftyMovesCounter = 0;
-    moveHistory[ply-1].movesCounter = 0;
+    moveHistory[ply-1].fiftyHalfMoves = 0;
+    moveHistory[ply-1].fullMoves = 0;
     moveHistory[ply-1].enpassantSquare = Square64::SQ64_NO_SQUARE;
     moveHistory[ply-1].positionKey = 0;
     moveHistory[ply-1].phaseWeight = 0;
@@ -533,11 +533,11 @@ void Position::do_null_move() {
 
     moveHistory[ply-1].nextMove = NOMOVE;
 
-    moveHistory[ply-1].fiftyMovesCounter = moveHistory[ply-2].fiftyMovesCounter + 1;
+    moveHistory[ply-1].fiftyHalfMoves = moveHistory[ply-2].fiftyHalfMoves + 1;
 
-    moveHistory[ply-1].movesCounter = moveHistory[ply-2].movesCounter;
+    moveHistory[ply-1].fullMoves = moveHistory[ply-2].fullMoves;
     if (sideToMove == Color::BLACK)
-        moveHistory[ply-1].movesCounter = moveHistory[ply-2].movesCounter + 1;
+        moveHistory[ply-1].fullMoves = moveHistory[ply-2].fullMoves + 1;
 
     if (moveHistory[ply-2].enpassantSquare != Square64::SQ64_NO_SQUARE) {
         moveHistory[ply-1].positionKey ^= Zobrist::enpassantSquare[square_file(moveHistory[ply-2].enpassantSquare)];
@@ -555,8 +555,8 @@ void Position::undo_null_move(){
 
     moveHistory[ply-1].nextMove = 0;
     moveHistory[ply-1].castlingRight = NO_RIGHT;
-    moveHistory[ply-1].fiftyMovesCounter = 0;
-    moveHistory[ply-1].movesCounter = 0;
+    moveHistory[ply-1].fiftyHalfMoves = 0;
+    moveHistory[ply-1].fullMoves = 0;
     moveHistory[ply-1].enpassantSquare = Square64::SQ64_NO_SQUARE;
     moveHistory[ply-1].positionKey = 0;
     moveHistory[ply-1].phaseWeight = 0;

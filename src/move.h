@@ -2,7 +2,7 @@
 #define INCLUDE_MOVE_H
 
 #include "types.h"
-
+#include <cstdint>
 namespace Xake{
 
 /*Move:
@@ -39,7 +39,7 @@ constexpr MoveScore KILLERMOVE_SOCORE_1 = (MS_ONE << 31);
 
 //[attackerType][capturedType]
 constexpr MoveScore MVVLVAScores[PIECETYPE_SIZE][PIECETYPE_SIZE] = {
-    {0,  0,  0,  0,  0,  0, 0},
+    {0,  0,  0,  0,  0,  0,  0},
     {0, (MoveScore{6} << CAP_SHIFT), (MoveScore{12} << CAP_SHIFT), (MoveScore{18} << CAP_SHIFT), (MoveScore{24} << CAP_SHIFT), (MoveScore{30} << CAP_SHIFT), 0},
     {0, (MoveScore{5} << CAP_SHIFT), (MoveScore{11} << CAP_SHIFT), (MoveScore{17} << CAP_SHIFT), (MoveScore{23} << CAP_SHIFT), (MoveScore{29} << CAP_SHIFT), 0},
     {0, (MoveScore{4} << CAP_SHIFT), (MoveScore{10} << CAP_SHIFT), (MoveScore{16} << CAP_SHIFT), (MoveScore{22} << CAP_SHIFT), (MoveScore{28} << CAP_SHIFT), 0},

@@ -12,8 +12,8 @@ namespace Xake{
     struct HistoryInfo{
         Move nextMove;
         CastlingRight castlingRight;
-        unsigned short int fiftyMovesCounter;
-        unsigned short int movesCounter;
+        unsigned short int fiftyHalfMoves;
+        unsigned short int fullMoves;
         Square64 enpassantSquare;
         Key positionKey;
         Evaluate::GamePhaseWeight phaseWeight;
@@ -85,10 +85,10 @@ inline Square64 Position::get_enpassant_square() const{
     return moveHistory[ply-1].enpassantSquare;
 }
 inline unsigned short Position::get_fifty_moves_counter() const{
-    return moveHistory[ply-1].fiftyMovesCounter;
+    return moveHistory[ply-1].fiftyHalfMoves;
 }
 inline unsigned short Position::get_moves_counter() const{
-    return moveHistory[ply-1].movesCounter;
+    return moveHistory[ply-1].fullMoves;
 }
 inline Piece Position::get_mailbox_piece(Square64 square) const{
     return mailbox[square];
