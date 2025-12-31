@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(Xake VERSION 1.0.0 LANGUAGES CXX)
+project(Akerbeltz VERSION 1.0.0 LANGUAGES CXX)
 
-set(XAKE_ENGINE_VERSION "${PROJECT_VERSION}" CACHE STRING "Engine version string")
-set(XAKE_ENGINE_AUTHOR "Julen Aristondo")
+set(AKERBELTZ_ENGINE_VERSION "${PROJECT_VERSION}" CACHE STRING "Engine version string")
+set(AKERBELTZ_ENGINE_AUTHOR "Julen Aristondo")
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,12 +20,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR})
 
 find_package(Threads REQUIRED)
 
-option(XAKE_BUILD_TESTS "Build unit tests" OFF)
-set(XAKE_ARCH "" CACHE STRING "Optional -march value (e.g., native, x86-64-v3). Leave empty for generic builds.")
+option(AKERBELTZ_BUILD_TESTS "Build unit tests" OFF)
+set(AKERBELTZ_ARCH "" CACHE STRING "Optional -march value (e.g., native, x86-64-v3). Leave empty for generic builds.")
 
 add_subdirectory(src)
 
-if(XAKE_BUILD_TESTS)
+if(AKERBELTZ_BUILD_TESTS)
   enable_testing()
   add_subdirectory(test)
 endif()

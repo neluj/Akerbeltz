@@ -4,7 +4,7 @@
 #include "position.h"
 #include "ttable.h"
 
-using namespace Xake;
+using namespace Akerbeltz;
 using namespace TestHelpers;
 
 namespace {

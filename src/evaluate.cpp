@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Xake {
+namespace Akerbeltz {
 
 using namespace Bitboards;
 namespace Evaluate {
@@ -429,4 +429,4 @@ static inline Score mg_eg_blend(double mg, double eg, int mgWeight, int egWeight
 }
 
 } // namespace Evaluate
-} // namespace Xake
+} // namespace Akerbeltz

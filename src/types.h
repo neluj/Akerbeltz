@@ -1,4 +1,4 @@
-/*General type definitios for Xake*/
+/*General type definitios for Akerbeltz*/
 
 #ifndef INCLUDE_TYPES_H
 #define INCLUDE_TYPES_H
@@ -8,7 +8,7 @@
 #include <string_view>
 #include <chrono>
 
-namespace Xake{
+namespace Akerbeltz{
 
 using DepthSize = uint16_t;
 using NodesSize = uint64_t;
@@ -160,6 +160,6 @@ inline CastlingRight&   operator|=(CastlingRight& cr1, int cr2){ return cr1 = Ca
 constexpr CastlingRight   operator&(CastlingRight cr1, int cr2){ return CastlingRight(int(cr1) & cr2); }
 inline CastlingRight&   operator&=(CastlingRight& cr1, int cr2){ return cr1 = CastlingRight(cr1 & cr2); }
 
-} // namespace Xake
+} // namespace Akerbeltz
 
 #endif // #ifndef INCLUDE_TYPES_H

@@ -4,7 +4,7 @@
 #include <vector>
 #include "move.h"
 
-namespace Xake{
+namespace Akerbeltz{
 
 class Position;
 
@@ -25,6 +25,6 @@ void generate_pseudo_moves(const Position &pos, MoveList &moveList);
 void generate_pseudo_captures(Position &pos, MoveList &moveList);
 
 
-} // namespace Xake
+} // namespace Akerbeltz
 }
 #endif // #ifndef INCLUDE_MOVEGENERATOR_H

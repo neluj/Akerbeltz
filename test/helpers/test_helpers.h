@@ -1,5 +1,5 @@
-#ifndef XAKE_TEST_HELPERS_H
-#define XAKE_TEST_HELPERS_H
+#ifndef AKERBELTZ_TEST_HELPERS_H
+#define AKERBELTZ_TEST_HELPERS_H
 
 #include <initializer_list>
 #include <mutex>
@@ -9,7 +9,7 @@
 #include "evaluate.h"
 #include "position.h"
 
-namespace Xake::TestHelpers {
+namespace Akerbeltz::TestHelpers {
 
 inline Bitboard squares(std::initializer_list<Square64> list) {
     Bitboard board = Bitboard{0};
@@ -39,4 +39,4 @@ inline void init_evaluate_once() {
 
 }  // namespace
 
-#endif  // XAKE_TEST_HELPERS_H
+#endif  // AKERBELTZ_TEST_HELPERS_H

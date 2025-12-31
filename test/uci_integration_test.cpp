@@ -13,7 +13,7 @@
 #include "uci.h"
 #include "helpers/test_helpers.h"
 
-using namespace Xake;
+using namespace Akerbeltz;
 using namespace TestHelpers;
 
 namespace {

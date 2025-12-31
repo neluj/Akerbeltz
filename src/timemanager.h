@@ -6,7 +6,7 @@
 #include <optional>
 #include <algorithm>
 
-namespace Xake {
+namespace Akerbeltz {
 
 class TimeManager {
 
@@ -51,5 +51,5 @@ private:
     double ema_growth = 0.0;
 
 };
-} // namespace Xake
+} // namespace Akerbeltz
 #endif

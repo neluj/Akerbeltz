@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace Xake {
+namespace Akerbeltz {
 
 class Position;
 
@@ -55,6 +55,6 @@ namespace TT {
 
 } // namespace TT
 
-} // namespace Xake
+} // namespace Akerbeltz
 
 #endif

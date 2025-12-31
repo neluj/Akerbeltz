@@ -7,7 +7,7 @@
 
 #include <atomic>
 
-namespace Xake{
+namespace Akerbeltz{
 
 class Position;
 
@@ -16,7 +16,7 @@ namespace Search{
         DepthSize depth;
         NodesSize nodes;
         DepthSize searchPly;
-        Xake::TimeManager timeManager;
+        Akerbeltz::TimeManager timeManager;
         std::atomic_bool stop;
     };
 

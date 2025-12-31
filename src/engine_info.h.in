@@ -3,12 +3,12 @@
 
 #include <string_view>
 
-namespace Xake{
+namespace Akerbeltz{
 
 const std::string_view ENGINE_NAME{"@PROJECT_NAME@"};
-const std::string_view ENGINE_VERSION{"@XAKE_ENGINE_VERSION@"};
-const std::string_view ENGINE_AUTHOR{"@XAKE_ENGINE_AUTHOR@"};
+const std::string_view ENGINE_VERSION{"@AKERBELTZ_ENGINE_VERSION@"};
+const std::string_view ENGINE_AUTHOR{"@AKERBELTZ_ENGINE_AUTHOR@"};
 
-} // namespace Xake
+} // namespace Akerbeltz
 
 #endif // #ifndef INCLUDE_ENGINE_INFO_H

@@ -4,7 +4,7 @@ configure_file(
   @ONLY
 )
 
-add_library(xake_core
+add_library(akerbeltz_core
   position.cpp
   attacks.cpp
   movegen.cpp
@@ -15,20 +15,20 @@ add_library(xake_core
   ttable.cpp
 )
 
-target_include_directories(xake_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(xake_core PUBLIC Threads::Threads)
+target_include_directories(akerbeltz_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(akerbeltz_core PUBLIC Threads::Threads)
 
-target_compile_options(xake_core PRIVATE -Wall -Wextra -Wpedantic $<$<CONFIG:Release>:-O3>)
+target_compile_options(akerbeltz_core PRIVATE -Wall -Wextra -Wpedantic $<$<CONFIG:Release>:-O3>)
 
-add_executable(Xake main.cpp)
-target_link_libraries(Xake PRIVATE xake_core)
-target_compile_options(Xake PRIVATE -Wall -Wextra -Wpedantic $<$<CONFIG:Release>:-O3>)
-set_target_properties(Xake PROPERTIES OUTPUT_NAME "Xake-${XAKE_ENGINE_VERSION}")
+add_executable(Akerbeltz main.cpp)
+target_link_libraries(Akerbeltz PRIVATE akerbeltz_core)
+target_compile_options(Akerbeltz PRIVATE -Wall -Wextra -Wpedantic $<$<CONFIG:Release>:-O3>)
+set_target_properties(Akerbeltz PROPERTIES OUTPUT_NAME "Akerbeltz-${AKERBELTZ_ENGINE_VERSION}")
 
-if(XAKE_ARCH)
-  target_compile_options(xake_core PRIVATE "-march=${XAKE_ARCH}")
-  target_compile_options(Xake PRIVATE "-march=${XAKE_ARCH}")
+if(AKERBELTZ_ARCH)
+  target_compile_options(akerbeltz_core PRIVATE "-march=${AKERBELTZ_ARCH}")
+  target_compile_options(Akerbeltz PRIVATE "-march=${AKERBELTZ_ARCH}")
 endif()
 
-set_target_properties(Xake PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
-set_target_properties(xake_core PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+set_target_properties(Akerbeltz PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+set_target_properties(akerbeltz_core PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)

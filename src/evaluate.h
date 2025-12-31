@@ -4,7 +4,7 @@
 #include "types.h"
 
 
-namespace Xake{
+namespace Akerbeltz{
 
 class Position;
 

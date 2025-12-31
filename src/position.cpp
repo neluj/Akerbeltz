@@ -3,7 +3,7 @@
 
 #include <random>
 
-namespace Xake{
+namespace Akerbeltz{
 
 namespace Zobrist{
 
@@ -566,4 +566,4 @@ void Position::undo_null_move(){
 
 
 
-} // namespace Xake
+} // namespace Akerbeltz

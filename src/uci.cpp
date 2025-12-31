@@ -12,7 +12,7 @@
 #include <thread>
 #include <functional>
 
-namespace Xake{
+namespace Akerbeltz{
 
 namespace UCI{
 

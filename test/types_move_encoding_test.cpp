@@ -3,7 +3,7 @@
 #include "move.h"
 #include "types.h"
 
-using namespace Xake;
+using namespace Akerbeltz;
 
 namespace {
 

@@ -1,7 +1,7 @@
 #include "timemanager.h"
 
 
-namespace Xake {
+namespace Akerbeltz {
 
 
     bool TimeManager::enough_time_for_next_iteration(Ms last_ms) const {

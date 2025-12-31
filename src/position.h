@@ -7,7 +7,7 @@
 #include <sstream>
 
 
-namespace Xake{
+namespace Akerbeltz{
 
     struct HistoryInfo{
         Move nextMove;
@@ -110,6 +110,6 @@ inline bool Position::is_endgame_phase() const{
 }
 
 
-} // namespace Xake
+} // namespace Akerbeltz
 
 #endif // #ifndef INCLUDE_POSITION_H

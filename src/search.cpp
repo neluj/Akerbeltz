@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-namespace Xake{
+namespace Akerbeltz{
 
 namespace Search{
 

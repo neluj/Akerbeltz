@@ -4,7 +4,7 @@
 
 #include "timemanager.h"
 
-using namespace Xake;
+using namespace Akerbeltz;
 
 namespace {
 

@@ -1,6 +1,6 @@
 #include "attacks.h"
 
-namespace Xake{
+namespace Akerbeltz{
 
 using namespace Bitboards;
 namespace Attacks {

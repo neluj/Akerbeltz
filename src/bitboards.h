@@ -4,7 +4,7 @@
 #include "types.h"
 #include <iostream>
 
-namespace Xake{
+namespace Akerbeltz{
 
 
 using Bitboard = uint64_t;
@@ -98,7 +98,7 @@ namespace Bitboards {
     }
 
 };
-} // namespace Xake
+} // namespace Akerbeltz
 
 #endif // #ifndef INCLUDE_BITBOARDS_H
 

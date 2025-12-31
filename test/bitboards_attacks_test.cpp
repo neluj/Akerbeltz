@@ -6,7 +6,7 @@
 #include "types.h"
 #include "helpers/test_helpers.h"
 
-using namespace Xake;
+using namespace Akerbeltz;
 using namespace Bitboards;
 using namespace TestHelpers;
 

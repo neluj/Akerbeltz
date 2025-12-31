@@ -3,7 +3,7 @@
 
 #include "bitboards.h"
 
-namespace Xake{
+namespace Akerbeltz{
 
 
 namespace Attacks {
@@ -33,6 +33,6 @@ namespace Attacks {
     Bitboard sliding_diagonal_attacks(Square64 sq64, Bitboard occupied);
 };  
 
-} // namespace Xake
+} // namespace Akerbeltz
 
 #endif // #ifndef INCLUDE_ATTACKS_H

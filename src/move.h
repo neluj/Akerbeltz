@@ -3,7 +3,7 @@
 
 #include "types.h"
 #include <cstdint>
-namespace Xake{
+namespace Akerbeltz{
 
 /*Move:
 .... 0000 0000 0000 0000 0000 0000 0000 0011 1111 -> From
@@ -140,7 +140,7 @@ inline std::string algebraic_move(Move move) {
     return algebraic_move;
 }
 
-} // namespace Xake
+} // namespace Akerbeltz
 
 #endif // #ifndef INCLUDE_MOVE_H
 

@@ -2,7 +2,7 @@
 #include "position.h"
 #include "attacks.h"
 
-namespace Xake{
+namespace Akerbeltz{
 
 namespace MoveGen{
 
