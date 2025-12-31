@@ -1,0 +1,14 @@
+#ifndef INCLUDE_ENGINE_INFO_H
+#define INCLUDE_ENGINE_INFO_H
+
+#include <string_view>
+
+namespace Akerbeltz{
+
+const std::string_view ENGINE_NAME{"@PROJECT_NAME@"};
+const std::string_view ENGINE_VERSION{"@AKERBELTZ_ENGINE_VERSION@"};
+const std::string_view ENGINE_AUTHOR{"@AKERBELTZ_ENGINE_AUTHOR@"};
+
+} // namespace Akerbeltz
+
+#endif // #ifndef INCLUDE_ENGINE_INFO_H

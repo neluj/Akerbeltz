@@ -1,0 +1,5 @@
+#Binary folders
+/.vscode
+/build
+/scripts/logs
+/scripts/pgn
