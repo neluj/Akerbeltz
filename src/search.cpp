@@ -93,7 +93,9 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     ++searchInfo.nodes;
 
-    bool isCheck = position.square_is_attacked_bySide(Square64(Bitboards::ctz(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING))), ~position.get_side_to_move());
+    bool isCheck = position.square_is_attacked_bySide(Square64
+        (Bitboards::ctz(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING))), 
+        ~position.get_side_to_move());
 
     if(isCheck){
         depth++;
@@ -246,25 +248,37 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         return Evaluate::calc_score(position);
     }
 
-    Score score = Evaluate::calc_score(position);
+    bool isCheck = position.square_is_attacked_bySide(
+        Square64(Bitboards::ctz(position.get_pieceTypes_bitboard(position.get_side_to_move(), KING))),
+        ~position.get_side_to_move()
+    );
 
-    if(score >= beta){
-        return beta;
-    }
-
-    if(score > alpha){
-        alpha = score;
-    }
+    Score score = -CHECKMATE_SCORE;
 
     MoveGen::MoveList moveList;
-    MoveGen::generate_pseudo_captures(position, moveList);
+
+    if (isCheck) {
+        MoveGen::generate_pseudo_moves(position, moveList);
+    } else {
+        score = Evaluate::calc_score(position);
+
+        if(score >= beta){
+            return beta;
+        }
+
+        if(score > alpha){
+            alpha = score;
+        }
+
+        MoveGen::generate_pseudo_captures(position, moveList);
+    }
 
     for (int mIndx = 0; mIndx < moveList.size; ++mIndx) {
         Move move = moveList.moves[mIndx];
 
-        if (move_special(move) == ENPASSANT) {
+        if (is_capture(move) && move_special(move) == ENPASSANT) {
             moveList.moves[mIndx] = set_heuristic_score(move, MVVLVAScores[PAWN][PAWN]);
-        } else {
+        } else if (is_capture(move)) {
             moveList.moves[mIndx] = set_heuristic_score(
                 move,
                 MVVLVAScores[piece_type(attacker_piece(move))][piece_type(captured_piece(move))]
@@ -274,6 +288,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
 
     score = -CHECKMATE_SCORE;
     Move bestMove = 0;
+    int legalMoves = 0;
 
     for(int mIndx = 0; mIndx < moveList.size; ++mIndx){
 
@@ -284,6 +299,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
             continue;
         }
         ++searchInfo.searchPly;
+        ++legalMoves;
 
         score = -quiescence_search(position, searchInfo, -beta, -alpha);
         position.undo_move();
@@ -298,6 +314,12 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
             alpha = score;
             bestMove = move;
         }
+    }
+
+    if (isCheck && legalMoves == 0) {
+        Score res = -CHECKMATE_SCORE + searchInfo.searchPly;
+        TT::store(position.get_key(), 0, res, TT::FLAG_EXACT, NOMOVE);
+        return res;
     }
 
     if (bestMove != NOMOVE) {
