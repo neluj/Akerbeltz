@@ -259,6 +259,19 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
     MoveGen::MoveList moveList;
     MoveGen::generate_pseudo_captures(position, moveList);
 
+    for (int mIndx = 0; mIndx < moveList.size; ++mIndx) {
+        Move move = moveList.moves[mIndx];
+
+        if (move_special(move) == ENPASSANT) {
+            moveList.moves[mIndx] = set_heuristic_score(move, MVVLVAScores[PAWN][PAWN]);
+        } else {
+            moveList.moves[mIndx] = set_heuristic_score(
+                move,
+                MVVLVAScores[piece_type(attacker_piece(move))][piece_type(captured_piece(move))]
+            );
+        }
+    }
+
     score = -CHECKMATE_SCORE;
     Move bestMove = 0;
 
