@@ -85,6 +85,10 @@ Score alpha_beta(Position &position, SearchInfo &searchInfo, Score alpha, Score 
 
     if (is_draw(position, searchInfo)) { return DRAW_SOCORE; }
 
+    if (searchInfo.searchPly > MAX_DEPTH - 1) {
+        return Evaluate::calc_score(position);
+    }
+
     if(depth==0) { return quiescence_search(position, searchInfo, alpha, beta); }
 
     ++searchInfo.nodes;
@@ -238,7 +242,7 @@ Score quiescence_search(Position &position, SearchInfo &searchInfo, Score alpha,
         return DRAW_SOCORE;
     }
 
-    if(searchInfo.depth > MAX_DEPTH - 1){
+    if (searchInfo.searchPly > MAX_DEPTH - 1){
         return Evaluate::calc_score(position);
     }
 
