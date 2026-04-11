@@ -1,5 +1,9 @@
 <div align="center">
-  <img src="img/akerbeltz-logo.png" alt="Akerbeltz logo" width="280">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="img/akerbeltz-white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="img/akerbeltz-black.svg">
+    <img src="img/akerbeltz-black.svg" alt="Akerbeltz logo" width="280">
+  </picture>
   <h3>Akerbeltz</h3>
   <p>
     <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/neluj/Akerbeltz"></a>
@@ -27,10 +31,10 @@ Akerbeltz is a UCI chess engine written in C++23. This project started out of in
 
 ## Project layout
 Core layout and where to look for each subsystem:
-- `src/` engine core (position, movegen, search, eval, TT, UCI, time manager).
+- `src/` engine core.
 - `test/` unit and integration tests (GoogleTest v1.14.0).
-- `scripts/` utilities for perft, SPRT/smoke runs, and logs/results.
-- `img/` logo and other static assets.
+- `scripts/` utilities for perft.
+- `img/` logos.
 - `CMakeLists.txt` and `src/CMakeLists.txt` for the main build; `test/CMakeLists.txt` for tests.
 - `README.md` project overview and usage.
 
@@ -74,72 +78,31 @@ Core layout and where to look for each subsystem:
 - [Perft](https://www.chessprogramming.org/Perft) via `go perft` to validate move generation.
 
 ## Engine strength
-These results are from internal matches and are meant as a quick reference. Opponents are selected from the [CCRL](https://computerchess.org.uk/ccrl/404/) (Computer Chess Rating Lists). CCRL is a community rating list that benchmarks engines under standardized conditions and publishes multiple lists for different time controls (e.g., 40/4, 40/15, blitz). The table uses the 40/4 list as of 2025-12-20; 40/4 means 40 moves in 4 minutes. The tests were run on Ubuntu 24.04.3 LTS, Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, 16 GB RAM. Locally, the matches were run with the smoke test script (`scripts/smoke_test_ab.sh`) using cutechess time control `--tc 40/4` and the [UHO 2024 opening book](https://www.sp-cc.de/uho_2024.htm), specifically the 8‑move positions set in the 085–094 Elo band (EPD). The estimated Elo difference (Akerbeltz-1.0.0 minus opponent) and +/- values are taken from the match summary and should be read as rough indicators for this run.
 
 <table>
   <thead>
     <tr>
-      <th>Engine</th>
       <th>Version</th>
-      <th>Elo</th>
-      <th>Akerbeltz-1.0.0 vs (W-L-D)</th>
-      <th>Score</th>
-      <th>Elo diff (Akerbeltz-1.0.0 +/-)</th>
+      <th>List</th>
+      <th>Rating</th>
+      <th>Rank</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td><a href="https://github.com/JasonCreighton/snowy">Snowy</a></td>
-      <td>0.2 64-bit</td>
-      <td>1871 (+20/-20)</td>
-      <td>69-287-44</td>
-      <td>0.228</td>
-      <td>-212.4 +/- 37.5</td>
+      <td>1.0.0</td>
+      <td>Local</td>
+      <td>1615</td>
+      <td>-</td>
     </tr>
     <tr>
-      <td><a href="https://github.com/stnevans/Apollo">Apollo</a></td>
-      <td>1.2.1 64-bit</td>
-      <td>1665 (+19/-19)</td>
-      <td>119-234-47</td>
-      <td>0.356</td>
-      <td>-102.8 +/- 33.3</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/GunshipPenguin/shallow-blue">Shallow Blue</a></td>
-      <td>2.0.0 64-bit</td>
-      <td>1572 (+20/-20)</td>
-      <td>178-174-48</td>
-      <td>0.505</td>
-      <td>3.5 +/- 32.0</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/En-En-Code/cookiecat">CookieCat</a></td>
-      <td>2012.10.10 64-bit</td>
-      <td>1564 (+20/-20)</td>
-      <td>205-125-70</td>
-      <td>0.600</td>
-      <td>70.4 +/- 31.5</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/NicolasSegl/Athena">Athena</a></td>
-      <td>1.0.1</td>
-      <td>1529 (+19/-19)</td>
-      <td>215-39-146</td>
-      <td>0.720</td>
-      <td>164.1 +/- 28.1</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/tm512/minnow">Minnow</a></td>
-      <td>no version</td>
-      <td>1446 (+19/-19)</td>
-      <td>241-103-56</td>
-      <td>0.672</td>
-      <td>125.0 +/- 33.4</td>
+      <td>1.1.0</td>
+      <td>Local</td>
+      <td>2254</td>
+      <td>-</td>
     </tr>
   </tbody>
 </table>
-
-Based on these matches, **Akerbeltz-1.0.0 lands around ~1615 Elo for this specific pool and time control**, which is the key takeaway from the table.
 
 ## Build and run
 
@@ -153,9 +116,9 @@ Note: other toolchains/compilers may work, but the ones listed below are the one
   cmake -S . -B build
   cmake --build build
   ```
-- Run the engine (UCI). The binary is named `Akerbeltz-<version>` (default `Akerbeltz-1.0.0`, override with `-DAKERBELTZ_ENGINE_VERSION=...`):
+- Run the engine (UCI). The binary is named `Akerbeltz-<version>`:
   ```bash
-  ./build/Akerbeltz-1.0.0
+  ./build/Akerbeltz-1.1.0
   ```
 - Tests are OFF by default; enable them with `-DAKERBELTZ_BUILD_TESTS=ON` when configuring (GoogleTest is fetched automatically).
   ```bash
@@ -167,28 +130,51 @@ Note: other toolchains/compilers may work, but the ones listed below are the one
   ctest --test-dir build --output-on-failure
   ```
 
-### Windows (MSYS2 MINGW64)
-- Prerequisites: MSYS2 MINGW64 with GCC (mingw-w64-x86_64-gcc), CMake >= 3.20, and Ninja.
-- Configure and build (Release by default):
+### Windows (MSYS2 UCRT64)
+- Prerequisites: use the `MSYS2 UCRT64` shell with GCC, CMake ≥ 3.20, and Ninja:
   ```bash
-  cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
-  cmake --build build
+  pacman -S --needed mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja
   ```
-- Run the engine (UCI). The binary is named `Akerbeltz-<version>.exe` (default `Akerbeltz-1.0.0.exe`, override with `-DAKERBELTZ_ENGINE_VERSION=...`):
+- Configure and build a generic static binary (recommended for widest compatibility across Windows PCs):
   ```bash
-  ./build/Akerbeltz-1.0.0.exe
+  cmake -S . -B build-win -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DAKERBELTZ_BUILD_TESTS=OFF \
+    -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++"
+  cmake --build build-win -j
+  strip build-win/Akerbeltz-1.1.0.exe
   ```
-- Tests are OFF by default; enable them with `-DAKERBELTZ_BUILD_TESTS=ON` when configuring:
+- Run the engine (UCI):
   ```bash
-  cmake -S . -B build -G Ninja -DAKERBELTZ_BUILD_TESTS=ON DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
-  cmake --build build
+  ./build-win/Akerbeltz-1.1.0.exe
   ```
-- Run tests:
+- Tests are OFF by default; enable them in a separate build directory if needed:
   ```bash
-  ctest --test-dir build --output-on-failure
+  cmake -S . -B build-win-tests -G Ninja -DCMAKE_BUILD_TYPE=Release -DAKERBELTZ_BUILD_TESTS=ON
+  cmake --build build-win-tests -j
+  ctest --test-dir build-win-tests --output-on-failure
   ```
+- Static linking here is meant to avoid MinGW runtime DLL dependencies such as `libstdc++-6.dll`, `libgcc_s_seh-1.dll`, and `libwinpthread-1.dll`.
 
 ## Using the engine
+
+### GUI (UCI)
+- The engine speaks UCI, so it can be used with any UCI-compatible GUI. The tools listed below are just examples.
+- Arena (Windows/Linux):
+  1. Open [Arena](https://www.playwitharena.de).
+  2. Go to `Engines → Install New Engine...`.
+  3. Select `Akerbeltz-<version>` (Linux) or `Akerbeltz-<version>.exe` (Windows) from your build folder.
+  4. When prompted, choose UCI as the protocol.
+  5. Configure options like `Hash` under `Engines → Manage...` if needed.
+  6. Start a new game and select Akerbeltz as the engine.
+- Cute Chess (Linux/Windows/macOS):
+  1. Open Cute Chess and go to the engine manager.
+  2. Add a new engine and point it to `Akerbeltz-<version>` (Linux/macOS) or `Akerbeltz-<version>.exe` (Windows).
+  3. Select UCI as the protocol and save the engine.
+  4. Start a game or tournament and pick Akerbeltz as one of the engines.
+- Other UCI GUIs (e.g., Banksia, SCID vs. PC) are available on Linux/macOS/Windows:
+  1. Add a new engine and point it to `Akerbeltz-<version>` (Linux/macOS) or `Akerbeltz-<version>.exe` (Windows).
+  2. Select UCI as the protocol and adjust options (e.g., `Hash`) if available.
 
 ### Console (UCI)
 - [UCI](https://www.chessprogramming.org/UCI) (Universal Chess Interface) Protocol is a text protocol used to connect engines with GUIs and tournament tools.
@@ -212,7 +198,7 @@ Note: other toolchains/compilers may work, but the ones listed below are the one
   - `d`: prints the board state (debug helper).
 - Examples (UCI):
   ```bash
-  ./build/Akerbeltz-1.0.0
+  ./build/Akerbeltz-1.1.0
   uci
   isready
   position startpos
@@ -228,62 +214,7 @@ Note: other toolchains/compilers may work, but the ones listed below are the one
   go perft 5
   ```
 
-### GUI (UCI)
-- The engine speaks UCI, so it can be used with any UCI-compatible GUI. The tools listed below are just examples.
-- Arena (Windows/Linux):
-  1. Open [Arena](https://www.playwitharena.de).
-  2. Go to `Engines → Install New Engine...`.
-  3. Select `Akerbeltz-<version>` (Linux) or `Akerbeltz-<version>.exe` (Windows) from your build folder.
-  4. When prompted, choose UCI as the protocol.
-  5. Configure options like `Hash` under `Engines → Manage...` if needed.
-  6. Start a new game and select Akerbeltz as the engine.
-- Cute Chess (Linux/Windows/macOS):
-  1. Open Cute Chess and go to the engine manager.
-  2. Add a new engine and point it to `Akerbeltz-<version>` (Linux/macOS) or `Akerbeltz-<version>.exe` (Windows).
-  3. Select UCI as the protocol and save the engine.
-  4. Start a game or tournament and pick Akerbeltz as one of the engines.
-- Other UCI GUIs (e.g., Banksia, SCID vs. PC) are available on Linux/macOS/Windows:
-  1. Add a new engine and point it to `Akerbeltz-<version>` (Linux/macOS) or `Akerbeltz-<version>.exe` (Windows).
-  2. Select UCI as the protocol and adjust options (e.g., `Hash`) if available.
-
 ## Scripts
-- The shell scripts (`smoke_test_ab.sh`, `sprt_ci.sh`, `confirm_ltc.sh`) are Bash-based. On Windows, run them via WSL2 or a similar environment.
-- Those three scripts read engine definitions from `scripts/engines.tsv` and write logs to `scripts/logs/` and PGNs to `scripts/pgn/`.
-- `scripts/engines.tsv` is semicolon-separated with columns: `name`, `cmd`, `proto` (optional: `uci` or `xboard`/`winboard`), `hash`. If `proto` is omitted/blank, it defaults to `uci`. If you want a hash but no proto, keep the empty field: `name;cmd;;hash`.
-- Note: Scripts and utilities tested on Ubuntu 22.04.
-
-### `scripts/smoke_test_ab.sh`
-- Purpose: fast A/B smoke test with cutechess-cli using EPD openings and both colors per position.
-- Requirements: `bash`, `cutechess-cli`, standard Unix tools (`awk`, `sed`, `grep`, `nproc`, `stdbuf`, `tee`), `scripts/engines.tsv`, and an EPD openings file.
-- Tip: running without parameters prints the script usage/help.
-- Usage example:
-  ```bash
-  ./scripts/smoke_test_ab.sh --engines scripts/engines.tsv \
-    --openings scripts/utils/UHO_2024/UHO_2024_+090_+099/UHO_2024_8mvs_+090_+099.epd \
-    --rounds 10 --tc 3+0.05
-  ```
-
-### `scripts/sprt_ci.sh`
-- Purpose: A/B SPRT test with cutechess-cli (EPD or PGN openings).
-- Requirements: `bash`, `cutechess-cli`, standard Unix tools (`awk`, `nproc`, `stdbuf`, `tee`), `scripts/engines.tsv`, and an EPD/PGN openings file.
-- Tip: running without parameters prints the script usage/help.
-- Usage example:
-  ```bash
-  ./scripts/sprt_ci.sh --engines scripts/engines.tsv \
-    --openings scripts/utils/UHO_2024/UHO_2024_+090_+099/UHO_2024_8mvs_+090_+099.epd \
-    --sprt-elo0 0 --sprt-elo1 5 --tc 10+0.1
-  ```
-
-### `scripts/confirm_ltc.sh`
-- Purpose: long time control confirmation (pairwise or round-robin) with cutechess-cli.
-- Requirements: `bash`, `cutechess-cli`, standard Unix tools (`awk`, `sed`, `grep`, `nproc`, `stdbuf`, `tee`), `scripts/engines.tsv`, and a PGN openings file.
-- Tip: running without parameters prints the script usage/help.
-- Usage example:
-  ```bash
-  ./scripts/confirm_ltc.sh --engines scripts/engines.tsv \
-    --openings scripts/utils/UHO_2024/UHO_2024_+090_+099/UHO_2024_8mvs_+090_+099.pgn \
-    --rounds 10 --tc 40/300+3
-  ```
 
 ### `scripts/perft_suite.py`
 - Purpose: run perft checks against an EPD suite and compare expected node counts.
@@ -298,7 +229,7 @@ Note: other toolchains/compilers may work, but the ones listed below are the one
   ```
 - Usage example:
   ```bash
-  python3 scripts/perft_suite.py --engine ./build/Akerbeltz-1.0.0 \
+  python3 scripts/perft_suite.py --engine ./build/Akerbeltz-1.1.0 \
     --epd path/to/your_suite.epd --depths 1,2,3 --max-positions 20
   ```
 

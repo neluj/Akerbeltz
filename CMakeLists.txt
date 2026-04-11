@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(Akerbeltz VERSION 1.0.0 LANGUAGES CXX)
+project(Akerbeltz VERSION 1.1.0 LANGUAGES CXX)
 
 set(AKERBELTZ_ENGINE_VERSION "${PROJECT_VERSION}" CACHE STRING "Engine version string")
 set(AKERBELTZ_ENGINE_AUTHOR "Julen Aristondo")
