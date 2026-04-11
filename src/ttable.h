@@ -16,7 +16,7 @@ namespace TT {
 
     using Evaluate::Score;
 
-    constexpr std::size_t DEFAULT_TT_MB = 128;
+    constexpr std::size_t DEFAULT_TT_MB = 256;
     constexpr std::size_t MIN_TT_MB     = 4;
     constexpr std::size_t MAX_TT_MB     = 4096;
 
